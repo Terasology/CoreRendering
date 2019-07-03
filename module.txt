@@ -1,0 +1,9 @@
+{
+    "id" : "BasicRendering",
+    "version" : "0.1.0-SNAPSHOT",
+    "author" : "Respective rendering authors",
+    "displayName" : "BasicRendering",
+    "description" : "This module contains all essential rendering nodes",
+    "dependencies" : [],
+    "serverSideOnly" : false
+}
