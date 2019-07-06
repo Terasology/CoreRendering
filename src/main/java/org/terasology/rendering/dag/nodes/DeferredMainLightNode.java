@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.rendering.BasicRenderingModule;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.backdrop.BackdropProvider;
@@ -69,6 +70,7 @@ public class DeferredMainLightNode extends NewAbstractNode {
     private BackdropProvider backdropProvider;
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
+    private BasicRenderingModule basicRendering;
 
     private LightComponent mainLightComponent = new LightComponent();
 
@@ -89,10 +91,11 @@ public class DeferredMainLightNode extends NewAbstractNode {
         backdropProvider = context.get(BackdropProvider.class);
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);
+        basicRendering = context.get(BasicRenderingModule.class);
 
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        lightCamera = worldRenderer.getLightCamera();
+        lightCamera = basicRendering.getLightCamera();
 
         addDesiredStateChange(new EnableMaterial(LIGHT_GEOMETRY_MATERIAL_URN));
         lightGeometryMaterial = getMaterial(LIGHT_GEOMETRY_MATERIAL_URN);
