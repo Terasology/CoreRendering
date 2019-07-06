@@ -27,7 +27,7 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.rendering.BasicRenderingSystem;
+import org.terasology.rendering.BasicRenderingModule;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.cameras.Camera;
@@ -94,7 +94,7 @@ public class DeferredPointLightsNode extends NewAbstractNode {
 
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        lightCamera = context.get(BasicRenderingSystem.class).getLightCamera();
+        lightCamera = context.get(BasicRenderingModule.class).getLightCamera();
 
         addDesiredStateChange(new LookThrough(activeCamera));
 
