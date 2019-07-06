@@ -151,6 +151,10 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
     public RefractiveReflectiveBlocksNode(String nodeUri, Context context) {
         super(nodeUri, context);
 
+        // TODO This is a temporary hack, see RefractiveReflectiveBlocksNodeProxy's doc
+        RefractiveReflectiveBlocksNodeProxy.updateWaterAttributes(waveIntensity, waveIntensityFalloff, waveSize,
+                                                                  waveSizeFalloff, waveSpeed, waveSpeedFalloff, waterOffsetY);
+
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);
         worldProvider = context.get(WorldProvider.class);
