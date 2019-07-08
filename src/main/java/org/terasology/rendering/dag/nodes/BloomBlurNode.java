@@ -40,11 +40,10 @@ public class BloomBlurNode extends BlurNode {
      * Constructs a BloomBlurNode instance. This method must be called once shortly after instantiation
      * to fully initialize the node and make it ready for rendering.
      *
-     * @param inputFbo The input fbo, containing the image to be blurred.
      * @param outputFbo The output fbo, to store the blurred image.
      */
-    public BloomBlurNode(String nodeUri, Context context, FBO inputFbo, FBO outputFbo) {
-        super(nodeUri, context, inputFbo, outputFbo, BLUR_RADIUS);
+    public BloomBlurNode(String nodeUri, Context context, FBO outputFbo) {
+        super(nodeUri, context, outputFbo, BLUR_RADIUS);
 
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         requiresCondition(renderingConfig::isBloom);

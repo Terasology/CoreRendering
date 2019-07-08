@@ -15,6 +15,7 @@
  */
 package org.terasology.rendering;
 
+import javafx.util.Pair;
 import org.terasology.context.Context;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -128,17 +129,23 @@ public class BasicRenderingModule extends BaseComponentSystem {
         FBO intermediateHazeFbo = displayResolutionDependentFbo.request(intermediateHazeConfig);
 
         HazeNode intermediateHazeNode = new HazeNode("intermediateHazeNode", context,
-                displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo(), intermediateHazeFbo);
+                                                    intermediateHazeFbo);
+        // TODO I introduce new BufferPairConnection but I have to fetch it from the old system. This must be removed when every node uses new system
+        // make this implicit
+        // intermediateHazeNode.addInputBufferPairConnection(1, new Pair<FBO,FBO>(displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo(),
+        //                                                                          displayResolutionDependentFbo.getGBufferPair().getStaleFbo()));
+        intermediateHazeNode.addInputFboConnection(1, displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo());
         renderGraph.addNode(intermediateHazeNode);
 
         FboConfig finalHazeConfig = new FboConfig(HazeNode.FINAL_HAZE_FBO_URI, ONE_32TH_SCALE, FBO.Type.DEFAULT);
         FBO finalHazeFbo = displayResolutionDependentFbo.request(finalHazeConfig);
 
-        HazeNode finalHazeNode = new HazeNode("finalHazeNode", context, intermediateHazeFbo, finalHazeFbo);
+        HazeNode finalHazeNode = new HazeNode("finalHazeNode", context, finalHazeFbo);
+        renderGraph.connectFbo(intermediateHazeNode, 1, finalHazeNode, 1);
         renderGraph.addNode(finalHazeNode);
 
         NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
-        renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode, intermediateHazeNode, finalHazeNode);
+        renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode, intermediateHazeNode);
     }
 
     private void addWorldRenderingNodes(RenderGraph renderGraph) {
@@ -229,7 +236,7 @@ public class BasicRenderingModule extends BaseComponentSystem {
         renderGraph.connect(applyDeferredLightingNode, ambientOcclusionNode);
 
         NewNode blurredAmbientOcclusionNode = new BlurredAmbientOcclusionNode("blurredAmbientOcclusionNode", context);
-        blurredAmbientOcclusionNode.connectFbo(1, ambientOcclusionNode.getOutputFboConnection(1));
+        renderGraph.connectFbo(ambientOcclusionNode, 1, blurredAmbientOcclusionNode,1);
         renderGraph.addNode(blurredAmbientOcclusionNode);
         renderGraph.connect(ambientOcclusionNode, blurredAmbientOcclusionNode);
     }
@@ -276,8 +283,8 @@ public class BasicRenderingModule extends BaseComponentSystem {
         NewNode blurredAmbientOcclusionNode = renderGraph.findNode("BasicRendering:blurredAmbientOcclusionNode");
 
         NewNode prePostCompositeNode = new PrePostCompositeNode("prePostCompositeNode", context);
-        prePostCompositeNode.connectFbo(1, blurredAmbientOcclusionNode.getOutputFboConnection(1));
-        prePostCompositeNode.connectFbo(2, outlineNode.getOutputFboConnection(1));
+        renderGraph.connectFbo(blurredAmbientOcclusionNode, 1, prePostCompositeNode,1);
+        renderGraph.connectFbo(outlineNode, 1, prePostCompositeNode, 2);
         renderGraph.addNode(prePostCompositeNode);
         renderGraph.connect(overlaysNode, prePostCompositeNode);
         renderGraph.connect(finalHazeNode, prePostCompositeNode);
@@ -300,20 +307,23 @@ public class BasicRenderingModule extends BaseComponentSystem {
         FboConfig halfScaleBloomConfig = new FboConfig(BloomBlurNode.HALF_SCALE_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
         FBO halfScaleBloomFbo = displayResolutionDependentFbo.request(halfScaleBloomConfig);
 
-        BloomBlurNode halfScaleBlurredBloomNode = new BloomBlurNode("halfScaleBlurredBloomNode", context,
-                displayResolutionDependentFbo.get(HighPassNode.HIGH_PASS_FBO_URI), halfScaleBloomFbo);
+        // TODO once everything is new system based, update halfscaleblurrednode's input obtaining
+        BloomBlurNode halfScaleBlurredBloomNode = new BloomBlurNode("halfScaleBlurredBloomNode", context, halfScaleBloomFbo);
+        halfScaleBlurredBloomNode.addInputFboConnection(1, displayResolutionDependentFbo.get(HighPassNode.HIGH_PASS_FBO_URI));
         renderGraph.addNode(halfScaleBlurredBloomNode);
 
         FboConfig quarterScaleBloomConfig = new FboConfig(BloomBlurNode.QUARTER_SCALE_FBO_URI, QUARTER_SCALE, FBO.Type.DEFAULT);
         FBO quarterScaleBloomFbo = displayResolutionDependentFbo.request(quarterScaleBloomConfig);
 
-        BloomBlurNode quarterScaleBlurredBloomNode = new BloomBlurNode("quarterScaleBlurredBloomNode", context, halfScaleBloomFbo, quarterScaleBloomFbo);
+        BloomBlurNode quarterScaleBlurredBloomNode = new BloomBlurNode("quarterScaleBlurredBloomNode", context, quarterScaleBloomFbo);
+        renderGraph.connectFbo(halfScaleBlurredBloomNode, 1, quarterScaleBlurredBloomNode, 1);
         renderGraph.addNode(quarterScaleBlurredBloomNode);
 
         FboConfig one8thScaleBloomConfig = new FboConfig(BloomBlurNode.ONE_8TH_SCALE_FBO_URI, ONE_8TH_SCALE, FBO.Type.DEFAULT);
         FBO one8thScaleBloomFbo = displayResolutionDependentFbo.request(one8thScaleBloomConfig);
 
-        BloomBlurNode one8thScaleBlurredBloomNode = new BloomBlurNode("one8thScaleBlurredBloomNode", context, quarterScaleBloomFbo, one8thScaleBloomFbo);
+        BloomBlurNode one8thScaleBlurredBloomNode = new BloomBlurNode("one8thScaleBlurredBloomNode", context, one8thScaleBloomFbo);
+        renderGraph.connectFbo(quarterScaleBlurredBloomNode, 1, one8thScaleBlurredBloomNode, 1);
         renderGraph.addNode(one8thScaleBlurredBloomNode);
 
         NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
@@ -383,24 +393,24 @@ public class BasicRenderingModule extends BaseComponentSystem {
         FboConfig firstLateBlurConfig = new FboConfig(FIRST_LATE_BLUR_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
         FBO firstLateBlurFbo = displayResolutionDependentFbo.request(firstLateBlurConfig);
 
-
-        LateBlurNode firstLateBlurNode = new LateBlurNode("firstLateBlurNode", context,
-                displayResolutionDependentFbo.get(ToneMappingNode.TONE_MAPPING_FBO_URI), firstLateBlurFbo);
+        LateBlurNode firstLateBlurNode = new LateBlurNode("firstLateBlurNode", context, firstLateBlurFbo);
+        renderGraph.connectFbo(toneMappingNode, 1, firstLateBlurNode, 1);
         renderGraph.addNode(firstLateBlurNode);
 
         FboConfig secondLateBlurConfig = new FboConfig(SECOND_LATE_BLUR_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
         FBO secondLateBlurFbo = displayResolutionDependentFbo.request(secondLateBlurConfig);
 
-        LateBlurNode secondLateBlurNode = new LateBlurNode("secondLateBlurNode", context, firstLateBlurFbo, secondLateBlurFbo);
+        LateBlurNode secondLateBlurNode = new LateBlurNode("secondLateBlurNode", context, secondLateBlurFbo);
+        renderGraph.connectFbo(firstLateBlurNode, 1, secondLateBlurNode, 1);
         renderGraph.addNode(secondLateBlurNode);
 
         FinalPostProcessingNode finalPostProcessingNode = new FinalPostProcessingNode("finalPostProcessingNode", context/*finalIn1*/);
-        finalPostProcessingNode.connectFbo(1, toneMappingNode.getOutputFboConnection(1));
-        finalPostProcessingNode.connectFbo(2, secondLateBlurNode.getOutputFboConnection(1));
+        renderGraph.connectFbo(toneMappingNode,1, finalPostProcessingNode, 1);
+        renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode,2);
 
         renderGraph.addNode(finalPostProcessingNode);
 
-        renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode, finalPostProcessingNode);
+        // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);
     }
 
     private void addOutputNodes(RenderGraph renderGraph) {
@@ -415,7 +425,7 @@ public class BasicRenderingModule extends BaseComponentSystem {
         renderGraph.connect(finalPostProcessingNode, outputToVRFrameBufferNode);
 
         NewNode outputToScreenNode = new OutputToScreenNode("outputToScreenNode", context);
-        outputToScreenNode.connectFbo(1, finalPostProcessingNode.getOutputFboConnection(1));
+        renderGraph.connectFbo(finalPostProcessingNode, 1, outputToScreenNode, 1);
         renderGraph.addNode(outputToScreenNode);
         renderGraph.connect(finalPostProcessingNode, outputToScreenNode);
         // renderGraph.connectFbo(finalPostProcessingNode, tintNode, outputToScreenNode);

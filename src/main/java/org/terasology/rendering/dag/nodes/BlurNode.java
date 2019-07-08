@@ -44,16 +44,15 @@ public class BlurNode extends ConditionDependentNode {
     /**
      * Constructs a BlurNode instance.
      *
-     * @param inputFbo The input fbo, containing the image to be blurred.
      * @param outputFbo The output fbo, to store the blurred image.
      * @param blurRadius the blur radius: higher values cause higher blur. The shader's default is 16.0f.
      */
-    public BlurNode(String nodeUri, Context context, FBO inputFbo, FBO outputFbo, float blurRadius) {
+    public BlurNode(String nodeUri, Context context, FBO outputFbo, float blurRadius) {
         super(nodeUri, context);
 
         this.blurRadius = blurRadius;
 
-        addInputFboConnection(1, inputFbo);
+        //addInputFboConnection(1, inputFbo);
         addOutputFboConnection(1, outputFbo);
 
         this.inputFbo = inputFbo;
@@ -63,6 +62,12 @@ public class BlurNode extends ConditionDependentNode {
 
         addDesiredStateChange(new EnableMaterial(BLUR_MATERIAL_URN));
         this.blurMaterial = getMaterial(BLUR_MATERIAL_URN);
+    }
+
+    @Override
+    public void setDependencies(Context context) {
+        inputFbo =  this.getInputFboData(1);
+        addOutputFboConnection(1, outputFbo);
     }
 
     /**
@@ -77,15 +82,11 @@ public class BlurNode extends ConditionDependentNode {
         blurMaterial.setFloat2("texelSize", 1.0f / outputFbo.width(), 1.0f / outputFbo.height(), true);
 
         // TODO: binding the color buffer of an FBO should also be done in its own StateChange implementation
-        inputFbo.bindTexture();
+       inputFbo.bindTexture();
 
         renderFullscreenQuad();
 
         PerformanceMonitor.endActivity();
     }
 
-    @Override
-    public void setDependencies(Context context) {
-
-    }
 }

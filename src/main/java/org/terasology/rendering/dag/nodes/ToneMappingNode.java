@@ -84,7 +84,7 @@ public class ToneMappingNode extends NewAbstractNode {
     }
 
     @Override
-    public void setDependencies(Context context){
+    public void setDependencies(Context context) {
 
     }
 

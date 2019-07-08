@@ -42,11 +42,10 @@ public class HazeNode extends BlurNode {
     /**
      * Initializes the HazeNode instance.
      *
-     * @param inputFbo The input fbo, containing the image to be blurred.
      * @param outputFbo The output fbo, to store the blurred image.
      */
-    public HazeNode(String nodeUri, Context context, FBO inputFbo, FBO outputFbo) {
-        super(nodeUri, context, inputFbo, outputFbo, BLUR_RADIUS);
+    public HazeNode(String nodeUri, Context context, FBO outputFbo) {
+        super(nodeUri, context, outputFbo, BLUR_RADIUS);
 
         renderingConfig = context.get(Config.class).getRendering();
         requiresCondition(renderingConfig::isInscattering);
