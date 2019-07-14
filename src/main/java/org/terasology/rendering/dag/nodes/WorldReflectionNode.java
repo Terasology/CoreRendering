@@ -37,7 +37,6 @@ import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
@@ -47,8 +46,6 @@ import org.terasology.world.chunks.RenderableChunk;
 import java.beans.PropertyChangeEvent;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
-import static org.terasology.rendering.dag.nodes.BackdropReflectionNode.REFLECTED_FBO_URI;
-import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
 import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
@@ -107,11 +104,16 @@ public class WorldReflectionNode extends ConditionDependentNode {
         worldProvider = context.get(WorldProvider.class);
 
         activeCamera = worldRenderer.getActiveCamera();
+            }
+
+    @Override
+    public void setDependencies(Context context) {
         addDesiredStateChange(new ReflectedCamera(activeCamera)); // this has to go before the LookThrough state change
         addDesiredStateChange(new LookThrough(activeCamera));
 
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        FBO reflectedFbo = requiresFbo(new FboConfig(REFLECTED_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
+        FBO reflectedFbo = getInputFboData(1);
+        addOutputFboConnection(1, reflectedFbo);
         addDesiredStateChange(new BindFbo(reflectedFbo));
         addDesiredStateChange(new SetViewportToSizeOf(reflectedFbo));
         addDesiredStateChange(new EnableFaceCulling());
@@ -142,10 +144,6 @@ public class WorldReflectionNode extends ConditionDependentNode {
                 addDesiredStateChange(setHeightTerrain);
             }
         }
-    }
-
-    @Override
-    public void setDependencies(Context context) {
 
     }
 

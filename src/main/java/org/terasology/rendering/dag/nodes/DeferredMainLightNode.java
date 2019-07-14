@@ -45,7 +45,6 @@ import org.terasology.world.WorldProvider;
 
 import static org.lwjgl.opengl.GL11.GL_ONE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_COLOR;
-import static org.terasology.rendering.dag.nodes.ShadowMapNode.SHADOW_MAP_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
@@ -97,6 +96,11 @@ public class DeferredMainLightNode extends NewAbstractNode {
         activeCamera = worldRenderer.getActiveCamera();
         lightCamera = basicRendering.getLightCamera();
 
+
+    }
+
+    @Override
+    public void setDependencies(Context context) {
         addDesiredStateChange(new EnableMaterial(LIGHT_GEOMETRY_MATERIAL_URN));
         lightGeometryMaterial = getMaterial(LIGHT_GEOMETRY_MATERIAL_URN);
 
@@ -119,17 +123,12 @@ public class DeferredMainLightNode extends NewAbstractNode {
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
         if (renderingConfig.isDynamicShadows()) {
-            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, SHADOW_MAP_FBO_URI, DepthStencilTexture, shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
+            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(1), DepthStencilTexture, shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
 
             if (renderingConfig.isCloudShadows()) {
                 addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:perlinNoiseTileable", LIGHT_GEOMETRY_MATERIAL_URN, "texSceneClouds"));
             }
         }
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     // TODO: one day the main light (sun/moon) should be just another light in the scene.

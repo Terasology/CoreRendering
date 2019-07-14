@@ -52,8 +52,17 @@ public class OpaqueObjectsNode extends NewAbstractNode implements WireframeCapab
         componentSystemManager = context.get(ComponentSystemManager.class);
 
         worldRenderer = context.get(WorldRenderer.class);
-        Camera playerCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(playerCamera));
+
+        faceCullingStateChange = new EnableFaceCulling();
+
+        wireframeStateChange = new SetWireframe(true);
+        RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
+        new WireframeTrigger(renderingDebugConfig, this);
+    }
+
+    @Override
+    public void setDependencies(Context context) {
+        addDesiredStateChange(new LookThrough(worldRenderer.getActiveCamera()));
 
         // IF wireframe is enabled the WireframeTrigger will remove the face culling state change
         // from the set of desired state changes.
@@ -61,19 +70,9 @@ public class OpaqueObjectsNode extends NewAbstractNode implements WireframeCapab
         // add the face culling state change. However, if wireframe *is* enabled, the WireframeTrigger
         // would attempt to remove the face culling state even though it isn't there, relying on the
         // quiet behaviour of Set.remove(nonExistentItem). We therefore favored the first solution.
-        faceCullingStateChange = new EnableFaceCulling();
+
         addDesiredStateChange(faceCullingStateChange);
-
-        wireframeStateChange = new SetWireframe(true);
-        RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
-        new WireframeTrigger(renderingDebugConfig, this);
-
         addDesiredStateChange(new BindFbo(context.get(DisplayResolutionDependentFbo.class).getGBufferPair().getLastUpdatedFbo()));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     public void enableWireframe() {

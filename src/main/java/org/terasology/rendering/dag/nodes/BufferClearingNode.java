@@ -33,7 +33,7 @@ import static org.lwjgl.opengl.GL11.glClear;
  */
 public class BufferClearingNode extends NewAbstractNode {
     private int clearingMask;
-
+    private FBO fbo;
     /**
      * Constructs the node by requesting the creation (if necessary) of the FBO to be cleared
      * and by requesting for this FBO to be bound by the time process() gets executed. Also
@@ -52,7 +52,7 @@ public class BufferClearingNode extends NewAbstractNode {
         boolean argumentsAreValid = validateArguments(fboConfig, fboManager, clearingMask);
 
         if (argumentsAreValid) {
-            FBO fbo = requiresFbo(fboConfig, fboManager);
+            this.fbo = requiresFbo(fboConfig, fboManager);
             addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
@@ -66,6 +66,7 @@ public class BufferClearingNode extends NewAbstractNode {
         boolean argumentsAreValid = validateArguments(fbo, clearingMask);
 
         if (argumentsAreValid) {
+            this.fbo = fbo;
             addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
@@ -123,6 +124,6 @@ public class BufferClearingNode extends NewAbstractNode {
 
     @Override
     public void setDependencies(Context context) {
-
+        addOutputFboConnection(1, fbo);
     }
 }

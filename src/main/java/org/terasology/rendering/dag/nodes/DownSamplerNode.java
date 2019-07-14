@@ -42,34 +42,23 @@ public class DownSamplerNode extends ConditionDependentNode {
 
     private FBO outputFbo;
     private Material downSampler;
-
+    private BaseFboManager inputFboManager;
     /**
      * Constructs the DownSamplerNode instance.
      *
-     * @param inputConnection an input FboConnection instance containing input data (equals FboConnection output of connected node).
      * @param inputFboManager the FBO manager from which to retrieve the input FBO
      * @param outputFboConfig an FboConfig instance describing the output FBO, to be retrieved from the FBO manager
      * @param outputFboManager the FBO manager from which to retrieve the output FBO
      */
     public DownSamplerNode(String nodeUri, Context context,
-                           FboConnection inputConnection, BaseFboManager inputFboManager,
+                           BaseFboManager inputFboManager,
                            FboConfig outputFboConfig, BaseFboManager outputFboManager) {
         super(nodeUri, context);
 
-        // IN
-        addInputFboConnection(1, inputConnection.getData());
-
         // OUT
+        // TODO get rid of this? why load input fbo from dependency when I still need this
+        this.inputFboManager = inputFboManager;
         outputFbo = requiresFbo(outputFboConfig, outputFboManager);
-        addOutputFboConnection(1, outputFbo);
-
-        addDesiredStateChange(new BindFbo(outputFbo));
-        addDesiredStateChange(new SetViewportToSizeOf(outputFbo));
-        addDesiredStateChange(new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, inputFboManager,
-                DOWN_SAMPLER_MATERIAL_URN, TEXTURE_NAME));
-
-        addDesiredStateChange(new EnableMaterial(DOWN_SAMPLER_MATERIAL_URN));
-        downSampler = getMaterial(DOWN_SAMPLER_MATERIAL_URN);
     }
 
     /**
@@ -88,6 +77,13 @@ public class DownSamplerNode extends ConditionDependentNode {
 
     @Override
     public void setDependencies(Context context) {
+        addOutputFboConnection(1, outputFbo);
+        addDesiredStateChange(new BindFbo(outputFbo));
+        addDesiredStateChange(new SetViewportToSizeOf(outputFbo));
+        addDesiredStateChange(new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, inputFboManager,
+                DOWN_SAMPLER_MATERIAL_URN, TEXTURE_NAME));
 
+        addDesiredStateChange(new EnableMaterial(DOWN_SAMPLER_MATERIAL_URN));
+        downSampler = getMaterial(DOWN_SAMPLER_MATERIAL_URN);
     }
 }

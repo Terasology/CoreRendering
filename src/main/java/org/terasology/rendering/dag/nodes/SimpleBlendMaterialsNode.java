@@ -54,7 +54,10 @@ public class SimpleBlendMaterialsNode extends NewAbstractNode {
         super(nodeUri, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         Camera playerCamera = context.get(WorldRenderer.class).getActiveCamera();
         addDesiredStateChange(new LookThrough(playerCamera));
 
@@ -80,11 +83,6 @@ public class SimpleBlendMaterialsNode extends NewAbstractNode {
         // This is an unresolved (unresolv-able?) issue that would only be reversed, not eliminated,
         // by re-enabling writing to the Depth Buffer.
         addDesiredStateChange(new DisableDepthWriting());
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**

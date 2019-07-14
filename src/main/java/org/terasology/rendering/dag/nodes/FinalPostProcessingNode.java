@@ -15,6 +15,7 @@
  */
 package org.terasology.rendering.dag.nodes;
 
+import javafx.util.Pair;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
@@ -97,6 +98,16 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
 
         postMaterial = getMaterial(POST_MATERIAL_URN);
 
+        renderingConfig = context.get(Config.class).getRendering();
+        isFilmGrainEnabled = renderingConfig.isFilmGrain();
+        renderingConfig.subscribe(RenderingConfig.FILM_GRAIN, this);
+        isMotionBlurEnabled = renderingConfig.isMotionBlur();
+        renderingConfig.subscribe(RenderingConfig.MOTION_BLUR, this);
+        renderingConfig.subscribe(RenderingConfig.BLUR_INTENSITY, this);
+    }
+
+    @Override
+    public void setDependencies(Context context) {
         addDesiredStateChange(new EnableMaterial(POST_MATERIAL_URN));
 
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
@@ -105,20 +116,11 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
 
-        renderingConfig = context.get(Config.class).getRendering();
-        isFilmGrainEnabled = renderingConfig.isFilmGrain();
-        renderingConfig.subscribe(RenderingConfig.FILM_GRAIN, this);
-        isMotionBlurEnabled = renderingConfig.isMotionBlur();
-        renderingConfig.subscribe(RenderingConfig.MOTION_BLUR, this);
-        renderingConfig.subscribe(RenderingConfig.BLUR_INTENSITY, this);
+        // DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
 
-        lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
-
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
+         lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
+        // lastUpdatedGBuffer = getInputBufferPairConnection(1).getPrimaryFbo();
+        addOutputBufferPairConnection(1, new Pair<FBO,FBO>(lastUpdatedGBuffer,displayResolutionDependentFBOs.getGBufferPair().getStaleFbo()));
 
         int texId = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, POST_MATERIAL_URN, "texScene"));

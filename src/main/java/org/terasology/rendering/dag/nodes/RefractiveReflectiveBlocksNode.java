@@ -102,10 +102,11 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
 
+    private DisplayResolutionDependentFbo displayResolutionDependentFBOs;
+
     private Material chunkMaterial;
 
     private FBO lastUpdatedGBuffer;
-    private FBO refractiveReflectiveFbo;
 
     private SubmersibleCamera activeCamera;
 
@@ -161,17 +162,19 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(activeCamera));
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
+
+        displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
-        refractiveReflectiveFbo = requiresFbo(new FboConfig(REFRACTIVE_REFLECTIVE_FBO_URI, FULL_SCALE, FBO.Type.HDR).useNormalBuffer(), displayResolutionDependentFBOs);
-        addDesiredStateChange(new BindFbo(refractiveReflectiveFbo));
-        lastUpdatedGBuffer.attachDepthBufferTo(refractiveReflectiveFbo);
+        addOutputFboConnection(1, requiresFbo(new FboConfig(REFRACTIVE_REFLECTIVE_FBO_URI, FULL_SCALE, FBO.Type.HDR).useNormalBuffer(), displayResolutionDependentFBOs));
+
+
+        lastUpdatedGBuffer.attachDepthBufferTo(getOutputFboData(1));
+
         displayResolutionDependentFBOs.subscribe(PRE_FBO_REGENERATION, this);
         displayResolutionDependentFBOs.subscribe(POST_FBO_REGENERATION, this);
 
-        addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
+
 
         chunkMaterial = getMaterial(CHUNK_MATERIAL_URN);
 
@@ -183,14 +186,23 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         animatedWaterIsEnabled = renderingConfig.isAnimateWater();
         renderingConfig.subscribe(RenderingConfig.ANIMATE_WATER, this);
 
+    }
+
+    @Override
+    public void setDependencies(Context context) {
+        addDesiredStateChange(new LookThrough(activeCamera));
+        addDesiredStateChange(new BindFbo(getInputFboData(1)));
+        addOutputFboConnection(1, getInputFboData(1));
+        addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:terrain", CHUNK_MATERIAL_URN, "textureAtlas"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:effects", CHUNK_MATERIAL_URN, "textureEffects"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN, "textureWater"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN, "textureWaterNormal"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN, "textureWaterNormalAlt"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, REFLECTED_FBO_URI, ColorTexture, displayResolutionDependentFBOs, CHUNK_MATERIAL_URN, "textureWaterReflection"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFBOs, CHUNK_MATERIAL_URN, "textureWaterReflection"));
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFBOs, CHUNK_MATERIAL_URN, "texSceneOpaque"));
+
         setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal", CHUNK_MATERIAL_URN, "textureAtlasNormal");
         setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN, "textureAtlasHeight");
 
@@ -201,11 +213,6 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         if (parallaxMappingIsEnabled) {
             addDesiredStateChange(setTerrainHeightInputTexture);
         }
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**
@@ -303,11 +310,11 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
 
         switch (propertyName) {
             case PRE_FBO_REGENERATION:
-                refractiveReflectiveFbo.detachDepthBuffer();
+                getOutputFboData(1).detachDepthBuffer();
                 return;
 
             case POST_FBO_REGENERATION:
-                lastUpdatedGBuffer.attachDepthBufferTo(refractiveReflectiveFbo);
+                lastUpdatedGBuffer.attachDepthBufferTo(getOutputFboData(1));
                 return;
 
             case RenderingConfig.NORMAL_MAPPING:

@@ -70,7 +70,7 @@ public class UpdateExposureNode extends NewAbstractNode {
     private ScreenGrabber screenGrabber;
 
     private RenderingConfig renderingConfig;
-    private FBO downSampledScene;
+    private int downSampledSceneId;
     private PBO writeOnlyPbo;   // PBOs are 1x1 pixels buffers used to read GPU data back into the CPU.
                                 // This data is then used in the context of eye adaptation.
 
@@ -81,13 +81,13 @@ public class UpdateExposureNode extends NewAbstractNode {
         screenGrabber = context.get(ScreenGrabber.class);
 
         renderingConfig = context.get(Config.class).getRendering();
-        downSampledScene = requiresFbo(DownSamplerForExposureNode.FBO_1X1_CONFIG, context.get(ImmutableFbo.class));
+        // downSampledScene = requiresFbo(DownSamplerForExposureNode.FBO_1X1_CONFIG, context.get(ImmutableFbo.class));
         writeOnlyPbo = new PBO(1, 1);
     }
 
     @Override
     public void setDependencies(Context context) {
-
+        downSampledSceneId = getInputFboData(1).getId();
     }
 
     /**
@@ -102,7 +102,7 @@ public class UpdateExposureNode extends NewAbstractNode {
         if (renderingConfig.isEyeAdaptation()) {
             PerformanceMonitor.startActivity("rendering/" + getUri());
 
-            writeOnlyPbo.copyFromFBO(downSampledScene.getId(), 1, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE);
+            writeOnlyPbo.copyFromFBO(downSampledSceneId, 1, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE);
             ByteBuffer pixels = writeOnlyPbo.readBackPixels();
 
             if (pixels.limit() < 3) {

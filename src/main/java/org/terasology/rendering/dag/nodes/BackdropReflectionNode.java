@@ -36,8 +36,6 @@ import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.glCallList;
@@ -45,7 +43,6 @@ import static org.lwjgl.opengl.GL11.glEndList;
 import static org.lwjgl.opengl.GL11.glGenLists;
 import static org.lwjgl.opengl.GL11.glNewList;
 import static org.terasology.rendering.dag.nodes.BackdropNode.getAllWeatherZenith;
-import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
 
 /**
  * An instance of this class is responsible for rendering a reflected backdrop (usually the sky) into the
@@ -99,7 +96,10 @@ public class BackdropReflectionNode extends NewAbstractNode {
      */
     public BackdropReflectionNode(String nodeUri, Context context) {
         super(nodeUri, context);
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         backdropProvider = context.get(BackdropProvider.class);
 
         SubmersibleCamera activeCamera = context.get(WorldRenderer.class).getActiveCamera();
@@ -107,9 +107,9 @@ public class BackdropReflectionNode extends NewAbstractNode {
         addDesiredStateChange(new LookThroughNormalized(activeCamera));
         initSkysphere();
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        FBO reflectedFbo = requiresFbo(new FboConfig(REFLECTED_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
+        FBO reflectedFbo = getInputFboData(1);
         addDesiredStateChange(new BindFbo(reflectedFbo));
+        addOutputFboConnection(1, reflectedFbo);
         addDesiredStateChange(new SetViewportToSizeOf(reflectedFbo));
         addDesiredStateChange(new EnableFaceCulling());
         addDesiredStateChange(new DisableDepthWriting());
@@ -120,11 +120,6 @@ public class BackdropReflectionNode extends NewAbstractNode {
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:sky90", SKY_MATERIAL_URN, "texSky90"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:sky180", SKY_MATERIAL_URN, "texSky180"));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**

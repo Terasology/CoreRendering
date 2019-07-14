@@ -61,8 +61,10 @@ public class OutputToScreenNode extends ConditionDependentNode {
         addDesiredStateChange(bindFbo);
 
         SwappableFBO gBufferPair = displayResolutionDependentFBOs.getGBufferPair();
-        lastUpdatedGBuffer = gBufferPair.getLastUpdatedFbo();
-        staleGBuffer = gBufferPair.getStaleFbo();
+        // lastUpdatedGBuffer = gBufferPair.getLastUpdatedFbo();
+        lastUpdatedGBuffer = getInputBufferPairConnection(1).getPrimaryFbo();
+        staleGBuffer = getInputBufferPairConnection(1).getSecondaryFbo();
+        // staleGBuffer = gBufferPair.getStaleFbo();
     }
 
     @Override

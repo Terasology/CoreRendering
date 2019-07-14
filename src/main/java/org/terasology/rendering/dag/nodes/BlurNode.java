@@ -52,10 +52,8 @@ public class BlurNode extends ConditionDependentNode {
 
         this.blurRadius = blurRadius;
 
-        //addInputFboConnection(1, inputFbo);
         addOutputFboConnection(1, outputFbo);
-
-        this.inputFbo = inputFbo;
+        // TODO not sure this can be in here, it's its own out, so maybe this can stay
         this.outputFbo = outputFbo;
         addDesiredStateChange(new BindFbo(outputFbo));
         addDesiredStateChange(new SetViewportToSizeOf(outputFbo));
@@ -84,9 +82,9 @@ public class BlurNode extends ConditionDependentNode {
         // TODO: binding the color buffer of an FBO should also be done in its own StateChange implementation
        inputFbo.bindTexture();
 
-        renderFullscreenQuad();
+       renderFullscreenQuad();
 
-        PerformanceMonitor.endActivity();
+       PerformanceMonitor.endActivity();
     }
 
 }
