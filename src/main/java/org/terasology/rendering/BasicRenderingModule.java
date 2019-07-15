@@ -120,21 +120,26 @@ public class BasicRenderingModule extends ModuleRendering {
         fullScale.setDimensions(Display.getWidth(), Display.getHeight());
 
         BufferPair gBufferPair = createBufferPair("gBuffer1", "gBuffer2",
-                                                                        FULL_SCALE, FULL_SCALE, FBO.Type.HDR, FBO.Type.HDR, fullScale);
+                                                                        FULL_SCALE, FBO.Type.HDR, fullScale);
 
         BufferClearingNode lastUpdatedGBufferClearingNode = new BufferClearingNode("lastUpdatedGBufferClearingNode", context,
                 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         lastUpdatedGBufferClearingNode.addInputFboConnection(1, gBufferPair.getPrimaryFbo());
+        lastUpdatedGBufferClearingNode.addOutputBufferPairConnection(1, gBufferPair);
+
         renderGraph.addNode(lastUpdatedGBufferClearingNode);
 
         BufferClearingNode staleGBufferClearingNode = new BufferClearingNode("staleGBufferClearingNode", context,
                 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         staleGBufferClearingNode.addInputFboConnection(1, gBufferPair.getSecondaryFbo());
+        staleGBufferClearingNode.addOutputBufferPairConnection(1, gBufferPair);
         renderGraph.addNode(staleGBufferClearingNode);
     }
 
     private void addSkyNodes(RenderGraph renderGraph) {
+        NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
         NewNode backdropNode = new BackdropNode("backdropNode", context);
+        renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
         renderGraph.addNode(backdropNode);
 
         FboConfig intermediateHazeConfig = new FboConfig(HazeNode.INTERMEDIATE_HAZE_FBO_URI, ONE_16TH_SCALE, FBO.Type.DEFAULT);
@@ -146,18 +151,18 @@ public class BasicRenderingModule extends ModuleRendering {
         // make this implicit
         // intermediateHazeNode.addInputBufferPairConnection(1, new Pair<FBO,FBO>(displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo(),
         //                                                                          displayResolutionDependentFbo.getGBufferPair().getStaleFbo()));
-        intermediateHazeNode.addInputFboConnection(1, displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo());
+        renderGraph.connectFbo(backdropNode, 1, intermediateHazeNode, 1);
         renderGraph.addNode(intermediateHazeNode);
 
         FboConfig finalHazeConfig = new FboConfig(HazeNode.FINAL_HAZE_FBO_URI, ONE_32TH_SCALE, FBO.Type.DEFAULT);
         FBO finalHazeFbo = displayResolutionDependentFbo.request(finalHazeConfig);
 
         HazeNode finalHazeNode = new HazeNode("finalHazeNode", context, finalHazeFbo);
+        renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, finalHazeNode, 1);
         renderGraph.connectFbo(intermediateHazeNode, 1, finalHazeNode, 1);
         renderGraph.addNode(finalHazeNode);
 
-        NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
-        renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
+        //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
     }
 
     private void addWorldRenderingNodes(RenderGraph renderGraph) {
@@ -173,21 +178,24 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode finalHazeNode = renderGraph.findNode("BasicRendering:finalHazeNode");
 
         NewNode opaqueObjectsNode = new OpaqueObjectsNode("opaqueObjectsNode", context);
-
+        renderGraph.connectBufferPair(finalHazeNode, 1, opaqueObjectsNode, 1);
         renderGraph.addNode(opaqueObjectsNode);
         renderGraph.connect(finalHazeNode, opaqueObjectsNode);
 
         NewNode opaqueBlocksNode = new OpaqueBlocksNode("opaqueBlocksNode", context);
+        renderGraph.connectBufferPair(finalHazeNode, 1, opaqueBlocksNode, 1);
         renderGraph.addNode(opaqueBlocksNode);
-        renderGraph.connect(finalHazeNode, opaqueBlocksNode);
+        // renderGraph.connect(finalHazeNode, opaqueBlocksNode);
 
         NewNode alphaRejectBlocksNode = new AlphaRejectBlocksNode("alphaRejectBlocksNode", context);
+        renderGraph.connectBufferPair(finalHazeNode, 1, alphaRejectBlocksNode, 1);
         renderGraph.addNode(alphaRejectBlocksNode);
-        renderGraph.connect(finalHazeNode, alphaRejectBlocksNode);
+        // renderGraph.connect(finalHazeNode, alphaRejectBlocksNode);
 
         NewNode overlaysNode = new OverlaysNode("overlaysNode", context);
+        renderGraph.connectBufferPair(finalHazeNode, 1, overlaysNode, 1);
         renderGraph.addNode(overlaysNode);
-        renderGraph.connect(finalHazeNode, overlaysNode);
+        // renderGraph.connect(finalHazeNode, overlaysNode);
     }
 
     private void addLightingNodes(RenderGraph renderGraph) {

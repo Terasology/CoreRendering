@@ -24,6 +24,8 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.BufferPair;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
@@ -72,7 +74,10 @@ public class OpaqueObjectsNode extends NewAbstractNode implements WireframeCapab
         // quiet behaviour of Set.remove(nonExistentItem). We therefore favored the first solution.
 
         addDesiredStateChange(faceCullingStateChange);
-        addDesiredStateChange(new BindFbo(context.get(DisplayResolutionDependentFbo.class).getGBufferPair().getLastUpdatedFbo()));
+
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        addOutputBufferPairConnection(1, bufferPairConnection);
+        addDesiredStateChange(new BindFbo(bufferPairConnection.getBufferPair().getPrimaryFbo()));
     }
 
     public void enableWireframe() {

@@ -29,6 +29,7 @@ import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
@@ -88,7 +89,10 @@ public class OpaqueBlocksNode extends NewAbstractNode implements WireframeCapabl
 
         renderQueues = context.get(RenderQueuesHelper.class);
         worldProvider = context.get(WorldProvider.class);
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
         addDesiredStateChange(new LookThrough(activeCamera));
@@ -106,7 +110,9 @@ public class OpaqueBlocksNode extends NewAbstractNode implements WireframeCapabl
         renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
         new WireframeTrigger(renderingDebugConfig, this);
 
-        addDesiredStateChange(new BindFbo(context.get(DisplayResolutionDependentFbo.class).getGBufferPair().getLastUpdatedFbo()));
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        addOutputBufferPairConnection(1, bufferPairConnection);
+        addDesiredStateChange(new BindFbo(bufferPairConnection.getBufferPair().getPrimaryFbo()));
 
         addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
 
@@ -131,11 +137,6 @@ public class OpaqueBlocksNode extends NewAbstractNode implements WireframeCapabl
         if (parallaxMappingIsEnabled) {
             addDesiredStateChange(setTerrainHeightInputTexture);
         }
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     public void enableWireframe() {

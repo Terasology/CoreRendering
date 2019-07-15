@@ -25,6 +25,7 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -53,6 +54,10 @@ public class OverlaysNode extends NewAbstractNode implements WireframeCapable {
         componentSystemManager = context.get(ComponentSystemManager.class);
 
         worldRenderer = context.get(WorldRenderer.class);
+    }
+
+    @Override
+    public void setDependencies(Context context) {
         SubmersibleCamera playerCamera = worldRenderer.getActiveCamera();
         addDesiredStateChange(new LookThrough(playerCamera));
 
@@ -60,14 +65,11 @@ public class OverlaysNode extends NewAbstractNode implements WireframeCapable {
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
         new WireframeTrigger(renderingDebugConfig, this);
 
-        addDesiredStateChange(new BindFbo(context.get(DisplayResolutionDependentFbo.class).getGBufferPair().getLastUpdatedFbo()));
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        addOutputBufferPairConnection(1, bufferPairConnection);
+        addDesiredStateChange(new BindFbo(bufferPairConnection.getBufferPair().getPrimaryFbo()));
 
         addDesiredStateChange(new EnableMaterial(DEFAULT_TEXTURED_MATERIAL_URN));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**

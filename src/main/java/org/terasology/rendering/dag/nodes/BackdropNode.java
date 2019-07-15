@@ -29,6 +29,7 @@ import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
@@ -96,19 +97,29 @@ public class BackdropNode extends NewAbstractNode implements WireframeCapable {
 
         backdropProvider = context.get(BackdropProvider.class);
 
+        wireframeStateChange = new SetWireframe(true);
+
+        skyMaterial = getMaterial(SKY_MATERIAL_URN);
+    }
+
+    @Override
+    public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
         SubmersibleCamera activeCamera = worldRenderer.getActiveCamera();
         addDesiredStateChange(new LookThroughNormalized(activeCamera));
 
         initSkysphere(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS);
 
-        wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
         new WireframeTrigger(renderingDebugConfig, this);
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        FBO lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
         addDesiredStateChange(new BindFbo(lastUpdatedGBuffer));
+
+        addOutputFboConnection(1, lastUpdatedGBuffer);
+        addOutputBufferPairConnection(1, bufferPairConnection);
+
         addDesiredStateChange(new SetFboWriteMask(lastUpdatedGBuffer, true, false, false));
 
         addDesiredStateChange(new EnableMaterial(SKY_MATERIAL_URN));
@@ -122,16 +133,9 @@ public class BackdropNode extends NewAbstractNode implements WireframeCapable {
         addDesiredStateChange(new EnableFaceCulling());
         addDesiredStateChange(new SetFacesToCull(GL_FRONT));
 
-        skyMaterial = getMaterial(SKY_MATERIAL_URN);
-
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:sky90", SKY_MATERIAL_URN, "texSky90"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:sky180", SKY_MATERIAL_URN, "texSky180"));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     public void enableWireframe() {
