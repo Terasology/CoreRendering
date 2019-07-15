@@ -16,17 +16,27 @@
 package org.terasology.rendering;
 
 import javafx.util.Pair;
+import org.lwjgl.opengl.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.context.Context;
+import org.terasology.engine.SimpleUri;
+import org.terasology.engine.module.ModuleManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.naming.Name;
 import org.terasology.registry.In;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.RenderGraph;
 
+import org.terasology.rendering.dag.gsoc.BufferPair;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
+import org.terasology.rendering.dag.gsoc.ModuleRendering;
 import org.terasology.rendering.dag.gsoc.NewNode;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.FboConfig;
+import org.terasology.rendering.opengl.ScalingFactors;
 import org.terasology.rendering.opengl.SwappableFBO;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.opengl.fbms.ImmutableFbo;
@@ -51,12 +61,7 @@ import static org.terasology.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
 import static org.terasology.rendering.opengl.ScalingFactors.QUARTER_SCALE;
 
 @RegisterSystem
-public class BasicRenderingModule extends BaseComponentSystem {
-
-    @In
-    protected Context context;
-    protected RenderGraph renderGraph;
-    protected WorldRenderer worldRendererImpl;
+public class BasicRenderingModule extends ModuleRendering {
 
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
     private ShadowMapResolutionDependentFbo shadowMapResolutionDependentFbo;
@@ -66,10 +71,9 @@ public class BasicRenderingModule extends BaseComponentSystem {
 
     @Override
     public void initialise() {
-        super.initialise();
+        super.initialise(this.getClass());
         context.put(BasicRenderingModule.class,this);
-        this.worldRendererImpl = context.get(WorldRenderer.class);
-        this.renderGraph = context.get(RenderGraph.class);
+
         initBasicRendering();
     }
 
@@ -106,18 +110,26 @@ public class BasicRenderingModule extends BaseComponentSystem {
 
         addOutputNodes(renderGraph);
 
-        worldRendererImpl.requestTaskListRefresh();
+        worldRenderer.requestTaskListRefresh();
     }
 
     private void addGBufferClearingNodes(RenderGraph renderGraph) {
-        SwappableFBO gBufferPair = displayResolutionDependentFbo.getGBufferPair();
+        // SwappableFBO gBufferPair = displayResolutionDependentFbo.getGBufferPair();
+        // TODO leave this here?
+        FBO.Dimensions fullScale = new FBO.Dimensions();
+        fullScale.setDimensions(Display.getWidth(), Display.getHeight());
 
-        BufferClearingNode lastUpdatedGBufferClearingNode = new BufferClearingNode("lastUpdatedGBufferClearingNode", context, gBufferPair.getLastUpdatedFbo(),
+        BufferPair gBufferPair = createBufferPair("gBuffer1", "gBuffer2",
+                                                                        FULL_SCALE, FULL_SCALE, FBO.Type.HDR, FBO.Type.HDR, fullScale);
+
+        BufferClearingNode lastUpdatedGBufferClearingNode = new BufferClearingNode("lastUpdatedGBufferClearingNode", context,
                 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        lastUpdatedGBufferClearingNode.addInputFboConnection(1, gBufferPair.getPrimaryFbo());
         renderGraph.addNode(lastUpdatedGBufferClearingNode);
 
-        BufferClearingNode staleGBufferClearingNode = new BufferClearingNode("staleGBufferClearingNode", context, gBufferPair.getStaleFbo(),
+        BufferClearingNode staleGBufferClearingNode = new BufferClearingNode("staleGBufferClearingNode", context,
                 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        staleGBufferClearingNode.addInputFboConnection(1, gBufferPair.getSecondaryFbo());
         renderGraph.addNode(staleGBufferClearingNode);
     }
 
@@ -416,6 +428,7 @@ public class BasicRenderingModule extends BaseComponentSystem {
         renderGraph.connectFbo(firstLateBlurNode, 1, secondLateBlurNode, 1);
         renderGraph.addNode(secondLateBlurNode);
 
+        // TODO rework
         FinalPostProcessingNode finalPostProcessingNode = new FinalPostProcessingNode("finalPostProcessingNode", context/*finalIn1*/);
         renderGraph.connectFbo(toneMappingNode,1, finalPostProcessingNode, 1);
         renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode,2);

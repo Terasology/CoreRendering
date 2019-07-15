@@ -60,11 +60,8 @@ public class OutputToScreenNode extends ConditionDependentNode {
         bindFbo = new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, DEFAULT_TEXTURED_MATERIAL_URN, "texture");
         addDesiredStateChange(bindFbo);
 
-        SwappableFBO gBufferPair = displayResolutionDependentFBOs.getGBufferPair();
-        // lastUpdatedGBuffer = gBufferPair.getLastUpdatedFbo();
-        lastUpdatedGBuffer = getInputBufferPairConnection(1).getPrimaryFbo();
-        staleGBuffer = getInputBufferPairConnection(1).getSecondaryFbo();
-        // staleGBuffer = gBufferPair.getStaleFbo();
+        lastUpdatedGBuffer = getInputBufferPairConnection(1).getBufferPair().getPrimaryFbo();
+        staleGBuffer = getInputBufferPairConnection(1).getBufferPair().getSecondaryFbo();
     }
 
     @Override

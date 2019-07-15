@@ -45,7 +45,7 @@ public class BufferClearingNode extends NewAbstractNode {
      *                      i.e. "GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT". This argument can't be zero.
      *                      Non GL_*_BIT values will be accepted but might eventually generate an opengl error.
      * @throws IllegalArgumentException if fboConfig, fboManager are null and if clearingMask is zero.
-     */
+     */@Deprecated
     public BufferClearingNode(String nodeUri, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
         super(nodeUri, context);
 
@@ -53,13 +53,25 @@ public class BufferClearingNode extends NewAbstractNode {
 
         if (argumentsAreValid) {
             this.fbo = requiresFbo(fboConfig, fboManager);
-            addDesiredStateChange(new BindFbo(fbo));
+            // addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
             throw new IllegalArgumentException("Illegal argument(s): see the log for details.");
         }
     }
 
+    /**
+     * For passing the FBO by renderGraph.connectInputFbo
+     * @param nodeUri
+     * @param context
+     * @param clearingMask
+     */
+    public BufferClearingNode(String nodeUri, Context context, int clearingMask) {
+        super(nodeUri, context);
+        this.clearingMask = clearingMask;
+    }
+
+    @Deprecated
     public BufferClearingNode(String nodeUri, Context context, FBO fbo, int clearingMask) {
         super(nodeUri, context);
 
@@ -67,7 +79,7 @@ public class BufferClearingNode extends NewAbstractNode {
 
         if (argumentsAreValid) {
             this.fbo = fbo;
-            addDesiredStateChange(new BindFbo(fbo));
+            // addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
             throw new IllegalArgumentException("Illegal argument(s): see the log for details.");
@@ -124,6 +136,12 @@ public class BufferClearingNode extends NewAbstractNode {
 
     @Override
     public void setDependencies(Context context) {
+        // TODO there should be a better way to distinguish between usages. Ideally, all usages should be the same/
+        if (fbo == null) {
+            fbo = getInputFboData(1);
+        }
+        // TODO this will be redundant for bufferClearingNodes created trough older constructors
+        addDesiredStateChange(new BindFbo(fbo));
         addOutputFboConnection(1, fbo);
     }
 }

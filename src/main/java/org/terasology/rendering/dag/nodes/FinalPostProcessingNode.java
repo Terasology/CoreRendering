@@ -20,12 +20,14 @@ import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
+import org.terasology.engine.SimpleUri;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.BufferPair;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -35,6 +37,7 @@ import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
+import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.ScreenGrabber;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.world.WorldRenderer;
@@ -49,6 +52,7 @@ import java.beans.PropertyChangeListener;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
 import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 /**
@@ -110,22 +114,23 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
     public void setDependencies(Context context) {
         addDesiredStateChange(new EnableMaterial(POST_MATERIAL_URN));
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        FBO finalBuffer = displayResolutionDependentFBOs.get(FINAL_BUFFER);
+        DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
+        FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(new SimpleUri("fbo.finalBuffer"), FULL_SCALE, FBO.Type.DEFAULT));
         this.addOutputFboConnection(1, finalBuffer);
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
 
         // DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
 
-         lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
+        // TODO render DAG: renderGrap.connectBufferPair instead
+         lastUpdatedGBuffer = displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo();
         // lastUpdatedGBuffer = getInputBufferPairConnection(1).getPrimaryFbo();
-        addOutputBufferPairConnection(1, new Pair<FBO,FBO>(lastUpdatedGBuffer,displayResolutionDependentFBOs.getGBufferPair().getStaleFbo()));
+        addOutputBufferPairConnection(1, new BufferPair(lastUpdatedGBuffer,displayResolutionDependentFbo.getGBufferPair().getStaleFbo()));
 
         int texId = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, POST_MATERIAL_URN, "texScene"));
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, POST_MATERIAL_URN, "texDepth"));
-        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFBOs, POST_MATERIAL_URN, "texBlur");
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
+        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
         addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN, "texColorGradingLut"));
         // TODO: evaluate the possibility to use GPU-based noise algorithms instead of CPU-generated textures.
         setNoiseTexture = new SetInputTexture2D(texId, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize, 0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
