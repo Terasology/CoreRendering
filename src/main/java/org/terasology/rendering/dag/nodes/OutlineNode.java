@@ -24,6 +24,7 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.ConditionDependentNode;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
@@ -71,11 +72,15 @@ public class OutlineNode extends ConditionDependentNode {
         renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.OUTLINE, this);
         requiresCondition(() -> renderingConfig.isOutline());
+    }
+
+    @Override
+    public void setDependencies(Context context) {
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
 
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
         FBO outlineFbo = requiresFbo(new FboConfig(OUTLINE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT), displayResolutionDependentFBOs);
-
         this.addOutputFboConnection(1, outlineFbo);
 
         addDesiredStateChange(new BindFbo(outlineFbo));
@@ -86,11 +91,6 @@ public class OutlineNode extends ConditionDependentNode {
 
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, OUTLINE_MATERIAL_URN, "texDepth"));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**

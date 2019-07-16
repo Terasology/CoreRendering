@@ -29,6 +29,7 @@ import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.rendering.assets.texture.TextureData;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.ConditionDependentNode;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
@@ -104,13 +105,12 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.SSAO, this);
         requiresCondition(renderingConfig::isSsao);
-
-        addDesiredStateChange(new EnableMaterial(SSAO_MATERIAL_URN));
-        ssaoMaterial = getMaterial(SSAO_MATERIAL_URN);
     }
 
     @Override
     public void setDependencies(Context context) {
+        addDesiredStateChange(new EnableMaterial(SSAO_MATERIAL_URN));
+        ssaoMaterial = getMaterial(SSAO_MATERIAL_URN);
 
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         ssaoFbo = requiresFbo(new FboConfig(SSAO_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT), displayResolutionDependentFBOs);
@@ -124,7 +124,9 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         retrieveFboDimensions();
         // TODO: check for input textures brought in by the material
 
-        FBO lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
 
         int texId = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, SSAO_MATERIAL_URN, "texDepth"));

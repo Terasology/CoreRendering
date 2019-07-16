@@ -160,6 +160,8 @@ public class BasicRenderingModule extends ModuleRendering {
         HazeNode finalHazeNode = new HazeNode("finalHazeNode", context, finalHazeFbo);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, finalHazeNode, 1);
         renderGraph.connectFbo(intermediateHazeNode, 1, finalHazeNode, 1);
+        // Hack because HazeNode extends Blur which is a reusable node and we can't tailor its code to this need
+        finalHazeNode.addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1));
         renderGraph.addNode(finalHazeNode);
 
         //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
@@ -215,25 +217,28 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.addNode(shadowMapNode);
 
         NewNode deferredPointLightsNode = new DeferredPointLightsNode("deferredPointLightsNode", context);
+        renderGraph.connectBufferPair(opaqueObjectsNode, 1, deferredPointLightsNode, 1);
         renderGraph.addNode(deferredPointLightsNode);
-        renderGraph.connect(opaqueObjectsNode, deferredPointLightsNode);
+        // renderGraph.connect(opaqueObjectsNode, deferredPointLightsNode);
         renderGraph.connect(opaqueBlocksNode, deferredPointLightsNode);
         renderGraph.connect(alphaRejectBlocksNode, deferredPointLightsNode);
 
         NewNode deferredMainLightNode = new DeferredMainLightNode("deferredMainLightNode", context);
         renderGraph.connectFbo(shadowMapNode, 1, deferredMainLightNode, 1);
+        renderGraph.connectBufferPair(opaqueBlocksNode, 1, deferredMainLightNode, 1);
         renderGraph.addNode(deferredMainLightNode);
-        renderGraph.connect(opaqueObjectsNode, deferredMainLightNode);
+        // renderGraph.connect(opaqueObjectsNode, deferredMainLightNode);
         renderGraph.connect(opaqueBlocksNode, deferredMainLightNode);
         renderGraph.connect(alphaRejectBlocksNode, deferredMainLightNode);
         renderGraph.connect(deferredPointLightsNode, deferredMainLightNode);
 
         NewNode applyDeferredLightingNode = new ApplyDeferredLightingNode("applyDeferredLightingNode", context);
+        renderGraph.connectBufferPair(deferredMainLightNode, 1, applyDeferredLightingNode, 1);
         renderGraph.addNode(applyDeferredLightingNode);
-        renderGraph.connect(deferredMainLightNode, applyDeferredLightingNode);
+        // renderGraph.connect(deferredMainLightNode, applyDeferredLightingNode);
         renderGraph.connect(deferredPointLightsNode, applyDeferredLightingNode);
         renderGraph.connect(lastUpdatedGBufferClearingNode, applyDeferredLightingNode);
-        renderGraph.connect(staleGBufferClearingNode, applyDeferredLightingNode);
+        // renderGraph.connect(staleGBufferClearingNode, applyDeferredLightingNode);
     }
 
     private void add3dDecorationNodes(RenderGraph renderGraph) {
@@ -243,12 +248,14 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
 
         NewNode outlineNode = new OutlineNode("outlineNode", context);
+        renderGraph.connectBufferPair(opaqueObjectsNode, 1, outlineNode, 1);
         renderGraph.addNode(outlineNode);
-        renderGraph.connect(opaqueObjectsNode, outlineNode);
+        // renderGraph.connect(opaqueObjectsNode, outlineNode);
         renderGraph.connect(opaqueBlocksNode, outlineNode);
         renderGraph.connect(alphaRejectBlocksNode, outlineNode);
 
         NewNode ambientOcclusionNode = new AmbientOcclusionNode("ambientOcclusionNode", context);
+        renderGraph.connectBufferPair(opaqueObjectsNode, 1, ambientOcclusionNode, 1);
         renderGraph.addNode(ambientOcclusionNode);
         renderGraph.connect(opaqueObjectsNode, ambientOcclusionNode);
         renderGraph.connect(opaqueBlocksNode, ambientOcclusionNode);
@@ -257,9 +264,9 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connect(applyDeferredLightingNode, ambientOcclusionNode);
 
         NewNode blurredAmbientOcclusionNode = new BlurredAmbientOcclusionNode("blurredAmbientOcclusionNode", context);
+        renderGraph.connectBufferPair(ambientOcclusionNode, 1, blurredAmbientOcclusionNode, 1);
         renderGraph.connectFbo(ambientOcclusionNode, 1, blurredAmbientOcclusionNode,1);
         renderGraph.addNode(blurredAmbientOcclusionNode);
-        renderGraph.connect(ambientOcclusionNode, blurredAmbientOcclusionNode);
     }
 
     private void addReflectionAndRefractionNodes(RenderGraph renderGraph) {
