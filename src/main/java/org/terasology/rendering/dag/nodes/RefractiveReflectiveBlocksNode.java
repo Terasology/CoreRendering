@@ -27,6 +27,7 @@ import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -35,7 +36,6 @@ import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
@@ -46,9 +46,7 @@ import org.terasology.world.chunks.RenderableChunk;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.dag.nodes.BackdropReflectionNode.REFLECTED_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
 import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
 import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.PRE_FBO_REGENERATION;
 import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.REFRACTIVE;
@@ -102,11 +100,12 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
 
-    private DisplayResolutionDependentFbo displayResolutionDependentFBOs;
+    private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material chunkMaterial;
 
     private FBO lastUpdatedGBuffer;
+    private FBO refractiveReflectiveFbo;
 
     private SubmersibleCamera activeCamera;
 
@@ -163,19 +162,6 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
 
-
-        displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        lastUpdatedGBuffer = displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo();
-        addOutputFboConnection(1, requiresFbo(new FboConfig(REFRACTIVE_REFLECTIVE_FBO_URI, FULL_SCALE, FBO.Type.HDR).useNormalBuffer(), displayResolutionDependentFBOs));
-
-
-        lastUpdatedGBuffer.attachDepthBufferTo(getOutputFboData(1));
-
-        displayResolutionDependentFBOs.subscribe(PRE_FBO_REGENERATION, this);
-        displayResolutionDependentFBOs.subscribe(POST_FBO_REGENERATION, this);
-
-
-
         chunkMaterial = getMaterial(CHUNK_MATERIAL_URN);
 
         renderingConfig = context.get(Config.class).getRendering();
@@ -190,9 +176,25 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
 
     @Override
     public void setDependencies(Context context) {
+
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        lastUpdatedGBuffer =  bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
+
+        refractiveReflectiveFbo = getInputFboData(1);
+
+        displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
+        addOutputFboConnection(1, refractiveReflectiveFbo);
+
+        lastUpdatedGBuffer.attachDepthBufferTo(getOutputFboData(1));
+
+        displayResolutionDependentFbo.subscribe(PRE_FBO_REGENERATION, this);
+        displayResolutionDependentFbo.subscribe(POST_FBO_REGENERATION, this);
+
+
         addDesiredStateChange(new LookThrough(activeCamera));
-        addDesiredStateChange(new BindFbo(getInputFboData(1)));
-        addOutputFboConnection(1, getInputFboData(1));
+        addDesiredStateChange(new BindFbo(refractiveReflectiveFbo));
+        addOutputFboConnection(1, refractiveReflectiveFbo);
         addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:terrain", CHUNK_MATERIAL_URN, "textureAtlas"));
@@ -200,8 +202,8 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN, "textureWater"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN, "textureWaterNormal"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN, "textureWaterNormalAlt"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFBOs, CHUNK_MATERIAL_URN, "textureWaterReflection"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFBOs, CHUNK_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
 
         setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal", CHUNK_MATERIAL_URN, "textureAtlasNormal");
         setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN, "textureAtlasHeight");
