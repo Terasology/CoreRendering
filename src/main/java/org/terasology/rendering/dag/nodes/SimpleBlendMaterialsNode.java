@@ -20,6 +20,7 @@ import org.terasology.engine.ComponentSystemManager;
 import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.cameras.Camera;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
@@ -61,7 +62,9 @@ public class SimpleBlendMaterialsNode extends NewAbstractNode {
         Camera playerCamera = context.get(WorldRenderer.class).getActiveCamera();
         addDesiredStateChange(new LookThrough(playerCamera));
 
-        this.addOutputFboConnection(1,context.get(DisplayResolutionDependentFbo.class).getGBufferPair().getLastUpdatedFbo());
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        this.addOutputBufferPairConnection(1, bufferPairConnection);
+        this.addOutputFboConnection(1, bufferPairConnection.getBufferPair().getPrimaryFbo());
         addDesiredStateChange(new BindFbo(this.getOutputFboData(1)));
 
         // Sets the state for the rendering of objects or portions of objects having some degree of transparency.

@@ -23,6 +23,8 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
+import org.terasology.rendering.dag.gsoc.DependencyConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -111,11 +113,13 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
     @Override
     public void setDependencies(Context context) {
         // TODO: Move everything you can into constructor
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        SwappableFBO gBufferPair = displayResolutionDependentFBOs.getGBufferPair();
+
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        // Add new instance of swapped bufferPair as output
+        addOutputBufferPairConnection(1, bufferPairConnection.getSwappedCopy(DependencyConnection.Type.OUTPUT, this.getUri()));
 
         addDesiredStateChange(new EnableMaterial(PRE_POST_MATERIAL_URN));
-        addDesiredStateChange(new BindFbo(gBufferPair.getStaleFbo()));
+        addDesiredStateChange(new BindFbo(bufferPairConnection.getBufferPair().getSecondaryFbo()));
 
         prePostMaterial = getMaterial(PRE_POST_MATERIAL_URN);
 
@@ -131,8 +135,9 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
         volumetricFogIsEnabled = renderingConfig.isVolumetricFog();
         renderingConfig.subscribe(RenderingConfig.VOLUMETRIC_FOG, this);
 
-        FBO lastUpdatedGBuffer = gBufferPair.getLastUpdatedFbo();
+        FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
 
+        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaque"));
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaqueDepth"));
@@ -156,8 +161,6 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
         if (hazeIsEnabled) {
             addDesiredStateChange(setHazeInputTexture);
         }
-
-        addDesiredStateChange(new SwapGBuffers(gBufferPair));
     }
 
     /**

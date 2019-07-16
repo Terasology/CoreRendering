@@ -72,8 +72,6 @@ public class ApplyDeferredLightingNode extends NewAbstractNode {
                 displayResolutionDependentFBOs, DEFERRED_LIGHTING_MATERIAL_URN, "texSceneOpaqueNormals"));
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot,   lastUpdatedGBuffer, LightAccumulationTexture,
                 displayResolutionDependentFBOs, DEFERRED_LIGHTING_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
-
-        // addDesiredStateChange(new SwapGBuffers(gBufferPair));
     }
 
     /**

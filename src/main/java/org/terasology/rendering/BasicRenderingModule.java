@@ -313,6 +313,8 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode blurredAmbientOcclusionNode = renderGraph.findNode("BasicRendering:blurredAmbientOcclusionNode");
 
         NewNode prePostCompositeNode = new PrePostCompositeNode("prePostCompositeNode", context);
+        // swapped bufferPairInstance
+        renderGraph.connectBufferPair(applyDeferredLightingNode, 1, prePostCompositeNode, 1);
         renderGraph.connectFbo(blurredAmbientOcclusionNode, 1, prePostCompositeNode,1);
         renderGraph.connectFbo(outlineNode, 1, prePostCompositeNode, 2);
         renderGraph.connectFbo(finalHazeNode, 1, prePostCompositeNode, 3);
@@ -326,8 +328,9 @@ public class BasicRenderingModule extends ModuleRendering {
         // renderGraph.connect(blurredAmbientOcclusionNode, prePostCompositeNode);
 
         NewNode simpleBlendMaterialsNode = new SimpleBlendMaterialsNode("simpleBlendMaterialsNode", context);
+        renderGraph.connectBufferPair(prePostCompositeNode, 1, simpleBlendMaterialsNode, 1);
         renderGraph.addNode(simpleBlendMaterialsNode);
-        renderGraph.connect(prePostCompositeNode, simpleBlendMaterialsNode);
+        // renderGraph.connect(prePostCompositeNode, simpleBlendMaterialsNode);
     }
 
     private void addBloomNodes(RenderGraph renderGraph) {
