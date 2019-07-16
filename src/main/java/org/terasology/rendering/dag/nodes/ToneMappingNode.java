@@ -31,7 +31,6 @@ import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.ScreenGrabber;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 
-import static org.terasology.rendering.dag.nodes.InitialPostProcessingNode.INITIAL_POST_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
@@ -64,11 +63,14 @@ public class ToneMappingNode extends NewAbstractNode {
         super(nodeUri, context);
 
         screenGrabber = context.get(ScreenGrabber.class);
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         DisplayResolutionDependentFbo displayResolutionDependentFboManager = context.get(DisplayResolutionDependentFbo.class);
         FBO toneMappingFbo = requiresFbo(new FboConfig(TONE_MAPPING_FBO_URI, FULL_SCALE, FBO.Type.HDR), displayResolutionDependentFboManager);
 
-        addOutputFboConnection(1,toneMappingFbo);
+        addOutputFboConnection(1, toneMappingFbo);
 
         //DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         //FBO toneMappingFbo = requiresFbo(new FboConfig(TONE_MAPPING_FBO_URI, FULL_SCALE, FBO.Type.HDR), displayResolutionDependentFBOs);
@@ -79,13 +81,10 @@ public class ToneMappingNode extends NewAbstractNode {
 
         toneMappingMaterial = getMaterial(TONE_MAPPING_MATERIAL_URN);
 
+        FBO initialPostProcessingFbo = getInputFboData(1);
+
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, INITIAL_POST_FBO_URI, ColorTexture, displayResolutionDependentFboManager, TONE_MAPPING_MATERIAL_URN, "texScene"));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, initialPostProcessingFbo, ColorTexture, displayResolutionDependentFboManager, TONE_MAPPING_MATERIAL_URN, "texScene"));
     }
 
     /**

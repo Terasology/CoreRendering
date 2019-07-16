@@ -335,8 +335,10 @@ public class BasicRenderingModule extends ModuleRendering {
 
     private void addBloomNodes(RenderGraph renderGraph) {
         // Bloom Effect: one high-pass filter and three blur passes
+        NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
 
         NewNode highPassNode = new HighPassNode("highPassNode", context);
+        renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, highPassNode, 1);
         renderGraph.addNode(highPassNode);
 
         FboConfig halfScaleBloomConfig = new FboConfig(BloomBlurNode.HALF_SCALE_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
@@ -361,9 +363,6 @@ public class BasicRenderingModule extends ModuleRendering {
         BloomBlurNode one8thScaleBlurredBloomNode = new BloomBlurNode("one8thScaleBlurredBloomNode", context, one8thScaleBloomFbo);
         renderGraph.connectFbo(quarterScaleBlurredBloomNode, 1, one8thScaleBlurredBloomNode, 1);
         renderGraph.addNode(one8thScaleBlurredBloomNode);
-
-        NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
-        renderGraph.connect(simpleBlendMaterialsNode, highPassNode);
     }
 
     private void addExposureNodes(RenderGraph renderGraph) {
@@ -410,15 +409,15 @@ public class BasicRenderingModule extends ModuleRendering {
 
         // Light shafts
         LightShaftsNode lightShaftsNode = new LightShaftsNode("lightShaftsNode", context);
-
+        renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, lightShaftsNode, 1);
         renderGraph.addNode(lightShaftsNode);
-        renderGraph.connect(simpleBlendMaterialsNode, lightShaftsNode);
 
         // Adding the bloom and light shafts to the gBuffer
         NewNode initialPostProcessingNode = new InitialPostProcessingNode("initialPostProcessingNode", context);
+        renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, initialPostProcessingNode, 1);
+        renderGraph.connectFbo(lightShaftsNode, 1, initialPostProcessingNode, 1);
+        renderGraph.connectFbo(one8thScaleBlurredBloomNode, 1, initialPostProcessingNode, 2);
         renderGraph.addNode(initialPostProcessingNode);
-        renderGraph.connect(lightShaftsNode, initialPostProcessingNode);
-        renderGraph.connect(one8thScaleBlurredBloomNode, initialPostProcessingNode);
     }
 
     private void addFinalPostProcessingNodes(RenderGraph renderGraph) {
@@ -426,10 +425,9 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode updateExposureNode = renderGraph.findNode("BasicRendering:updateExposureNode");
 
         ToneMappingNode toneMappingNode = new ToneMappingNode("toneMappingNode", context);
-
+        renderGraph.connectFbo(initialPostProcessingNode, 1, toneMappingNode, 1);
         renderGraph.addNode(toneMappingNode);
         renderGraph.connect(updateExposureNode, toneMappingNode);
-        renderGraph.connect(initialPostProcessingNode, toneMappingNode);
 
         // Late Blur nodes: assisting Motion Blur and Depth-of-Field effects
         FboConfig firstLateBlurConfig = new FboConfig(FIRST_LATE_BLUR_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
@@ -446,11 +444,10 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(firstLateBlurNode, 1, secondLateBlurNode, 1);
         renderGraph.addNode(secondLateBlurNode);
 
-        // TODO rework
         FinalPostProcessingNode finalPostProcessingNode = new FinalPostProcessingNode("finalPostProcessingNode", context/*finalIn1*/);
+        renderGraph.connectBufferPair(initialPostProcessingNode, 1, finalPostProcessingNode, 1);
         renderGraph.connectFbo(toneMappingNode,1, finalPostProcessingNode, 1);
         renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode,2);
-
         renderGraph.addNode(finalPostProcessingNode);
 
         // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);

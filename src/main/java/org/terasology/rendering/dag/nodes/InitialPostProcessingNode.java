@@ -24,6 +24,7 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -85,11 +86,16 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         // TODO: see if we could write this straight into a GBUFFER
         FBO initialPostFbo = requiresFbo(new FboConfig(INITIAL_POST_FBO_URI, FULL_SCALE, FBO.Type.HDR), displayResolutionDependentFBOs);
         addDesiredStateChange(new BindFbo(initialPostFbo));
+        addOutputFboConnection(1, initialPostFbo);
+
         addDesiredStateChange(new SetViewportToSizeOf(initialPostFbo));
 
         addDesiredStateChange(new EnableMaterial(INITIAL_POST_MATERIAL_URN));
@@ -103,14 +109,19 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
         renderingConfig.subscribe(RenderingConfig.LIGHT_SHAFTS, this);
 
         // TODO: Temporary hack for now.
-        FboConfig one8thScaleBloomConfig = new FboConfig(BloomBlurNode.ONE_8TH_SCALE_FBO_URI, ONE_8TH_SCALE, FBO.Type.DEFAULT);
-        FBO one8thBloomFbo = requiresFbo(one8thScaleBloomConfig, displayResolutionDependentFBOs);
+        FBO bloomFbo = getInputFboData(1);
+
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        FBO lastUpdatedFbo = bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
+
+        FBO lightShaftsFbo = getInputFboData(2);
 
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo(), ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texScene"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette", INITIAL_POST_MATERIAL_URN, "texVignette"));
-        setBloomInputTexture = new SetInputTextureFromFbo(textureSlot++, one8thBloomFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texBloom");
-        setLightShaftsInputTexture = new SetInputTextureFromFbo(textureSlot, LIGHT_SHAFTS_FBO_URI, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texLightShafts");
+        setBloomInputTexture = new SetInputTextureFromFbo(textureSlot++, bloomFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texBloom");
+        setLightShaftsInputTexture = new SetInputTextureFromFbo(textureSlot, lightShaftsFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texLightShafts");
 
         if (bloomIsEnabled) {
             addDesiredStateChange(setBloomInputTexture);
@@ -118,11 +129,6 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
         if (lightShaftsAreEnabled) {
             addDesiredStateChange(setLightShaftsInputTexture);
         }
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
     }
 
     /**

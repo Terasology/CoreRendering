@@ -27,6 +27,7 @@ import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.ConditionDependentNode;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
@@ -96,10 +97,14 @@ public class LightShaftsNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.LIGHT_SHAFTS, this);
         requiresCondition(renderingConfig::isLightShafts);
+    }
 
+    @Override
+    public void setDependencies(Context context) {
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         FBO lightShaftsFbo = requiresFbo(new FboConfig(LIGHT_SHAFTS_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT), displayResolutionDependentFBOs);
         addOutputFboConnection(1, lightShaftsFbo);
+
         addDesiredStateChange(new BindFbo(lightShaftsFbo));
         addDesiredStateChange(new SetViewportToSizeOf(lightShaftsFbo));
 
@@ -107,14 +112,13 @@ public class LightShaftsNode extends ConditionDependentNode {
 
         lightShaftsMaterial = getMaterial(LIGHT_SHAFTS_MATERIAL_URN);
 
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
+
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo(),
-                                    ColorTexture, displayResolutionDependentFBOs, LIGHT_SHAFTS_MATERIAL_URN, "texScene"));
-    }
-
-    @Override
-    public void setDependencies(Context context) {
-
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer,
+                ColorTexture, displayResolutionDependentFBOs, LIGHT_SHAFTS_MATERIAL_URN, "texScene"));
     }
 
     /**

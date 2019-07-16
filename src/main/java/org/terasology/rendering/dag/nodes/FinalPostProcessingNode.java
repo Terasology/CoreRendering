@@ -28,6 +28,7 @@ import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.gsoc.BufferPair;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -120,12 +121,9 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
 
-        // DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-
-        // TODO render DAG: renderGrap.connectBufferPair instead
-         lastUpdatedGBuffer = displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo();
-        // lastUpdatedGBuffer = getInputBufferPairConnection(1).getPrimaryFbo();
-        addOutputBufferPairConnection(1, new BufferPair(lastUpdatedGBuffer,displayResolutionDependentFbo.getGBufferPair().getStaleFbo()));
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
 
         int texId = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));

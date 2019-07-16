@@ -23,6 +23,7 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.ConditionDependentNode;
+import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
@@ -70,8 +71,12 @@ public class HighPassNode extends ConditionDependentNode {
         highPass = getMaterial(HIGH_PASS_MATERIAL_URN);
         addDesiredStateChange(new EnableMaterial(HIGH_PASS_MATERIAL_URN));
 
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
+        FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
+        addOutputBufferPairConnection(1, bufferPairConnection);
+
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, displayResolutionDependentFBOs.getGBufferPair().getLastUpdatedFbo(), ColorTexture,
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, ColorTexture,
                 displayResolutionDependentFBOs, HIGH_PASS_MATERIAL_URN, "tex"));
     }
 
