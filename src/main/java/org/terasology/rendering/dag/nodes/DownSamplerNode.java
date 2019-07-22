@@ -58,6 +58,7 @@ public class DownSamplerNode extends ConditionDependentNode {
         // OUT
         // TODO get rid of this? why load input fbo from dependency when I still need this
         this.inputFboManager = inputFboManager;
+        addOutputFboConnection(1);
         outputFbo = requiresFbo(outputFboConfig, outputFboManager);
     }
 

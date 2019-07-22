@@ -55,6 +55,8 @@ public class SimpleBlendMaterialsNode extends NewAbstractNode {
         super(nodeUri, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override
@@ -63,8 +65,8 @@ public class SimpleBlendMaterialsNode extends NewAbstractNode {
         addDesiredStateChange(new LookThrough(playerCamera));
 
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
-        this.addOutputBufferPairConnection(1, bufferPairConnection);
-        this.addOutputFboConnection(1, bufferPairConnection.getBufferPair().getPrimaryFbo());
+        addOutputBufferPairConnection(1, bufferPairConnection);
+        addOutputFboConnection(1, bufferPairConnection.getBufferPair().getPrimaryFbo());
         addDesiredStateChange(new BindFbo(this.getOutputFboData(1)));
 
         // Sets the state for the rendering of objects or portions of objects having some degree of transparency.

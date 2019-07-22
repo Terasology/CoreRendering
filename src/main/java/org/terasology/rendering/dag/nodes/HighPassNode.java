@@ -58,6 +58,8 @@ public class HighPassNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.BLOOM, this);
         requiresCondition(renderingConfig::isBloom);
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

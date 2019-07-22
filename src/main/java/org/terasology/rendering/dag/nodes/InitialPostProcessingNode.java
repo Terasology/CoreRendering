@@ -86,6 +86,9 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
+
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

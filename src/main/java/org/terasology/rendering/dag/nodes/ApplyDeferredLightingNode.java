@@ -45,6 +45,7 @@ public class ApplyDeferredLightingNode extends NewAbstractNode {
 
     public ApplyDeferredLightingNode(String nodeUri, Context context) {
         super(nodeUri, context);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

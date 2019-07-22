@@ -96,6 +96,8 @@ public class DeferredMainLightNode extends NewAbstractNode {
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
         lightCamera = basicRendering.getLightCamera();
+
+        addOutputBufferPairConnection(1);
     }
 
     @Override

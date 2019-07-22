@@ -105,6 +105,8 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.SSAO, this);
         requiresCondition(renderingConfig::isSsao);
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override
@@ -115,7 +117,7 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         ssaoFbo = requiresFbo(new FboConfig(SSAO_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT), displayResolutionDependentFBOs);
 
-        this.addOutputFboConnection(1,ssaoFbo);
+        addOutputFboConnection(1, ssaoFbo);
 
         addDesiredStateChange(new BindFbo(ssaoFbo));
         addDesiredStateChange(new SetViewportToSizeOf(ssaoFbo));

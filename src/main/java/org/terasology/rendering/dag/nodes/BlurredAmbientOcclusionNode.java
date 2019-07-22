@@ -69,6 +69,7 @@ public class BlurredAmbientOcclusionNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.SSAO, this);
         requiresCondition(renderingConfig::isSsao);
+        addOutputFboConnection(1);
     }
 
     @Override

@@ -89,6 +89,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
         requiresCondition(() -> renderingConfig.isDynamicShadows());
         renderingConfig.subscribe(RenderingConfig.DYNAMIC_SHADOWS, this);
+        addOutputFboConnection(1);
     }
 
     @Override

@@ -96,6 +96,7 @@ public class BackdropReflectionNode extends NewAbstractNode {
      */
     public BackdropReflectionNode(String nodeUri, Context context) {
         super(nodeUri, context);
+        addOutputFboConnection(1);
     }
 
     @Override

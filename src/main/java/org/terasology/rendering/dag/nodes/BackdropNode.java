@@ -100,6 +100,9 @@ public class BackdropNode extends NewAbstractNode implements WireframeCapable {
         wireframeStateChange = new SetWireframe(true);
 
         skyMaterial = getMaterial(SKY_MATERIAL_URN);
+
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

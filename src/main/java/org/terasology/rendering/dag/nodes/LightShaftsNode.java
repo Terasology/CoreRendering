@@ -97,6 +97,9 @@ public class LightShaftsNode extends ConditionDependentNode {
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.LIGHT_SHAFTS, this);
         requiresCondition(renderingConfig::isLightShafts);
+
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

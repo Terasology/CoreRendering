@@ -63,6 +63,7 @@ public class ToneMappingNode extends NewAbstractNode {
         super(nodeUri, context);
 
         screenGrabber = context.get(ScreenGrabber.class);
+        addOutputFboConnection(1);
     }
 
     @Override

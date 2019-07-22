@@ -172,6 +172,8 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         animatedWaterIsEnabled = renderingConfig.isAnimateWater();
         renderingConfig.subscribe(RenderingConfig.ANIMATE_WATER, this);
 
+        addOutputBufferPairConnection(1);
+        addOutputFboConnection(1);
     }
 
     @Override
@@ -186,7 +188,7 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
         displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         addOutputFboConnection(1, refractiveReflectiveFbo);
 
-        lastUpdatedGBuffer.attachDepthBufferTo(getOutputFboData(1));
+        lastUpdatedGBuffer.attachDepthBufferTo(refractiveReflectiveFbo);
 
         displayResolutionDependentFbo.subscribe(PRE_FBO_REGENERATION, this);
         displayResolutionDependentFbo.subscribe(POST_FBO_REGENERATION, this);
@@ -194,7 +196,6 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
 
         addDesiredStateChange(new LookThrough(activeCamera));
         addDesiredStateChange(new BindFbo(refractiveReflectiveFbo));
-        addOutputFboConnection(1, refractiveReflectiveFbo);
         addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:terrain", CHUNK_MATERIAL_URN, "textureAtlas"));

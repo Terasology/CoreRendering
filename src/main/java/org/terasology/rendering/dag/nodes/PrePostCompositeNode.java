@@ -29,17 +29,14 @@ import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.dag.stateChanges.SwapGBuffers;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.SwappableFBO;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.world.WorldRenderer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.dag.nodes.RefractiveReflectiveBlocksNode.REFRACTIVE_REFLECTIVE_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
@@ -64,13 +61,22 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
     private RenderingConfig renderingConfig;
     private WorldRenderer worldRenderer;
     private SubmersibleCamera activeCamera;
+    private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material prePostMaterial;
 
+    private int textureSlot = 0;
+
     private boolean localReflectionsAreEnabled;
+
     private boolean ssaoIsEnabled;
+    private int texSsaoSlot = -1;
+
     private boolean outlineIsEnabled;
+
     private boolean hazeIsEnabled;
+    private int texHazeSlot = -1;
+
     private boolean volumetricFogIsEnabled;
 
     private StateChange setReflectiveRefractiveNormalsInputTexture;
@@ -95,7 +101,7 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 1.0f)
     private float hazeThreshold = 0.8f;
-    
+
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 0.1f)
     private float volumetricFogGlobalDensity = 0.005f;
@@ -108,6 +114,7 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
+        addOutputBufferPairConnection(1);
     }
 
     @Override
@@ -137,28 +144,37 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
 
         FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-        int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaque"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaqueNormals"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractive"));
-        setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), NormalsTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractiveNormals");
-        setSsaoInputTexture = new SetInputTextureFromFbo(textureSlot++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSsao");
-        setEdgesInputTexture = new SetInputTextureFromFbo(textureSlot++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texEdges");
-        setHazeInputTexture = new SetInputTextureFromFbo(textureSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFBOs, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
+        displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
+        textureSlot = 0;
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractive"));
+        setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractiveNormals");
+
+        setEdgesInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texEdges");
+
 
         if (localReflectionsAreEnabled) {
+            // setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractiveNormals");
             addDesiredStateChange(setReflectiveRefractiveNormalsInputTexture);
         }
         if (ssaoIsEnabled) {
+            if (texSsaoSlot < 0) {
+                texSsaoSlot = textureSlot++;
+            }
+            setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
             addDesiredStateChange(setSsaoInputTexture);
         }
         if (outlineIsEnabled) {
             addDesiredStateChange(setEdgesInputTexture);
         }
         if (hazeIsEnabled) {
+            if (texHazeSlot < 0) {
+                texSsaoSlot = textureSlot++;
+            }
+            setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
             addDesiredStateChange(setHazeInputTexture);
         }
     }
@@ -221,6 +237,10 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
             case RenderingConfig.SSAO:
                 ssaoIsEnabled = renderingConfig.isSsao();
                 if (ssaoIsEnabled) {
+                    if (texSsaoSlot < 0) {
+                        texSsaoSlot = textureSlot++;
+                    }
+                    setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
                     addDesiredStateChange(setSsaoInputTexture);
                 } else {
                     removeDesiredStateChange(setSsaoInputTexture);
@@ -230,6 +250,7 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
             case RenderingConfig.OUTLINE:
                 outlineIsEnabled = renderingConfig.isOutline();
                 if (outlineIsEnabled) {
+                    getInputFboData(2);
                     addDesiredStateChange(setEdgesInputTexture);
                 } else {
                     removeDesiredStateChange(setEdgesInputTexture);
@@ -239,6 +260,10 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
             case RenderingConfig.INSCATTERING:
                 hazeIsEnabled = renderingConfig.isInscattering();
                 if (hazeIsEnabled) {
+                    if (texHazeSlot < 0) {
+                        texSsaoSlot = textureSlot++;
+                    }
+                    setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
                     addDesiredStateChange(setHazeInputTexture);
                 } else {
                     removeDesiredStateChange(setHazeInputTexture);

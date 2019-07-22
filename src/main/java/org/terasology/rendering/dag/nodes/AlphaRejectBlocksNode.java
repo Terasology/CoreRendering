@@ -90,7 +90,7 @@ public class AlphaRejectBlocksNode extends NewAbstractNode implements WireframeC
 
         renderQueues = context.get(RenderQueuesHelper.class);
         worldProvider = context.get(WorldProvider.class);
-
+        addOutputBufferPairConnection(1);
         worldRenderer = context.get(WorldRenderer.class);
     }
 

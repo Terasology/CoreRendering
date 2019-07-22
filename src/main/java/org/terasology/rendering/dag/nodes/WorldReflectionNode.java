@@ -104,7 +104,9 @@ public class WorldReflectionNode extends ConditionDependentNode {
         worldProvider = context.get(WorldProvider.class);
 
         activeCamera = worldRenderer.getActiveCamera();
-            }
+
+        addOutputFboConnection(1);
+    }
 
     @Override
     public void setDependencies(Context context) {

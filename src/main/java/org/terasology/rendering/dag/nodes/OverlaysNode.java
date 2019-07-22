@@ -52,7 +52,7 @@ public class OverlaysNode extends NewAbstractNode implements WireframeCapable {
         super(nodeUri, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
-
+        addOutputBufferPairConnection(1);
         worldRenderer = context.get(WorldRenderer.class);
     }
 

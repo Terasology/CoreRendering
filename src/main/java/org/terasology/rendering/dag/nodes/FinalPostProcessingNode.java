@@ -109,6 +109,8 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
         isMotionBlurEnabled = renderingConfig.isMotionBlur();
         renderingConfig.subscribe(RenderingConfig.MOTION_BLUR, this);
         renderingConfig.subscribe(RenderingConfig.BLUR_INTENSITY, this);
+        addOutputFboConnection(1);
+        addOutputBufferPairConnection(1);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
 
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(new SimpleUri("fbo.finalBuffer"), FULL_SCALE, FBO.Type.DEFAULT));
-        this.addOutputFboConnection(1, finalBuffer);
+        addOutputFboConnection(1, finalBuffer);
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
 

@@ -89,6 +89,7 @@ public class OpaqueBlocksNode extends NewAbstractNode implements WireframeCapabl
 
         renderQueues = context.get(RenderQueuesHelper.class);
         worldProvider = context.get(WorldProvider.class);
+        addOutputBufferPairConnection(1);
     }
 
     @Override

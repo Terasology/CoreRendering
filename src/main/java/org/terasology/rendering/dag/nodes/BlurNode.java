@@ -52,20 +52,20 @@ public class BlurNode extends ConditionDependentNode {
 
         this.blurRadius = blurRadius;
 
-        addOutputFboConnection(1, outputFbo);
         // TODO not sure this can be in here, it's its own out, so maybe this can stay
         this.outputFbo = outputFbo;
-        addDesiredStateChange(new BindFbo(outputFbo));
-        addDesiredStateChange(new SetViewportToSizeOf(outputFbo));
-
-        addDesiredStateChange(new EnableMaterial(BLUR_MATERIAL_URN));
-        this.blurMaterial = getMaterial(BLUR_MATERIAL_URN);
+        addOutputFboConnection(1);
     }
 
     @Override
     public void setDependencies(Context context) {
         inputFbo =  this.getInputFboData(1);
         addOutputFboConnection(1, outputFbo);
+        addDesiredStateChange(new BindFbo(outputFbo));
+        addDesiredStateChange(new SetViewportToSizeOf(outputFbo));
+
+        addDesiredStateChange(new EnableMaterial(BLUR_MATERIAL_URN));
+        this.blurMaterial = getMaterial(BLUR_MATERIAL_URN);
     }
 
     /**

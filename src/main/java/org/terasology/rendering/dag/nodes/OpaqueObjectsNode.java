@@ -60,6 +60,8 @@ public class OpaqueObjectsNode extends NewAbstractNode implements WireframeCapab
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
         new WireframeTrigger(renderingDebugConfig, this);
+
+        addOutputBufferPairConnection(1);
     }
 
     @Override

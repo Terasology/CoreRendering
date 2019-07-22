@@ -91,6 +91,8 @@ public class DeferredPointLightsNode extends NewAbstractNode {
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);
         entityManager = context.get(EntityManager.class);
+
+        addOutputFboConnection(1);
     }
 
     @Override

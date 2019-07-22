@@ -53,6 +53,7 @@ public class BufferClearingNode extends NewAbstractNode {
 
         if (argumentsAreValid) {
             this.fbo = requiresFbo(fboConfig, fboManager);
+            addOutputFboConnection(1, fbo);
             // addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
@@ -69,6 +70,7 @@ public class BufferClearingNode extends NewAbstractNode {
     public BufferClearingNode(String nodeUri, Context context, int clearingMask) {
         super(nodeUri, context);
         this.clearingMask = clearingMask;
+        addOutputFboConnection(1);
     }
 
     @Deprecated
@@ -79,6 +81,7 @@ public class BufferClearingNode extends NewAbstractNode {
 
         if (argumentsAreValid) {
             this.fbo = fbo;
+            addOutputFboConnection(1, fbo);
             // addDesiredStateChange(new BindFbo(fbo));
             this.clearingMask = clearingMask;
         } else {
