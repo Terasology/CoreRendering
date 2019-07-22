@@ -15,33 +15,21 @@
  */
 package org.terasology.rendering;
 
-import javafx.util.Pair;
 import org.lwjgl.opengl.Display;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.engine.module.ModuleManager;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.naming.Name;
-import org.terasology.registry.In;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.RenderGraph;
 
 import org.terasology.rendering.dag.gsoc.BufferPair;
-import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.ModuleRendering;
 import org.terasology.rendering.dag.gsoc.NewNode;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.ScalingFactors;
 import org.terasology.rendering.opengl.SwappableFBO;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.opengl.fbms.ImmutableFbo;
 import org.terasology.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
-import org.terasology.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -110,7 +98,7 @@ public class BasicRenderingModule extends ModuleRendering {
 
         addOutputNodes(renderGraph);
 
-        worldRenderer.requestTaskListRefresh();
+       // worldRenderer.requestTaskListRefresh();
     }
 
     private void addGBufferClearingNodes(RenderGraph renderGraph) {
@@ -141,32 +129,10 @@ public class BasicRenderingModule extends ModuleRendering {
 
     private void addSkyNodes(RenderGraph renderGraph) {
         NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
+
         NewNode backdropNode = new BackdropNode("backdropNode", context);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
         renderGraph.addNode(backdropNode);
-
-        FboConfig intermediateHazeConfig = new FboConfig(HazeNode.INTERMEDIATE_HAZE_FBO_URI, ONE_16TH_SCALE, FBO.Type.DEFAULT);
-        FBO intermediateHazeFbo = displayResolutionDependentFbo.request(intermediateHazeConfig);
-
-        HazeNode intermediateHazeNode = new HazeNode("intermediateHazeNode", context,
-                                                    intermediateHazeFbo);
-        // TODO I introduce new BufferPairConnection but I have to fetch it from the old system. This must be removed when every node uses new system
-        // make this implicit
-        // intermediateHazeNode.addInputBufferPairConnection(1, new Pair<FBO,FBO>(displayResolutionDependentFbo.getGBufferPair().getLastUpdatedFbo(),
-        //                                                                          displayResolutionDependentFbo.getGBufferPair().getStaleFbo()));
-        renderGraph.connectFbo(backdropNode, 1, intermediateHazeNode, 1);
-        renderGraph.addNode(intermediateHazeNode);
-
-        FboConfig finalHazeConfig = new FboConfig(HazeNode.FINAL_HAZE_FBO_URI, ONE_32TH_SCALE, FBO.Type.DEFAULT);
-        FBO finalHazeFbo = displayResolutionDependentFbo.request(finalHazeConfig);
-
-        HazeNode finalHazeNode = new HazeNode("finalHazeNode", context, finalHazeFbo);
-        renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, finalHazeNode, 1);
-        renderGraph.connectFbo(intermediateHazeNode, 1, finalHazeNode, 1);
-        // Hack because HazeNode extends Blur which is a reusable node and we can't tailor its code to this need
-        finalHazeNode.addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1));
-        renderGraph.addNode(finalHazeNode);
-
         //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
     }
 
@@ -180,25 +146,25 @@ public class BasicRenderingModule extends ModuleRendering {
         before the world rendering nodes. Here we have chosen to also ensure that finalHazeNode is
         processed before the world rendering nodes - not because it's necessary, but to keep all
         the haze-related nodes together. */
-        NewNode finalHazeNode = renderGraph.findNode("BasicRendering:finalHazeNode");
+        NewNode backdropNode = renderGraph.findNode("BasicRendering:backdropNode");
 
         NewNode opaqueObjectsNode = new OpaqueObjectsNode("opaqueObjectsNode", context);
-        renderGraph.connectBufferPair(finalHazeNode, 1, opaqueObjectsNode, 1);
+        renderGraph.connectBufferPair(backdropNode, 1, opaqueObjectsNode, 1);
         renderGraph.addNode(opaqueObjectsNode);
         // renderGraph.connect(finalHazeNode, opaqueObjectsNode);
 
         NewNode opaqueBlocksNode = new OpaqueBlocksNode("opaqueBlocksNode", context);
-        renderGraph.connectBufferPair(finalHazeNode, 1, opaqueBlocksNode, 1);
+        renderGraph.connectBufferPair(backdropNode, 1, opaqueBlocksNode, 1);
         renderGraph.addNode(opaqueBlocksNode);
         // renderGraph.connect(finalHazeNode, opaqueBlocksNode);
 
         NewNode alphaRejectBlocksNode = new AlphaRejectBlocksNode("alphaRejectBlocksNode", context);
-        renderGraph.connectBufferPair(finalHazeNode, 1, alphaRejectBlocksNode, 1);
+        renderGraph.connectBufferPair(backdropNode, 1, alphaRejectBlocksNode, 1);
         renderGraph.addNode(alphaRejectBlocksNode);
         // renderGraph.connect(finalHazeNode, alphaRejectBlocksNode);
 
         NewNode overlaysNode = new OverlaysNode("overlaysNode", context);
-        renderGraph.connectBufferPair(finalHazeNode, 1, overlaysNode, 1);
+        renderGraph.connectBufferPair(backdropNode, 1, overlaysNode, 1);
         renderGraph.addNode(overlaysNode);
         // renderGraph.connect(finalHazeNode, overlaysNode);
     }
@@ -207,8 +173,6 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode opaqueObjectsNode = renderGraph.findNode("BasicRendering:opaqueObjectsNode");
         NewNode opaqueBlocksNode = renderGraph.findNode("BasicRendering:opaqueBlocksNode");
         NewNode alphaRejectBlocksNode = renderGraph.findNode("BasicRendering:alphaRejectBlocksNode");
-        NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
-        NewNode staleGBufferClearingNode = renderGraph.findNode("BasicRendering:staleGBufferClearingNode");
 
         FboConfig shadowMapConfig = new FboConfig(ShadowMapNode.SHADOW_MAP_FBO_URI, FBO.Type.NO_COLOR).useDepthBuffer();
         BufferClearingNode shadowMapClearingNode = new BufferClearingNode("shadowMapClearingNode", context,
@@ -222,7 +186,6 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode deferredPointLightsNode = new DeferredPointLightsNode("deferredPointLightsNode", context);
         renderGraph.connectBufferPair(opaqueObjectsNode, 1, deferredPointLightsNode, 1);
         renderGraph.addNode(deferredPointLightsNode);
-        // renderGraph.connect(opaqueObjectsNode, deferredPointLightsNode);
         renderGraph.connectRunOrder(opaqueBlocksNode, 1, deferredPointLightsNode, 1);
         renderGraph.connectRunOrder(alphaRejectBlocksNode, 1, deferredPointLightsNode, 2);
 
@@ -231,45 +194,21 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connectBufferPair(opaqueBlocksNode, 1, deferredMainLightNode, 1);
         renderGraph.addNode(deferredMainLightNode);
         renderGraph.connectRunOrder(opaqueObjectsNode, 1, deferredMainLightNode, 1);
-        // renderGraph.connect(opaqueBlocksNode, deferredMainLightNode);
         renderGraph.connectRunOrder(alphaRejectBlocksNode, 2, deferredMainLightNode, 2);
         renderGraph.connectRunOrder(deferredPointLightsNode, 1, deferredMainLightNode, 3);
 
         NewNode applyDeferredLightingNode = new ApplyDeferredLightingNode("applyDeferredLightingNode", context);
         renderGraph.connectBufferPair(deferredMainLightNode, 1, applyDeferredLightingNode, 1);
         renderGraph.addNode(applyDeferredLightingNode);
-        // renderGraph.connect(deferredMainLightNode, applyDeferredLightingNode);
         renderGraph.connectRunOrder(deferredPointLightsNode, 2, applyDeferredLightingNode, 1);
-        // renderGraph.connect(lastUpdatedGBufferClearingNode, applyDeferredLightingNode);
-        // renderGraph.connect(staleGBufferClearingNode, applyDeferredLightingNode);
     }
 
     private void add3dDecorationNodes(RenderGraph renderGraph) {
-        NewNode opaqueObjectsNode = renderGraph.findNode("BasicRendering:opaqueObjectsNode");
-        NewNode opaqueBlocksNode = renderGraph.findNode("BasicRendering:opaqueBlocksNode");
-        NewNode alphaRejectBlocksNode = renderGraph.findNode("BasicRendering:alphaRejectBlocksNode");
         NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
 
         NewNode outlineNode = new OutlineNode("outlineNode", context);
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, outlineNode, 1);
         renderGraph.addNode(outlineNode);
-        renderGraph.connectRunOrder(opaqueObjectsNode, 2, outlineNode, 1);
-        renderGraph.connectRunOrder(opaqueBlocksNode, 2, outlineNode, 2);
-        renderGraph.connectRunOrder(alphaRejectBlocksNode, 3, outlineNode, 3);
-
-        NewNode ambientOcclusionNode = new AmbientOcclusionNode("ambientOcclusionNode", context);
-        renderGraph.connectBufferPair(applyDeferredLightingNode, 1, ambientOcclusionNode, 1);
-        renderGraph.addNode(ambientOcclusionNode);
-        renderGraph.connectRunOrder(opaqueObjectsNode, 3, ambientOcclusionNode, 1);
-        renderGraph.connectRunOrder(opaqueBlocksNode, 3, ambientOcclusionNode, 2);
-        renderGraph.connectRunOrder(alphaRejectBlocksNode, 4, ambientOcclusionNode, 3);
-        // TODO: At this stage, it is unclear -why- this connection is required, we just know that it's required. Investigate.
-        // renderGraph.connect(applyDeferredLightingNode, ambientOcclusionNode);
-
-        NewNode blurredAmbientOcclusionNode = new BlurredAmbientOcclusionNode("blurredAmbientOcclusionNode", context);
-        renderGraph.connectBufferPair(ambientOcclusionNode, 1, blurredAmbientOcclusionNode, 1);
-        renderGraph.connectFbo(ambientOcclusionNode, 1, blurredAmbientOcclusionNode, 1);
-        renderGraph.addNode(blurredAmbientOcclusionNode);
     }
 
     private void addReflectionAndRefractionNodes(RenderGraph renderGraph) {
@@ -315,14 +254,14 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode chunksRefractiveReflectiveNode = renderGraph.findNode("BasicRendering:chunksRefractiveReflectiveNode");
         NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
         NewNode outlineNode = renderGraph.findNode("BasicRendering:outlineNode");
-        NewNode blurredAmbientOcclusionNode = renderGraph.findNode("BasicRendering:blurredAmbientOcclusionNode");
+        // NewNode blurredAmbientOcclusionNode = renderGraph.findAka("blurredAmbientOcclusion");
 
         NewNode prePostCompositeNode = new PrePostCompositeNode("prePostCompositeNode", context);
         // swapped bufferPairInstance
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, prePostCompositeNode, 1);
-        renderGraph.connectFbo(blurredAmbientOcclusionNode, 1, prePostCompositeNode,1);
+        // renderGraph.connectFbo(blurredAmbientOcclusionNode, 1, prePostCompositeNode,1);
         renderGraph.connectFbo(outlineNode, 1, prePostCompositeNode, 2);
-        renderGraph.connectFbo(finalHazeNode, 1, prePostCompositeNode, 3);
+        // renderGraph.connectFbo(finalHazeNode, 1, prePostCompositeNode, 3);
         renderGraph.connectFbo(chunksRefractiveReflectiveNode, 1, prePostCompositeNode, 4);
         renderGraph.addNode(prePostCompositeNode);
         renderGraph.connectRunOrder(overlaysNode, 1, prePostCompositeNode, 1);
