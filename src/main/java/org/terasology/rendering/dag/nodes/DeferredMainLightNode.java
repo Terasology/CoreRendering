@@ -95,7 +95,6 @@ public class DeferredMainLightNode extends NewAbstractNode {
 
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        lightCamera = basicRendering.getLightCamera();
 
         addOutputBufferPairConnection(1);
     }
@@ -160,7 +159,7 @@ public class DeferredMainLightNode extends NewAbstractNode {
         // Specific Shader Parameters
 
         cameraPosition = activeCamera.getPosition();
-        activeCameraToLightSpace.sub(cameraPosition, lightCamera.getPosition());
+        // activeCameraToLightSpace.sub(cameraPosition, lightCamera.getPosition());
         mainLightInViewSpace = backdropProvider.getSunDirection(true);
         activeCamera.getViewMatrix().transformPoint(mainLightInViewSpace);
 
@@ -179,6 +178,8 @@ public class DeferredMainLightNode extends NewAbstractNode {
         }
 
         if (renderingConfig.isDynamicShadows()) {
+            lightCamera = basicRendering.getLightCamera();
+            activeCameraToLightSpace.sub(cameraPosition, lightCamera.getPosition());
             lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace, true);
