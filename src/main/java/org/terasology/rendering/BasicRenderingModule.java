@@ -174,15 +174,6 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode opaqueBlocksNode = renderGraph.findNode("BasicRendering:opaqueBlocksNode");
         NewNode alphaRejectBlocksNode = renderGraph.findNode("BasicRendering:alphaRejectBlocksNode");
 
-        FboConfig shadowMapConfig = new FboConfig(ShadowMapNode.SHADOW_MAP_FBO_URI, FBO.Type.NO_COLOR).useDepthBuffer();
-        BufferClearingNode shadowMapClearingNode = new BufferClearingNode("shadowMapClearingNode", context,
-                shadowMapConfig, shadowMapResolutionDependentFbo, GL_DEPTH_BUFFER_BIT);
-        renderGraph.addNode(shadowMapClearingNode);
-
-        shadowMapNode = new ShadowMapNode("shadowMapNode", context);
-        renderGraph.connectFbo(shadowMapClearingNode, 1, shadowMapNode, 1);
-        renderGraph.addNode(shadowMapNode);
-
         NewNode deferredPointLightsNode = new DeferredPointLightsNode("deferredPointLightsNode", context);
         renderGraph.connectBufferPair(opaqueObjectsNode, 1, deferredPointLightsNode, 1);
         renderGraph.addNode(deferredPointLightsNode);
@@ -190,7 +181,7 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connectRunOrder(alphaRejectBlocksNode, 1, deferredPointLightsNode, 2);
 
         NewNode deferredMainLightNode = new DeferredMainLightNode("deferredMainLightNode", context);
-        renderGraph.connectFbo(shadowMapNode, 1, deferredMainLightNode, 1);
+        // renderGraph.connectFbo(shadowMapNode, 1, deferredMainLightNode, 1);
         renderGraph.connectBufferPair(opaqueBlocksNode, 1, deferredMainLightNode, 1);
         renderGraph.addNode(deferredMainLightNode);
         renderGraph.connectRunOrder(opaqueObjectsNode, 1, deferredMainLightNode, 1);
@@ -384,8 +375,10 @@ public class BasicRenderingModule extends ModuleRendering {
         // renderGraph.connectFbo(finalPostProcessingNode, tintNode, outputToScreenNode);
     }
 
+
     public Camera getLightCamera() {
-        //FIXME: remove this method
+        // TODO Hack around our shadow node in adv. module. This ain't gonna work without adv.module
+        shadowMapNode = (ShadowMapNode) renderGraph.findAka("shadowMap");
         return shadowMapNode.shadowMapCamera;
     }
 
