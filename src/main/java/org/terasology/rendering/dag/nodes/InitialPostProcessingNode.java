@@ -41,11 +41,9 @@ import org.terasology.world.WorldProvider;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.dag.nodes.LightShaftsNode.LIGHT_SHAFTS_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
 
 /**
  * An instance of this node adds chromatic aberration (currently non-functional), light shafts,
@@ -60,14 +58,19 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
     private WorldProvider worldProvider;
     private WorldRenderer worldRenderer;
     private SubmersibleCamera activeCamera;
+    private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material initialPostMaterial;
 
-    private boolean bloomIsEnabled;
-    private boolean lightShaftsAreEnabled;
+    private int textureSlot = 0;
 
-    private StateChange setBloomInputTexture;
+    private boolean bloomIsEnabled;
+    private int texBloomSlot = -1;
+    private boolean lightShaftsAreEnabled;
+    private int texlightShaftsSlot = -1;
+
     private StateChange setLightShaftsInputTexture;
+    private StateChange setBloomInputTexture;
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 0.1f)
@@ -87,15 +90,21 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
 
+        renderingConfig = context.get(Config.class).getRendering();
+        bloomIsEnabled = renderingConfig.isBloom();
+        renderingConfig.subscribe(RenderingConfig.BLOOM, this);
+        lightShaftsAreEnabled = renderingConfig.isLightShafts();
+        renderingConfig.subscribe(RenderingConfig.LIGHT_SHAFTS, this);
+
         addOutputFboConnection(1);
         addOutputBufferPairConnection(1);
     }
 
     @Override
     public void setDependencies(Context context) {
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
+        displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         // TODO: see if we could write this straight into a GBUFFER
-        FBO initialPostFbo = requiresFbo(new FboConfig(INITIAL_POST_FBO_URI, FULL_SCALE, FBO.Type.HDR), displayResolutionDependentFBOs);
+        FBO initialPostFbo = requiresFbo(new FboConfig(INITIAL_POST_FBO_URI, FULL_SCALE, FBO.Type.HDR), displayResolutionDependentFbo);
         addDesiredStateChange(new BindFbo(initialPostFbo));
         addOutputFboConnection(1, initialPostFbo);
 
@@ -105,31 +114,29 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
 
         initialPostMaterial = getMaterial(INITIAL_POST_MATERIAL_URN);
 
-        renderingConfig = context.get(Config.class).getRendering();
-        bloomIsEnabled = renderingConfig.isBloom();
-        renderingConfig.subscribe(RenderingConfig.BLOOM, this);
-        lightShaftsAreEnabled = renderingConfig.isLightShafts();
-        renderingConfig.subscribe(RenderingConfig.LIGHT_SHAFTS, this);
-
-        // TODO: Temporary hack for now.
-        FBO bloomFbo = getInputFboData(1);
+        // FBO bloomFbo = getInputFboData(1);
 
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
         FBO lastUpdatedFbo = bufferPairConnection.getBufferPair().getPrimaryFbo();
         addOutputBufferPairConnection(1, bufferPairConnection);
 
-        FBO lightShaftsFbo = getInputFboData(2);
+        // FBO lightShaftsFbo = getInputFboData(1);
 
-        int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texScene"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette", INITIAL_POST_MATERIAL_URN, "texVignette"));
-        setBloomInputTexture = new SetInputTextureFromFbo(textureSlot++, bloomFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texBloom");
-        setLightShaftsInputTexture = new SetInputTextureFromFbo(textureSlot, lightShaftsFbo, ColorTexture, displayResolutionDependentFBOs, INITIAL_POST_MATERIAL_URN, "texLightShafts");
 
         if (bloomIsEnabled) {
+            if (texBloomSlot < 0) {
+                texBloomSlot = textureSlot++;
+            }
+            setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
             addDesiredStateChange(setBloomInputTexture);
         }
         if (lightShaftsAreEnabled) {
+            if (texBloomSlot < 0) {
+                texBloomSlot = textureSlot++;
+            }
+            setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
             addDesiredStateChange(setLightShaftsInputTexture);
         }
     }
@@ -170,6 +177,10 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
             case RenderingConfig.BLOOM:
                 bloomIsEnabled = renderingConfig.isBloom();
                 if (bloomIsEnabled) {
+                    if (texBloomSlot < 0) {
+                        texBloomSlot = textureSlot++;
+                    }
+                    setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
                     addDesiredStateChange(setBloomInputTexture);
                 } else {
                     removeDesiredStateChange(setBloomInputTexture);
@@ -179,6 +190,10 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
             case RenderingConfig.LIGHT_SHAFTS:
                 lightShaftsAreEnabled = renderingConfig.isLightShafts();
                 if (lightShaftsAreEnabled) {
+                    if (texBloomSlot < 0) {
+                        texBloomSlot = textureSlot++;
+                    }
+                    setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
                     addDesiredStateChange(setLightShaftsInputTexture);
                 } else {
                     removeDesiredStateChange(setLightShaftsInputTexture);

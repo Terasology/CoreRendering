@@ -278,39 +278,11 @@ public class BasicRenderingModule extends ModuleRendering {
     }
 
     private void addBloomNodes(RenderGraph renderGraph) {
-        // Bloom Effect: one high-pass filter and three blur passes
-        NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
 
-        NewNode highPassNode = new HighPassNode("highPassNode", context);
-        renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, highPassNode, 1);
-        renderGraph.addNode(highPassNode);
-
-        FboConfig halfScaleBloomConfig = new FboConfig(BloomBlurNode.HALF_SCALE_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT);
-        FBO halfScaleBloomFbo = displayResolutionDependentFbo.request(halfScaleBloomConfig);
-
-        // TODO once everything is new system based, update halfscaleblurrednode's input obtaining
-        BloomBlurNode halfScaleBlurredBloomNode = new BloomBlurNode("halfScaleBlurredBloomNode", context, halfScaleBloomFbo);
-        // halfScaleBlurredBloomNode.addInputFboConnection(1, displayResolutionDependentFbo.get(HighPassNode.HIGH_PASS_FBO_URI));
-        renderGraph.connectFbo(highPassNode, 1, halfScaleBlurredBloomNode, 1);
-        renderGraph.addNode(halfScaleBlurredBloomNode);
-
-        FboConfig quarterScaleBloomConfig = new FboConfig(BloomBlurNode.QUARTER_SCALE_FBO_URI, QUARTER_SCALE, FBO.Type.DEFAULT);
-        FBO quarterScaleBloomFbo = displayResolutionDependentFbo.request(quarterScaleBloomConfig);
-
-        BloomBlurNode quarterScaleBlurredBloomNode = new BloomBlurNode("quarterScaleBlurredBloomNode", context, quarterScaleBloomFbo);
-        renderGraph.connectFbo(halfScaleBlurredBloomNode, 1, quarterScaleBlurredBloomNode, 1);
-        renderGraph.addNode(quarterScaleBlurredBloomNode);
-
-        FboConfig one8thScaleBloomConfig = new FboConfig(BloomBlurNode.ONE_8TH_SCALE_FBO_URI, ONE_8TH_SCALE, FBO.Type.DEFAULT);
-        FBO one8thScaleBloomFbo = displayResolutionDependentFbo.request(one8thScaleBloomConfig);
-
-        BloomBlurNode one8thScaleBlurredBloomNode = new BloomBlurNode("one8thScaleBlurredBloomNode", context, one8thScaleBloomFbo);
-        renderGraph.connectFbo(quarterScaleBlurredBloomNode, 1, one8thScaleBlurredBloomNode, 1);
-        renderGraph.addNode(one8thScaleBlurredBloomNode);
     }
 
     private void addExposureNodes(RenderGraph renderGraph) {
-        SimpleBlendMaterialsNode simpleBlendMaterialsNode = (SimpleBlendMaterialsNode) renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
+            SimpleBlendMaterialsNode simpleBlendMaterialsNode = (SimpleBlendMaterialsNode) renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
         // FboConfig gBuffer2Config = displayResolutionDependentFbo.getFboConfig(new SimpleUri("BasicRendering:fbo.gBuffer2")); // TODO: Remove the hard coded value here
         DownSamplerForExposureNode exposureDownSamplerTo16pixels = new DownSamplerForExposureNode("exposureDownSamplerTo16pixels",
                 context, displayResolutionDependentFbo, FBO_16X16_CONFIG, immutableFbo);
@@ -351,16 +323,11 @@ public class BasicRenderingModule extends ModuleRendering {
         NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
         NewNode one8thScaleBlurredBloomNode = renderGraph.findNode("BasicRendering:one8thScaleBlurredBloomNode");
 
-        // Light shafts
-        LightShaftsNode lightShaftsNode = new LightShaftsNode("lightShaftsNode", context);
-        renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, lightShaftsNode, 1);
-        renderGraph.addNode(lightShaftsNode);
-
         // Adding the bloom and light shafts to the gBuffer
         NewNode initialPostProcessingNode = new InitialPostProcessingNode("initialPostProcessingNode", context);
         renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, initialPostProcessingNode, 1);
-        renderGraph.connectFbo(lightShaftsNode, 1, initialPostProcessingNode, 1);
-        renderGraph.connectFbo(one8thScaleBlurredBloomNode, 1, initialPostProcessingNode, 2);
+        // renderGraph.connectFbo(lightShaftsNode, 1, initialPostProcessingNode, 1);
+        // renderGraph.connectFbo(one8thScaleBlurredBloomNode, 1, initialPostProcessingNode, 2);
         renderGraph.addNode(initialPostProcessingNode);
     }
 
