@@ -19,6 +19,7 @@ import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
+import org.terasology.naming.Name;
 import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
 
@@ -51,8 +52,8 @@ public class LateBlurNode extends BlurNode implements PropertyChangeListener {
      *
      * @param outputFbo The output fbo, to store the blurred image.
      */
-    public LateBlurNode(String nodeUri, Context context, FBO outputFbo) {
-        super(nodeUri, context, outputFbo, 0); // note: blurRadius is 0.0 at this stage.
+    public LateBlurNode(String nodeUri, Name providingModule, Context context, FBO outputFbo) {
+        super(nodeUri, context, providingModule, outputFbo, 0); // note: blurRadius is 0.0 at this stage.
 
         renderingConfig = context.get(Config.class).getRendering();
         requiresCondition(() -> renderingConfig.getBlurIntensity() != 0); // getBlurIntensity > 0 implies blur is enabled.

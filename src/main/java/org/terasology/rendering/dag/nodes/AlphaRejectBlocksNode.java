@@ -22,6 +22,7 @@ import org.terasology.config.RenderingDebugConfig;
 import org.terasology.context.Context;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.cameras.SubmersibleCamera;
@@ -85,8 +86,8 @@ public class AlphaRejectBlocksNode extends NewAbstractNode implements WireframeC
     @Range(min = 0.0f, max = 0.50f)
     private float parallaxScale = 0.5f;
 
-    public AlphaRejectBlocksNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public AlphaRejectBlocksNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         worldProvider = context.get(WorldProvider.class);

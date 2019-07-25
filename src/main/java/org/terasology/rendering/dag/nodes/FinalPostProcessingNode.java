@@ -23,6 +23,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
@@ -93,8 +94,8 @@ public class FinalPostProcessingNode extends NewAbstractNode implements Property
 
     private final int noiseTextureSize = 1024;
 
-    public FinalPostProcessingNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public FinalPostProcessingNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();

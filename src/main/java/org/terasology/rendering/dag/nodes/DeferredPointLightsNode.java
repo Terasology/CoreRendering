@@ -27,6 +27,7 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.BasicRenderingModule;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
@@ -85,8 +86,8 @@ public class DeferredPointLightsNode extends NewAbstractNode {
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f activeCameraToLightSpace = new Vector3f();
 
-    public DeferredPointLightsNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public DeferredPointLightsNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);

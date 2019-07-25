@@ -23,6 +23,7 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.OrthographicCamera;
@@ -73,8 +74,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private SubmersibleCamera activeCamera;
     private float texelSize;
 
-    public ShadowMapNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public ShadowMapNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);

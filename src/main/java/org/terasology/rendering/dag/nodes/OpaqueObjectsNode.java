@@ -21,6 +21,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.ComponentSystemManager;
 import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
@@ -48,8 +49,8 @@ public class OpaqueObjectsNode extends NewAbstractNode implements WireframeCapab
     private SetWireframe wireframeStateChange;
     private EnableFaceCulling faceCullingStateChange;
 
-    public OpaqueObjectsNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OpaqueObjectsNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
 

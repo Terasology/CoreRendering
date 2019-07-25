@@ -22,6 +22,7 @@ import org.terasology.config.Config;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.opengl.FBO;
@@ -55,8 +56,8 @@ public class OutputToHMDNode extends ConditionDependentNode {
      * Constructs an instance of this node. Specifically, initialize the vrProvider and pass the frame buffer
      * information for the vrProvider to use.
      */
-    public OutputToHMDNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OutputToHMDNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         vrProvider = context.get(OpenVRProvider.class);
         requiresCondition(() -> (context.get(Config.class).getRendering().isVrSupport() && vrProvider.isInitialized()));

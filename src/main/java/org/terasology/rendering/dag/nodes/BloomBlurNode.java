@@ -19,6 +19,7 @@ import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
+import org.terasology.naming.Name;
 import org.terasology.rendering.opengl.FBO;
 
 /**
@@ -42,8 +43,8 @@ public class BloomBlurNode extends BlurNode {
      *
      * @param outputFbo The output fbo, to store the blurred image.
      */
-    public BloomBlurNode(String nodeUri, Context context, FBO outputFbo) {
-        super(nodeUri, context, outputFbo, BLUR_RADIUS);
+    public BloomBlurNode(String nodeUri, Name providingModule, Context context, FBO outputFbo) {
+        super(nodeUri, context, providingModule, outputFbo, BLUR_RADIUS);
 
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         requiresCondition(renderingConfig::isBloom);

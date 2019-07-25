@@ -18,6 +18,7 @@ package org.terasology.rendering.dag.nodes;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.gsoc.FboConnection;
@@ -50,10 +51,10 @@ public class DownSamplerNode extends ConditionDependentNode {
      * @param outputFboConfig an FboConfig instance describing the output FBO, to be retrieved from the FBO manager
      * @param outputFboManager the FBO manager from which to retrieve the output FBO
      */
-    public DownSamplerNode(String nodeUri, Context context,
+    public DownSamplerNode(String nodeUri, Context context, Name providingModule,
                            BaseFboManager inputFboManager,
                            FboConfig outputFboConfig, BaseFboManager outputFboManager) {
-        super(nodeUri, context);
+        super(nodeUri, providingModule, context);
 
         // OUT
         // TODO get rid of this? why load input fbo from dependency when I still need this

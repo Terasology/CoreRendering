@@ -18,6 +18,7 @@ package org.terasology.rendering.dag.nodes;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.DependencyConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
@@ -43,8 +44,8 @@ import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 public class ApplyDeferredLightingNode extends NewAbstractNode {
     private static final ResourceUrn DEFERRED_LIGHTING_MATERIAL_URN = new ResourceUrn("engine:prog.lightBufferPass");
 
-    public ApplyDeferredLightingNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public ApplyDeferredLightingNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
         addOutputBufferPairConnection(1);
     }
 

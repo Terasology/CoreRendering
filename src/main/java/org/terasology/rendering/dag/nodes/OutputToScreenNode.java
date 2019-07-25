@@ -20,18 +20,17 @@ import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.SwappableFBO;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-// import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 import static org.terasology.rendering.world.WorldRenderer.RenderingStage.LEFT_EYE;
 import static org.terasology.rendering.world.WorldRenderer.RenderingStage.MONO;
 
@@ -45,8 +44,8 @@ public class OutputToScreenNode extends ConditionDependentNode {
 
     private StateChange bindFbo;
 
-    public OutputToScreenNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OutputToScreenNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
 

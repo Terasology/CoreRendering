@@ -23,6 +23,7 @@ import org.terasology.config.RenderingDebugConfig;
 import org.terasology.context.Context;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.AABBRenderer;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
@@ -84,8 +85,8 @@ public class OpaqueBlocksNode extends NewAbstractNode implements WireframeCapabl
     @Range(min = 0.0f, max = 0.50f)
     private float parallaxScale = 0.5f;
 
-    public OpaqueBlocksNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OpaqueBlocksNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         worldProvider = context.get(WorldProvider.class);

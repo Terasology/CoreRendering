@@ -19,6 +19,7 @@ import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
@@ -59,8 +60,8 @@ public class ToneMappingNode extends NewAbstractNode {
     @Range(min = 0.0f, max = 100.0f)
     private float whitePoint = 9f;
 
-    public ToneMappingNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public ToneMappingNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         screenGrabber = context.get(ScreenGrabber.class);
         addOutputFboConnection(1);

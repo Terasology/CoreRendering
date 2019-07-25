@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
@@ -52,8 +53,8 @@ public class HighPassNode extends ConditionDependentNode {
 
     private Material highPass;
 
-    public HighPassNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public HighPassNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.BLOOM, this);

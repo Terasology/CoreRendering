@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.BasicRenderingModule;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
@@ -85,8 +86,8 @@ public class DeferredMainLightNode extends NewAbstractNode {
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f mainLightInViewSpace = new Vector3f();
 
-    public DeferredMainLightNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public DeferredMainLightNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         backdropProvider = context.get(BackdropProvider.class);
         renderingConfig = context.get(Config.class).getRendering();

@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
@@ -82,8 +83,8 @@ public class InitialPostProcessingNode extends NewAbstractNode implements Proper
     @Range(min = 0.0f, max = 1.0f)
     private float bloomFactor = 0.5f;
 
-    public InitialPostProcessingNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public InitialPostProcessingNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         worldProvider = context.get(WorldProvider.class);
 

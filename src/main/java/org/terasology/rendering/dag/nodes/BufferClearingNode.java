@@ -16,6 +16,7 @@
 package org.terasology.rendering.dag.nodes;
 
 import org.terasology.context.Context;
+import org.terasology.naming.Name;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.opengl.BaseFboManager;
@@ -46,8 +47,8 @@ public class BufferClearingNode extends NewAbstractNode {
      *                      Non GL_*_BIT values will be accepted but might eventually generate an opengl error.
      * @throws IllegalArgumentException if fboConfig, fboManager are null and if clearingMask is zero.
      */@Deprecated
-    public BufferClearingNode(String nodeUri, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
-        super(nodeUri, context);
+    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
+        super(nodeUri, providingModule, context);
 
         boolean argumentsAreValid = validateArguments(fboConfig, fboManager, clearingMask);
 
@@ -67,15 +68,15 @@ public class BufferClearingNode extends NewAbstractNode {
      * @param context
      * @param clearingMask
      */
-    public BufferClearingNode(String nodeUri, Context context, int clearingMask) {
-        super(nodeUri, context);
+    public BufferClearingNode(String nodeUri, Context context, Name providingModule, int clearingMask) {
+        super(nodeUri, providingModule, context);
         this.clearingMask = clearingMask;
         addOutputFboConnection(1);
     }
 
     @Deprecated
-    public BufferClearingNode(String nodeUri, Context context, FBO fbo, int clearingMask) {
-        super(nodeUri, context);
+    public BufferClearingNode(String nodeUri, Context context, Name providingModule, FBO fbo, int clearingMask) {
+        super(nodeUri, providingModule, context);
 
         boolean argumentsAreValid = validateArguments(fbo, clearingMask);
 

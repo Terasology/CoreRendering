@@ -22,6 +22,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.backdrop.BackdropProvider;
@@ -148,8 +149,8 @@ public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements P
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f sunDirection;
 
-    public RefractiveReflectiveBlocksNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public RefractiveReflectiveBlocksNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         // TODO This is a temporary hack, see RefractiveReflectiveBlocksNodeProxy's doc
         RefractiveReflectiveBlocksNodeProxy.updateWaterAttributes(waveIntensity, waveIntensityFalloff, waveSize,

@@ -19,6 +19,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.ComponentSystemManager;
 import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
@@ -51,8 +52,8 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 public class SimpleBlendMaterialsNode extends NewAbstractNode {
     private ComponentSystemManager componentSystemManager;
 
-    public SimpleBlendMaterialsNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public SimpleBlendMaterialsNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
         addOutputFboConnection(1);

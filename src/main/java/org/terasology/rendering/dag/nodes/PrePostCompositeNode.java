@@ -20,6 +20,7 @@ import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
@@ -109,8 +110,8 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
     @Range(min = -0.1f, max = 0.1f)
     private float volumetricFogHeightFalloff = -0.01f;
 
-    public PrePostCompositeNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public PrePostCompositeNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
@@ -172,7 +173,7 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
         }
         if (hazeIsEnabled) {
             if (texHazeSlot < 0) {
-                texSsaoSlot = textureSlot++;
+                texHazeSlot = textureSlot++;
             }
             setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
             addDesiredStateChange(setHazeInputTexture);
@@ -261,7 +262,7 @@ public class PrePostCompositeNode extends NewAbstractNode implements PropertyCha
                 hazeIsEnabled = renderingConfig.isInscattering();
                 if (hazeIsEnabled) {
                     if (texHazeSlot < 0) {
-                        texSsaoSlot = textureSlot++;
+                        texHazeSlot = textureSlot++;
                     }
                     setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
                     addDesiredStateChange(setHazeInputTexture);

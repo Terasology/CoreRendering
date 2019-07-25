@@ -24,6 +24,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.math.TeraMath;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.nui.properties.Range;
@@ -74,8 +75,8 @@ public class UpdateExposureNode extends NewAbstractNode {
     private PBO writeOnlyPbo;   // PBOs are 1x1 pixels buffers used to read GPU data back into the CPU.
                                 // This data is then used in the context of eye adaptation.
 
-    public UpdateExposureNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public UpdateExposureNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         backdropProvider = context.get(BackdropProvider.class);
         screenGrabber = context.get(ScreenGrabber.class);

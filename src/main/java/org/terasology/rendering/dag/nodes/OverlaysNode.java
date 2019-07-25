@@ -22,6 +22,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.ComponentSystemManager;
 import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
@@ -48,8 +49,8 @@ public class OverlaysNode extends NewAbstractNode implements WireframeCapable {
 
     private SetWireframe wireframeStateChange;
 
-    public OverlaysNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OverlaysNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         componentSystemManager = context.get(ComponentSystemManager.class);
         addOutputBufferPairConnection(1);

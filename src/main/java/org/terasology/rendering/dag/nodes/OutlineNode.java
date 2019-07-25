@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.ConditionDependentNode;
@@ -64,8 +65,8 @@ public class OutlineNode extends ConditionDependentNode {
     @Range(min = 0.0f, max = 16.0f)
     private float pixelOffsetY = 1.0f;
 
-    public OutlineNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public OutlineNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         activeCamera = worldRenderer.getActiveCamera();
 

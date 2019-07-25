@@ -22,6 +22,7 @@ import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
@@ -94,8 +95,8 @@ public class BackdropReflectionNode extends NewAbstractNode {
      *
      * This method also requests the material using the "sky" shaders (vertex, fragment) to be enabled.
      */
-    public BackdropReflectionNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public BackdropReflectionNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
         addOutputFboConnection(1);
     }
 

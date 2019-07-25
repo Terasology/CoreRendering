@@ -21,6 +21,7 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
@@ -63,8 +64,8 @@ public class BlurredAmbientOcclusionNode extends ConditionDependentNode {
 
     private FBO ssaoBlurredFbo;
 
-    public BlurredAmbientOcclusionNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public BlurredAmbientOcclusionNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         RenderingConfig renderingConfig = context.get(Config.class).getRendering();
         renderingConfig.subscribe(RenderingConfig.SSAO, this);

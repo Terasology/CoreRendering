@@ -23,6 +23,7 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector4f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
@@ -87,8 +88,8 @@ public class LightShaftsNode extends ConditionDependentNode {
     @SuppressWarnings("FieldCanBeLocal")
     private Vector4f sunPositionScreenSpace = new Vector4f();
 
-    public LightShaftsNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public LightShaftsNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         worldProvider = context.get(WorldProvider.class);
         backdropProvider = context.get(BackdropProvider.class);

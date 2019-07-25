@@ -24,6 +24,7 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.rendering.assets.texture.TextureData;
@@ -97,8 +98,8 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
 
     private FloatBuffer ssaoSamples;
 
-    public AmbientOcclusionNode(String nodeUri, Context context) {
-        super(nodeUri, context);
+    public AmbientOcclusionNode(String nodeUri, Name providingModule, Context context) {
+        super(nodeUri, providingModule, context);
 
         activeCamera = worldRenderer.getActiveCamera();
 

@@ -18,6 +18,7 @@ package org.terasology.rendering.dag.nodes;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
@@ -47,8 +48,8 @@ public class BlurNode extends ConditionDependentNode {
      * @param outputFbo The output fbo, to store the blurred image.
      * @param blurRadius the blur radius: higher values cause higher blur. The shader's default is 16.0f.
      */
-    public BlurNode(String nodeUri, Context context, FBO outputFbo, float blurRadius) {
-        super(nodeUri, context);
+    public BlurNode(String nodeUri, Context context, Name providingModule, FBO outputFbo, float blurRadius) {
+        super(nodeUri, providingModule, context);
 
         this.blurRadius = blurRadius;
 
