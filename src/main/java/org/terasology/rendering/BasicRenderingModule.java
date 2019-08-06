@@ -16,8 +16,7 @@
 package org.terasology.rendering;
 
 import org.lwjgl.opengl.Display;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.naming.Name;
+import org.terasology.context.Context;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.RenderGraph;
 
@@ -44,12 +43,7 @@ import static org.terasology.rendering.dag.nodes.LateBlurNode.FIRST_LATE_BLUR_FB
 import static org.terasology.rendering.dag.nodes.LateBlurNode.SECOND_LATE_BLUR_FBO_URI;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
 import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_16TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_32TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.QUARTER_SCALE;
 
-@RegisterSystem
 public class BasicRenderingModule extends ModuleRendering {
 
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
@@ -58,10 +52,17 @@ public class BasicRenderingModule extends ModuleRendering {
 
     private ShadowMapNode shadowMapNode;
 
+    private static int initializationPriority = 1;
+
+    // Created in renderingModuleRegistry trough reflection and Constructor calling
+    public BasicRenderingModule(Context context) {
+        super(context);
+        setInitializationPriority(initializationPriority);
+    }
+
     @Override
     public void initialise() {
-        super.initialise(this.getClass());
-        context.put(BasicRenderingModule.class,this);
+        super.initialise();
 
         initBasicRendering();
     }
@@ -98,8 +99,6 @@ public class BasicRenderingModule extends ModuleRendering {
         addFinalPostProcessingNodes(renderGraph);
 
         addOutputNodes(renderGraph);
-
-       // worldRenderer.requestTaskListRefresh();
     }
 
     private void addGBufferClearingNodes(RenderGraph renderGraph) {
