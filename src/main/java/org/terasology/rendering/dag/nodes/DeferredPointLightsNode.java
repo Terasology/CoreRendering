@@ -21,6 +21,7 @@ import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
+import org.terasology.engine.module.rendering.RenderingModuleManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
@@ -100,7 +101,8 @@ public class DeferredPointLightsNode extends NewAbstractNode {
     public void setDependencies(Context context) {
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        lightCamera = context.get(BasicRenderingModule.class).getLightCamera();
+        lightCamera = ((BasicRenderingModule) context.get(RenderingModuleManager.class)
+                        .getRegistry().getModuleRenderingByClass(BasicRenderingModule.class)).getLightCamera();
 
         addDesiredStateChange(new LookThrough(activeCamera));
 
