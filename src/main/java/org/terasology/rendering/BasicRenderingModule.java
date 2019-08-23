@@ -22,6 +22,7 @@ import org.terasology.rendering.dag.RenderGraph;
 
 import org.terasology.rendering.dag.gsoc.BufferPair;
 import org.terasology.rendering.dag.gsoc.ModuleRendering;
+import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.gsoc.NewNode;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
@@ -132,6 +133,8 @@ public class BasicRenderingModule extends ModuleRendering {
 
         NewNode backdropNode = new BackdropNode("backdropNode", providingModule, context);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
+        ((NewAbstractNode) backdropNode).addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
+
         renderGraph.addNode(backdropNode);
         //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
     }
