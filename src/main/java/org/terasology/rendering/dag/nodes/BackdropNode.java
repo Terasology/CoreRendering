@@ -102,8 +102,8 @@ public class BackdropNode extends NewAbstractNode implements WireframeCapable {
 
         skyMaterial = getMaterial(SKY_MATERIAL_URN);
 
-        addOutputFboConnection(1);
-        addOutputBufferPairConnection(1);
+        // addOutputFboConnection(1);
+        // addOutputBufferPairConnection(1);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class BackdropNode extends NewAbstractNode implements WireframeCapable {
         FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
         addDesiredStateChange(new BindFbo(lastUpdatedGBuffer));
 
-        addOutputFboConnection(1, lastUpdatedGBuffer);
+        // addOutputFboConnection(1, lastUpdatedGBuffer);
         addOutputBufferPairConnection(1, bufferPairConnection);
 
         addDesiredStateChange(new SetFboWriteMask(lastUpdatedGBuffer, true, false, false));
