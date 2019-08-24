@@ -28,7 +28,7 @@ import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.gsoc.BufferPairConnection;
+import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;

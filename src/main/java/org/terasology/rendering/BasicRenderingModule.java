@@ -22,7 +22,7 @@ import org.terasology.rendering.dag.Node;
 import org.terasology.rendering.dag.RenderGraph;
 
 import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.gsoc.BufferPair;
+import org.terasology.rendering.dag.dependencyConnections.BufferPair;
 import org.terasology.rendering.dag.ModuleRendering;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
