@@ -18,12 +18,12 @@ package org.terasology.rendering;
 import org.lwjgl.opengl.Display;
 import org.terasology.context.Context;
 import org.terasology.rendering.cameras.Camera;
+import org.terasology.rendering.dag.Node;
 import org.terasology.rendering.dag.RenderGraph;
 
 import org.terasology.rendering.dag.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPair;
 import org.terasology.rendering.dag.gsoc.ModuleRendering;
-import org.terasology.rendering.dag.gsoc.NewNode;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.FboConfig;
@@ -129,10 +129,10 @@ public class BasicRenderingModule extends ModuleRendering {
     }
 
     private void addSkyNodes(RenderGraph renderGraph) {
-        NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
+        Node lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
         // TODO maybe read from both clearing nodes and output bufferpair then, created along the way,
         //  don't make them output buffer pair when they only clear 1 of the buffers. Prone to error
-        NewNode backdropNode = new BackdropNode("backdropNode", providingModule, context);
+        Node backdropNode = new BackdropNode("backdropNode", providingModule, context);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
         ((AbstractNode) backdropNode).addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
 
@@ -150,41 +150,41 @@ public class BasicRenderingModule extends ModuleRendering {
         before the world rendering nodes. Here we have chosen to also ensure that finalHazeNode is
         processed before the world rendering nodes - not because it's necessary, but to keep all
         the haze-related nodes together. */
-        NewNode backdropNode = renderGraph.findNode("BasicRendering:backdropNode");
+        Node backdropNode = renderGraph.findNode("BasicRendering:backdropNode");
 
-        NewNode opaqueObjectsNode = new OpaqueObjectsNode("opaqueObjectsNode", providingModule, context);
+        Node opaqueObjectsNode = new OpaqueObjectsNode("opaqueObjectsNode", providingModule, context);
         renderGraph.connectBufferPair(backdropNode, 1, opaqueObjectsNode, 1);
         renderGraph.addNode(opaqueObjectsNode);
         // renderGraph.connect(finalHazeNode, opaqueObjectsNode);
 
-        NewNode opaqueBlocksNode = new OpaqueBlocksNode("opaqueBlocksNode", providingModule, context);
+        Node opaqueBlocksNode = new OpaqueBlocksNode("opaqueBlocksNode", providingModule, context);
         renderGraph.connectBufferPair(backdropNode, 1, opaqueBlocksNode, 1);
         renderGraph.addNode(opaqueBlocksNode);
         // renderGraph.connect(finalHazeNode, opaqueBlocksNode);
 
-        NewNode alphaRejectBlocksNode = new AlphaRejectBlocksNode("alphaRejectBlocksNode", providingModule, context);
+        Node alphaRejectBlocksNode = new AlphaRejectBlocksNode("alphaRejectBlocksNode", providingModule, context);
         renderGraph.connectBufferPair(backdropNode, 1, alphaRejectBlocksNode, 1);
         renderGraph.addNode(alphaRejectBlocksNode);
         // renderGraph.connect(finalHazeNode, alphaRejectBlocksNode);
 
-        NewNode overlaysNode = new OverlaysNode("overlaysNode", providingModule, context);
+        Node overlaysNode = new OverlaysNode("overlaysNode", providingModule, context);
         renderGraph.connectBufferPair(backdropNode, 1, overlaysNode, 1);
         renderGraph.addNode(overlaysNode);
         // renderGraph.connect(finalHazeNode, overlaysNode);
     }
 
     private void addLightingNodes(RenderGraph renderGraph) {
-        NewNode opaqueObjectsNode = renderGraph.findNode("BasicRendering:opaqueObjectsNode");
-        NewNode opaqueBlocksNode = renderGraph.findNode("BasicRendering:opaqueBlocksNode");
-        NewNode alphaRejectBlocksNode = renderGraph.findNode("BasicRendering:alphaRejectBlocksNode");
+        Node opaqueObjectsNode = renderGraph.findNode("BasicRendering:opaqueObjectsNode");
+        Node opaqueBlocksNode = renderGraph.findNode("BasicRendering:opaqueBlocksNode");
+        Node alphaRejectBlocksNode = renderGraph.findNode("BasicRendering:alphaRejectBlocksNode");
 
-        NewNode deferredPointLightsNode = new DeferredPointLightsNode("deferredPointLightsNode", providingModule, context);
+        Node deferredPointLightsNode = new DeferredPointLightsNode("deferredPointLightsNode", providingModule, context);
         renderGraph.connectBufferPair(opaqueObjectsNode, 1, deferredPointLightsNode, 1);
         renderGraph.addNode(deferredPointLightsNode);
         renderGraph.connectRunOrder(opaqueBlocksNode, 1, deferredPointLightsNode, 1);
         renderGraph.connectRunOrder(alphaRejectBlocksNode, 1, deferredPointLightsNode, 2);
 
-        NewNode deferredMainLightNode = new DeferredMainLightNode("deferredMainLightNode", providingModule, context);
+        Node deferredMainLightNode = new DeferredMainLightNode("deferredMainLightNode", providingModule, context);
         // renderGraph.connectFbo(shadowMapNode, 1, deferredMainLightNode, 1);
         renderGraph.connectBufferPair(opaqueBlocksNode, 1, deferredMainLightNode, 1);
         renderGraph.addNode(deferredMainLightNode);
@@ -192,33 +192,33 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connectRunOrder(alphaRejectBlocksNode, 2, deferredMainLightNode, 2);
         renderGraph.connectRunOrder(deferredPointLightsNode, 1, deferredMainLightNode, 3);
 
-        NewNode applyDeferredLightingNode = new ApplyDeferredLightingNode("applyDeferredLightingNode", providingModule, context);
+        Node applyDeferredLightingNode = new ApplyDeferredLightingNode("applyDeferredLightingNode", providingModule, context);
         renderGraph.connectBufferPair(deferredMainLightNode, 1, applyDeferredLightingNode, 1);
         renderGraph.addNode(applyDeferredLightingNode);
         renderGraph.connectRunOrder(deferredPointLightsNode, 2, applyDeferredLightingNode, 1);
     }
 
     private void add3dDecorationNodes(RenderGraph renderGraph) {
-        NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
+        Node applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
 
-        NewNode outlineNode = new OutlineNode("outlineNode", providingModule, context);
+        Node outlineNode = new OutlineNode("outlineNode", providingModule, context);
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, outlineNode, 1);
         renderGraph.addNode(outlineNode);
     }
 
     private void addReflectionAndRefractionNodes(RenderGraph renderGraph) {
-        NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
+        Node applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
 
         FboConfig reflectedBufferConfig = new FboConfig(BackdropReflectionNode.REFLECTED_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT).useDepthBuffer();
         BufferClearingNode reflectedBufferClearingNode = new BufferClearingNode("reflectedBufferClearingNode", providingModule, context, reflectedBufferConfig,
                 displayResolutionDependentFbo, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderGraph.addNode(reflectedBufferClearingNode);
 
-        NewNode reflectedBackdropNode = new BackdropReflectionNode("reflectedBackdropNode", providingModule, context);
+        Node reflectedBackdropNode = new BackdropReflectionNode("reflectedBackdropNode", providingModule, context);
         renderGraph.connectFbo(reflectedBufferClearingNode, 1, reflectedBackdropNode, 1);
         renderGraph.addNode(reflectedBackdropNode);
 
-        NewNode worldReflectionNode = new WorldReflectionNode("worldReflectionNode", providingModule, context);
+        Node worldReflectionNode = new WorldReflectionNode("worldReflectionNode", providingModule, context);
         renderGraph.connectFbo(reflectedBackdropNode, 1, worldReflectionNode, 1);
         renderGraph.addNode(worldReflectionNode);
 
@@ -227,7 +227,7 @@ public class BasicRenderingModule extends ModuleRendering {
                 context, reflectedRefractedBufferConfig, displayResolutionDependentFbo, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderGraph.addNode(reflectedRefractedBufferClearingNode);
 
-        NewNode chunksRefractiveReflectiveNode = new RefractiveReflectiveBlocksNode("chunksRefractiveReflectiveNode", providingModule, context);
+        Node chunksRefractiveReflectiveNode = new RefractiveReflectiveBlocksNode("chunksRefractiveReflectiveNode", providingModule, context);
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, chunksRefractiveReflectiveNode, 1);
         renderGraph.connectFbo(reflectedRefractedBufferClearingNode, 1, chunksRefractiveReflectiveNode, 1);
         renderGraph.connectFbo(worldReflectionNode, 1, chunksRefractiveReflectiveNode, 2);
@@ -244,14 +244,14 @@ public class BasicRenderingModule extends ModuleRendering {
         // Pre-post-processing, just one more interaction with 3D data (semi-transparent objects, in SimpleBlendMaterialsNode)
         // and then it's 2D post-processing all the way to the image shown on the display.
 
-        NewNode overlaysNode = renderGraph.findNode("BasicRendering:overlaysNode");
-        NewNode finalHazeNode = renderGraph.findNode("BasicRendering:finalHazeNode");
-        NewNode chunksRefractiveReflectiveNode = renderGraph.findNode("BasicRendering:chunksRefractiveReflectiveNode");
-        NewNode applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
-        NewNode outlineNode = renderGraph.findNode("BasicRendering:outlineNode");
-        // NewNode blurredAmbientOcclusionNode = renderGraph.findAka("blurredAmbientOcclusion");
+        Node overlaysNode = renderGraph.findNode("BasicRendering:overlaysNode");
+        Node finalHazeNode = renderGraph.findNode("BasicRendering:finalHazeNode");
+        Node chunksRefractiveReflectiveNode = renderGraph.findNode("BasicRendering:chunksRefractiveReflectiveNode");
+        Node applyDeferredLightingNode = renderGraph.findNode("BasicRendering:applyDeferredLightingNode");
+        Node outlineNode = renderGraph.findNode("BasicRendering:outlineNode");
+        // Node blurredAmbientOcclusionNode = renderGraph.findAka("blurredAmbientOcclusion");
 
-        NewNode prePostCompositeNode = new PrePostCompositeNode("prePostCompositeNode", providingModule, context);
+        Node prePostCompositeNode = new PrePostCompositeNode("prePostCompositeNode", providingModule, context);
         // swapped bufferPairInstance
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, prePostCompositeNode, 1);
         // renderGraph.connectFbo(blurredAmbientOcclusionNode, 1, prePostCompositeNode,1);
@@ -266,7 +266,7 @@ public class BasicRenderingModule extends ModuleRendering {
         // renderGraph.connect(outlineNode, prePostCompositeNode);
         // renderGraph.connect(blurredAmbientOcclusionNode, prePostCompositeNode);
 
-        NewNode simpleBlendMaterialsNode = new SimpleBlendMaterialsNode("simpleBlendMaterialsNode", providingModule, context);
+        Node simpleBlendMaterialsNode = new SimpleBlendMaterialsNode("simpleBlendMaterialsNode", providingModule, context);
         renderGraph.connectBufferPair(prePostCompositeNode, 1, simpleBlendMaterialsNode, 1);
         renderGraph.addNode(simpleBlendMaterialsNode);
         // renderGraph.connect(prePostCompositeNode, simpleBlendMaterialsNode);
@@ -305,7 +305,7 @@ public class BasicRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(exposureDownSamplerTo2pixels, 1, exposureDownSamplerTo1pixel, 1);
         renderGraph.addNode(exposureDownSamplerTo1pixel);
 
-        NewNode updateExposureNode = new UpdateExposureNode("updateExposureNode", providingModule, context);
+        Node updateExposureNode = new UpdateExposureNode("updateExposureNode", providingModule, context);
         renderGraph.connectFbo(exposureDownSamplerTo1pixel, 1, updateExposureNode, 1);
         renderGraph.addNode(updateExposureNode);
 
@@ -315,11 +315,11 @@ public class BasicRenderingModule extends ModuleRendering {
     }
 
     private void addInitialPostProcessingNodes(RenderGraph renderGraph) {
-        NewNode simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
-        NewNode one8thScaleBlurredBloomNode = renderGraph.findNode("BasicRendering:one8thScaleBlurredBloomNode");
+        Node simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
+        Node one8thScaleBlurredBloomNode = renderGraph.findNode("BasicRendering:one8thScaleBlurredBloomNode");
 
         // Adding the bloom and light shafts to the gBuffer
-        NewNode initialPostProcessingNode = new InitialPostProcessingNode("initialPostProcessingNode", providingModule, context);
+        Node initialPostProcessingNode = new InitialPostProcessingNode("initialPostProcessingNode", providingModule, context);
         renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, initialPostProcessingNode, 1);
         // renderGraph.connectFbo(lightShaftsNode, 1, initialPostProcessingNode, 1);
         // renderGraph.connectFbo(one8thScaleBlurredBloomNode, 1, initialPostProcessingNode, 2);
@@ -327,8 +327,8 @@ public class BasicRenderingModule extends ModuleRendering {
     }
 
     private void addFinalPostProcessingNodes(RenderGraph renderGraph) {
-        NewNode initialPostProcessingNode = renderGraph.findNode("BasicRendering:initialPostProcessingNode");
-        NewNode updateExposureNode = renderGraph.findNode("BasicRendering:updateExposureNode");
+        Node initialPostProcessingNode = renderGraph.findNode("BasicRendering:initialPostProcessingNode");
+        Node updateExposureNode = renderGraph.findNode("BasicRendering:updateExposureNode");
 
         ToneMappingNode toneMappingNode = new ToneMappingNode("toneMappingNode", providingModule, context);
         renderGraph.connectFbo(initialPostProcessingNode, 1, toneMappingNode, 1);
@@ -360,18 +360,18 @@ public class BasicRenderingModule extends ModuleRendering {
     }
 
     private void addOutputNodes(RenderGraph renderGraph) {
-        NewNode finalPostProcessingNode = renderGraph.findNode("BasicRendering:finalPostProcessingNode");
+        Node finalPostProcessingNode = renderGraph.findNode("BasicRendering:finalPostProcessingNode");
 
-//        NewNode  tintNode = new TintNode("tintNode", context);
+//        Node  tintNode = new TintNode("tintNode", context);
 //        tintNode.connectFbo(1, finalPostProcessingNode.getOutputFboConnection(1));
 //        renderGraph.addNode(tintNode);
 
-        NewNode outputToVRFrameBufferNode = new OutputToHMDNode("outputToVRFrameBufferNode", providingModule, context);
+        Node outputToVRFrameBufferNode = new OutputToHMDNode("outputToVRFrameBufferNode", providingModule, context);
         renderGraph.addNode(outputToVRFrameBufferNode);
 
         // renderGraph.connect(finalPostProcessingNode, outputToVRFrameBufferNode);
 
-        NewNode outputToScreenNode = new OutputToScreenNode("outputToScreenNode", providingModule, context);
+        Node outputToScreenNode = new OutputToScreenNode("outputToScreenNode", providingModule, context);
         renderGraph.connectBufferPair(finalPostProcessingNode, 1, outputToScreenNode, 1);
         renderGraph.connectFbo(finalPostProcessingNode, 1, outputToScreenNode, 1);
         renderGraph.addNode(outputToScreenNode);
