@@ -26,12 +26,10 @@ import org.terasology.math.TeraMath;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.nui.properties.Range;
-import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.PBO;
 import org.terasology.rendering.opengl.ScreenGrabber;
-import org.terasology.rendering.opengl.fbms.ImmutableFbo;
 
 import java.nio.ByteBuffer;
 
@@ -45,7 +43,7 @@ import java.nio.ByteBuffer;
  *
  * (1) See https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance
  */
-public class UpdateExposureNode extends NewAbstractNode {
+public class UpdateExposureNode extends AbstractNode {
     private static final Logger logger = LoggerFactory.getLogger(UpdateExposureNode.class);
 
     @SuppressWarnings("FieldCanBeLocal")

@@ -24,9 +24,9 @@ import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.gsoc.DependencyConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
@@ -56,7 +56,7 @@ import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
  *
  * [1] And refractions? To be verified.
  */
-public class PrePostCompositeNode extends NewAbstractNode implements PropertyChangeListener {
+public class PrePostCompositeNode extends AbstractNode implements PropertyChangeListener {
     private static final ResourceUrn PRE_POST_MATERIAL_URN = new ResourceUrn("engine:prog.prePostComposite");
 
     private RenderingConfig renderingConfig;

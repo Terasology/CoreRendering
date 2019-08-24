@@ -26,7 +26,7 @@ import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
@@ -51,7 +51,7 @@ import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
  * 1/8th resolution bloom and vignette onto the rendering achieved so far, stored in the gbuffer.
  * Stores the result into the InitialPostProcessingNode.INITIAL_POST_FBO_URI, to be used at a later stage.
  */
-public class InitialPostProcessingNode extends NewAbstractNode implements PropertyChangeListener {
+public class InitialPostProcessingNode extends AbstractNode implements PropertyChangeListener {
     static final SimpleUri INITIAL_POST_FBO_URI = new SimpleUri("engine:fbo.initialPost");
     private static final ResourceUrn INITIAL_POST_MATERIAL_URN = new ResourceUrn("engine:prog.initialPost");
 

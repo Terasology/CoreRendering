@@ -20,9 +20,9 @@ import org.terasology.context.Context;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.RenderGraph;
 
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPair;
 import org.terasology.rendering.dag.gsoc.ModuleRendering;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.gsoc.NewNode;
 import org.terasology.rendering.dag.nodes.*;
 import org.terasology.rendering.opengl.FBO;
@@ -130,10 +130,11 @@ public class BasicRenderingModule extends ModuleRendering {
 
     private void addSkyNodes(RenderGraph renderGraph) {
         NewNode lastUpdatedGBufferClearingNode = renderGraph.findNode("BasicRendering:lastUpdatedGBufferClearingNode");
-
+        // TODO maybe read from both clearing nodes and output bufferpair then, created along the way,
+        //  don't make them output buffer pair when they only clear 1 of the buffers. Prone to error
         NewNode backdropNode = new BackdropNode("backdropNode", providingModule, context);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
-        ((NewAbstractNode) backdropNode).addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
+        ((AbstractNode) backdropNode).addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
 
         renderGraph.addNode(backdropNode);
         //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);

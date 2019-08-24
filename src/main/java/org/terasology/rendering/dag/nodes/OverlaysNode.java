@@ -26,13 +26,12 @@ import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.LookThrough;
 import org.terasology.rendering.dag.stateChanges.SetWireframe;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.world.WorldRenderer;
 
 /**
@@ -41,7 +40,7 @@ import org.terasology.rendering.world.WorldRenderer;
  * Objects to be rendered as overlays must be registered as implementing the interface RenderSystem and
  * must take advantage of the RenderSystem.renderOverlay() method, which is called in process().
  */
-public class OverlaysNode extends NewAbstractNode implements WireframeCapable {
+public class OverlaysNode extends AbstractNode implements WireframeCapable {
     private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");
 
     private ComponentSystemManager componentSystemManager;

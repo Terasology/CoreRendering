@@ -21,14 +21,13 @@ import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.Camera;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
 import org.terasology.rendering.dag.stateChanges.EnableBlending;
 import org.terasology.rendering.dag.stateChanges.LookThrough;
 import org.terasology.rendering.dag.stateChanges.SetBlendFunction;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
@@ -49,7 +48,7 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
  * the distance to the semi-transparent surface or what's already stored in the depth buffer? As such
  * semi-transparent objects are handled here, after nodes relying on the depth buffer have done their job.
  */
-public class SimpleBlendMaterialsNode extends NewAbstractNode {
+public class SimpleBlendMaterialsNode extends AbstractNode {
     private ComponentSystemManager componentSystemManager;
 
     public SimpleBlendMaterialsNode(String nodeUri, Name providingModule, Context context) {

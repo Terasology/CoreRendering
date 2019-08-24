@@ -15,7 +15,6 @@
  */
 package org.terasology.rendering.dag.nodes;
 
-import javafx.util.Pair;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
@@ -28,9 +27,8 @@ import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.gsoc.BufferPair;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
@@ -55,7 +53,6 @@ import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.F
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 /**
  * An instance of this class adds depth of field blur, motion blur and film grain to the rendering
@@ -66,7 +63,7 @@ import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo
  * the content of a number of technical buffers rather than the final, post-processed rendering
  * of the scene.
  */
-public class FinalPostProcessingNode extends NewAbstractNode implements PropertyChangeListener {
+public class FinalPostProcessingNode extends AbstractNode implements PropertyChangeListener {
     private static final ResourceUrn POST_MATERIAL_URN = new ResourceUrn("engine:prog.post");
 
     private WorldRenderer worldRenderer;

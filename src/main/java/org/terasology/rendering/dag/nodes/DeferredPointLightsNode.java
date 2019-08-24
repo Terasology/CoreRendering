@@ -35,7 +35,7 @@ import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthTest;
 import org.terasology.rendering.dag.stateChanges.EnableBlending;
@@ -69,7 +69,7 @@ import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.F
  * Data from the light accumulation buffer is eventually combined with the
  * content of other buffers to correctly light up the scene.
  */
-public class DeferredPointLightsNode extends NewAbstractNode {
+public class DeferredPointLightsNode extends AbstractNode {
     private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("engine:prog.lightGeometryPass");
     private static int lightSphereDisplayList = -1;
 

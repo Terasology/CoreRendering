@@ -28,8 +28,8 @@ import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.LookThrough;
@@ -67,7 +67,7 @@ import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.REFRACTI
  * an experimental feature. It produces initially appealing reflections but rotating the
  * camera partially spoils the effect showing its limits.
  */
-public class RefractiveReflectiveBlocksNode extends NewAbstractNode implements PropertyChangeListener {
+public class RefractiveReflectiveBlocksNode extends AbstractNode implements PropertyChangeListener {
     public static final SimpleUri REFRACTIVE_REFLECTIVE_FBO_URI = new SimpleUri("engine:fbo.sceneReflectiveRefractive");
 
     // TODO: rename to more meaningful/precise variable names, like waveAmplitude or waveHeight.

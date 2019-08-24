@@ -26,7 +26,7 @@ import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
 import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
@@ -57,7 +57,7 @@ import static org.terasology.rendering.dag.nodes.BackdropNode.getAllWeatherZenit
  * by using method Node.setEnabled(boolean) or by removing the instance from the Render Graph.
  *
  */
-public class BackdropReflectionNode extends NewAbstractNode {
+public class BackdropReflectionNode extends AbstractNode {
     public static final SimpleUri REFLECTED_FBO_URI = new SimpleUri("engine:fbo.sceneReflected");
     private static final ResourceUrn SKY_MATERIAL_URN = new ResourceUrn("engine:prog.sky");
     private static final int RADIUS = 1024;

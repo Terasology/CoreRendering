@@ -29,15 +29,14 @@ import org.terasology.rendering.cameras.SubmersibleCamera;
 import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.WireframeCapable;
 import org.terasology.rendering.dag.WireframeTrigger;
+import org.terasology.rendering.dag.gsoc.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
-import org.terasology.rendering.dag.gsoc.NewAbstractNode;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.LookThrough;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.rendering.nui.properties.Range;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.WorldRenderer;
@@ -60,7 +59,7 @@ import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.ALPHA_RE
  * In alpha-blending the color of a semi-transparent fragment is combined with
  * the color stored in the frame buffer and the resulting color overwrites the previously stored one.
  */
-public class AlphaRejectBlocksNode extends NewAbstractNode implements WireframeCapable, PropertyChangeListener {
+public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapable, PropertyChangeListener {
     private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
 
     private WorldRenderer worldRenderer;
