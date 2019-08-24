@@ -20,7 +20,7 @@ import org.terasology.context.Context;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.RenderGraph;
 
-import org.terasology.rendering.dag.gsoc.AbstractNode;
+import org.terasology.rendering.dag.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPair;
 import org.terasology.rendering.dag.gsoc.ModuleRendering;
 import org.terasology.rendering.dag.gsoc.NewNode;

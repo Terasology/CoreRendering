@@ -21,7 +21,7 @@ import org.terasology.entitySystem.systems.RenderSystem;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.gsoc.AbstractNode;
+import org.terasology.rendering.dag.AbstractNode;
 import org.terasology.rendering.dag.gsoc.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
