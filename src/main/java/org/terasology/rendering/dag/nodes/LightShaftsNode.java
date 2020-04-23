@@ -15,13 +15,15 @@
  */
 package org.terasology.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector4f;
+import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
@@ -143,10 +145,10 @@ public class LightShaftsNode extends ConditionDependentNode {
         // This is a temporary solution to sun causing light shafts even at night.
 
         if (days < 0.25f || days > 0.75f) {
-            sunDirection = backdropProvider.getSunDirection(true);
+            sunDirection = JomlUtil.from(backdropProvider.getSunDirection(true));
             exposure = exposureNight;
         } else {
-            sunDirection = backdropProvider.getSunDirection(false);
+            sunDirection = JomlUtil.from(backdropProvider.getSunDirection(false));
             exposure = exposureDay;
         }
 
@@ -159,7 +161,7 @@ public class LightShaftsNode extends ConditionDependentNode {
 
         sunPositionWorldSpace4.set(sunDirection.x * 10000.0f, sunDirection.y * 10000.0f, sunDirection.z * 10000.0f, 1.0f);
         sunPositionScreenSpace.set(sunPositionWorldSpace4);
-        activeCamera.getViewProjectionMatrix().transform(sunPositionScreenSpace);
+        new Matrix4f(activeCamera.getViewProjectionMatrix()).transpose().transform(sunPositionScreenSpace);
 
         sunPositionScreenSpace.x /= sunPositionScreenSpace.w;
         sunPositionScreenSpace.y /= sunPositionScreenSpace.w;

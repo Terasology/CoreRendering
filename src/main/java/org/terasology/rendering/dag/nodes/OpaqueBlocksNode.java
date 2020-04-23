@@ -15,13 +15,15 @@
  */
 package org.terasology.rendering.dag.nodes;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.config.RenderingDebugConfig;
 import org.terasology.context.Context;
-import org.terasology.math.geom.Vector3f;
+import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.AABBRenderer;
@@ -189,7 +191,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         // Actual Node Processing
 
-        final Vector3f cameraPosition = activeCamera.getPosition();
+        final org.joml.Vector3f cameraPosition = activeCamera.getPosition();
 
         int numberOfRenderedTriangles = 0;
         int numberOfChunksThatAreNotReadyYet = 0;
@@ -199,7 +201,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = chunk.getPosition().toVector3f();
+                final Vector3f chunkPosition = JomlUtil.from(chunk.getPosition().toVector3f());
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
@@ -219,14 +221,14 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
         PerformanceMonitor.endActivity();
     }
 
-    private void renderChunkBoundingBox(RenderableChunk chunk, Vector3f chunkPosition, Vector3f cameraPosition) {
+    private void renderChunkBoundingBox(RenderableChunk chunk, Vector3f chunkPosition, Vector3fc cameraPosition) {
         GL11.glPushMatrix();
 
         // chunkPositionRelativeToCamera = chunkCoordinates * chunkDimensions - cameraCoordinate
         final Vector3f chunkPositionRelativeToCamera =
-                new Vector3f(chunkPosition.x * ChunkConstants.SIZE_X - cameraPosition.x,
-                        chunkPosition.y * ChunkConstants.SIZE_Y - cameraPosition.y,
-                        chunkPosition.z * ChunkConstants.SIZE_Z - cameraPosition.z);
+                new Vector3f(chunkPosition.x * ChunkConstants.SIZE_X - cameraPosition.x(),
+                        chunkPosition.y * ChunkConstants.SIZE_Y - cameraPosition.y(),
+                        chunkPosition.z * ChunkConstants.SIZE_Z - cameraPosition.z());
         GL11.glTranslatef(chunkPositionRelativeToCamera.x, chunkPositionRelativeToCamera.y, chunkPositionRelativeToCamera.z);
 
         new AABBRenderer(chunk.getAABB()).renderLocally(1f);
