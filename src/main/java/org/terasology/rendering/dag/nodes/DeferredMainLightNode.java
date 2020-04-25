@@ -163,8 +163,6 @@ public class DeferredMainLightNode extends AbstractNode {
         // Specific Shader Parameters
 
         cameraPosition = activeCamera.getPosition();
-        cameraPosition.sub(lightCamera.getPosition(),activeCameraToLightSpace);
-        // activeCameraToLightSpace.sub(cameraPosition, lightCamera.getPosition());
         mainLightInViewSpace = JomlUtil.from(backdropProvider.getSunDirection(true));
         activeCamera.getViewMatrix().transformPosition(mainLightInViewSpace);
 
@@ -184,7 +182,7 @@ public class DeferredMainLightNode extends AbstractNode {
 
         if (renderingConfig.isDynamicShadows()) {
             lightCamera = basicRendering.getLightCamera();
-            activeCameraToLightSpace.sub(cameraPosition, lightCamera.getPosition());
+            cameraPosition.sub(lightCamera.getPosition(),activeCameraToLightSpace);
             lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace, true);
