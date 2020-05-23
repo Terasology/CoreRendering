@@ -21,7 +21,7 @@ import org.terasology.basicRendering.rendering.BasicRenderingModule;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
-import org.terasology.engine.module.rendering.RenderingModuleManager;
+import org.terasology.engine.module.rendering.RenderingModuleRegistry;
 import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
@@ -94,8 +94,8 @@ public class DeferredMainLightNode extends AbstractNode {
         backdropProvider = context.get(BackdropProvider.class);
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);
-        basicRendering = ((BasicRenderingModule) context.get(RenderingModuleManager.class)
-                .getRegistry().getModuleRenderingByClass(BasicRenderingModule.class));
+        basicRendering = ((BasicRenderingModule) context.get(RenderingModuleRegistry.class)
+                .getModuleRenderingByClass(BasicRenderingModule.class));
 
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
