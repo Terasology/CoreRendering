@@ -15,6 +15,7 @@
  */
 package org.terasology.basicRendering.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.basicRendering.rendering.BasicRenderingModule;
@@ -183,8 +184,8 @@ public class DeferredMainLightNode extends AbstractNode {
         if (renderingConfig.isDynamicShadows()) {
             lightCamera = basicRendering.getLightCamera();
             cameraPosition.sub(lightCamera.getPosition(),activeCameraToLightSpace);
-            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
-            lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
+            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", new Matrix4f(lightCamera.getViewProjectionMatrix()).transpose(), true);
+            lightGeometryMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace, true);
         }
 

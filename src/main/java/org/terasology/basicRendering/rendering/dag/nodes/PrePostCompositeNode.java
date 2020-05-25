@@ -15,6 +15,7 @@
  */
 package org.terasology.basicRendering.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
@@ -194,8 +195,8 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
         prePostMaterial.setFloat3("cameraParameters", activeCamera.getzNear(), activeCamera.getzFar(), 0.0f, true);
 
         if (localReflectionsAreEnabled) {
-            prePostMaterial.setMatrix4("invProjMatrix", activeCamera.getInverseProjectionMatrix(), true);
-            prePostMaterial.setMatrix4("projMatrix", activeCamera.getProjectionMatrix(), true);
+            prePostMaterial.setMatrix4("invProjMatrix", new Matrix4f(activeCamera.getInverseProjectionMatrix()).transpose(), true);
+            prePostMaterial.setMatrix4("projMatrix", new Matrix4f(activeCamera.getProjectionMatrix()).transpose(), true);
         }
 
         if (outlineIsEnabled) {
@@ -204,7 +205,7 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
         }
 
         if (volumetricFogIsEnabled) {
-            prePostMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
+            prePostMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
             prePostMaterial.setFloat3("volumetricFogSettings", 1f, volumetricFogGlobalDensity, volumetricFogHeightFalloff, true);
         }
 
