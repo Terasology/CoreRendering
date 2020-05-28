@@ -1,11 +1,11 @@
 /*
- * Copyright 2017 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,10 @@ package org.terasology.corerendering.rendering.dag.nodes;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.corerendering.rendering.CoreenderingModule;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
+import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.engine.module.rendering.RenderingModuleRegistry;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -35,8 +35,8 @@ import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.AbstractNode;
+import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthTest;
 import org.terasology.rendering.dag.stateChanges.EnableBlending;
