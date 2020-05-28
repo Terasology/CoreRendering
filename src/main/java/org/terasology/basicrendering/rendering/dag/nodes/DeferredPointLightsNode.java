@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.basicrendering.rendering.dag.nodes;
+package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.basicrendering.rendering.BasicRenderingModule;
+import org.terasology.corerendering.rendering.CoreenderingModule;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
@@ -102,8 +102,8 @@ public class DeferredPointLightsNode extends AbstractNode {
     public void setDependencies(Context context) {
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        lightCamera = ((BasicRenderingModule) context.get(RenderingModuleRegistry.class)
-                        .getModuleRenderingByClass(BasicRenderingModule.class)).getLightCamera();
+        lightCamera = ((CoreRenderingModule) context.get(RenderingModuleRegistry.class)
+                        .getModuleRenderingByClass(CoreRenderingModule.class)).getLightCamera();
 
         addDesiredStateChange(new LookThrough(activeCamera));
 

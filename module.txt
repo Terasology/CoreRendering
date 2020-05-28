@@ -1,9 +1,10 @@
 {
-    "id" : "BasicRendering",
-    "version" : "0.5.0-SNAPSHOT",
-    "author" : "Respective rendering authors",
-    "displayName" : "BasicRendering",
-    "description" : "This module contains all essential rendering nodes",
-    "dependencies" : [],
-    "serverSideOnly" : false
+    "id": "CoreRendering",
+    "version": "0.5.0-SNAPSHOT",
+    "author": "The Terasology Foundation",
+    "displayName": "Core Rendering",
+    "description": "This module contains all essential rendering nodes",
+    "dependencies": [],
+    "serverSideOnly": false,
+    "isRendering": true
 }

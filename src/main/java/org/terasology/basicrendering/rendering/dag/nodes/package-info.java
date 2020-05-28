@@ -25,5 +25,5 @@
  * ApplyDeferredLightingNode) and reusable nodes such as BlurNode.
  */
 // @API
-package org.terasology.basicrendering.rendering.dag.nodes;
+package org.terasology.corerendering.rendering.dag.nodes;
 

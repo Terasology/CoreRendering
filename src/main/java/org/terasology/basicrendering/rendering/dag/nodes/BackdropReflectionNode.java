@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.basicrendering.rendering.dag.nodes;
+package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
@@ -43,7 +43,7 @@ import static org.lwjgl.opengl.GL11.glCallList;
 import static org.lwjgl.opengl.GL11.glEndList;
 import static org.lwjgl.opengl.GL11.glGenLists;
 import static org.lwjgl.opengl.GL11.glNewList;
-import static org.terasology.basicrendering.rendering.dag.nodes.BackdropNode.getAllWeatherZenith;
+import static org.terasology.corerendering.rendering.dag.nodes.BackdropNode.getAllWeatherZenith;
 
 /**
  * An instance of this class is responsible for rendering a reflected backdrop (usually the sky) into the
