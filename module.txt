@@ -1,9 +1,10 @@
 {
     "id": "CoreRendering",
-    "version": "0.5.0-SNAPSHOT",
+    "version": "1.0.0",
+    "isReleaseManaged": true,
     "author": "The Terasology Foundation",
     "displayName": "Core Rendering",
-    "description": "This module contains all essential rendering nodes",
+    "description": "The essential rendering module needed for clients, containing all basic rendering nodes to display the world.",
     "dependencies": [],
     "serverSideOnly": false,
     "isRendering": true
