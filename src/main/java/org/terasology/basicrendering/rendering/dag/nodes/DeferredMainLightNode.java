@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.basicrendering.rendering.dag.nodes;
+package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.basicrendering.rendering.BasicRenderingModule;
+import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
@@ -74,7 +74,7 @@ public class DeferredMainLightNode extends AbstractNode {
     private BackdropProvider backdropProvider;
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
-    private BasicRenderingModule basicRendering;
+    private CoreRenderingModule coreRendering;
 
     private LightComponent mainLightComponent = new LightComponent();
 
@@ -95,8 +95,8 @@ public class DeferredMainLightNode extends AbstractNode {
         backdropProvider = context.get(BackdropProvider.class);
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);
-        basicRendering = ((BasicRenderingModule) context.get(RenderingModuleRegistry.class)
-                .getModuleRenderingByClass(BasicRenderingModule.class));
+        coreRendering = ((CoreRenderingModule) context.get(RenderingModuleRegistry.class)
+                .getModuleRenderingByClass(CoreRenderingModule.class));
 
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
@@ -182,7 +182,7 @@ public class DeferredMainLightNode extends AbstractNode {
         }
 
         if (renderingConfig.isDynamicShadows()) {
-            lightCamera = basicRendering.getLightCamera();
+            lightCamera = coreRendering.getLightCamera();
             cameraPosition.sub(lightCamera.getPosition(),activeCameraToLightSpace);
             lightGeometryMaterial.setMatrix4("lightViewProjMatrix", new Matrix4f(lightCamera.getViewProjectionMatrix()).transpose(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.basicrendering.rendering.dag.nodes;
+package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;

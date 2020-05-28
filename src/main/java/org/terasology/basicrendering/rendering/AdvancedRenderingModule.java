@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package org.terasology.basicrendering.rendering;
+package org.terasology.corerendering.rendering;
 
-import org.terasology.basicrendering.rendering.dag.nodes.AmbientOcclusionNode;
-import org.terasology.basicrendering.rendering.dag.nodes.BloomBlurNode;
-import org.terasology.basicrendering.rendering.dag.nodes.BlurredAmbientOcclusionNode;
-import org.terasology.basicrendering.rendering.dag.nodes.BufferClearingNode;
-import org.terasology.basicrendering.rendering.dag.nodes.HazeNode;
-import org.terasology.basicrendering.rendering.dag.nodes.HighPassNode;
-import org.terasology.basicrendering.rendering.dag.nodes.LightShaftsNode;
-import org.terasology.basicrendering.rendering.dag.nodes.ShadowMapNode;
+import org.terasology.corerendering.rendering.dag.nodes.AmbientOcclusionNode;
+import org.terasology.corerendering.rendering.dag.nodes.BloomBlurNode;
+import org.terasology.corerendering.rendering.dag.nodes.BlurredAmbientOcclusionNode;
+import org.terasology.corerendering.rendering.dag.nodes.BufferClearingNode;
+import org.terasology.corerendering.rendering.dag.nodes.HazeNode;
+import org.terasology.corerendering.rendering.dag.nodes.HighPassNode;
+import org.terasology.corerendering.rendering.dag.nodes.LightShaftsNode;
+import org.terasology.corerendering.rendering.dag.nodes.ShadowMapNode;
 import org.terasology.context.Context;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.ModuleRendering;
@@ -141,12 +141,12 @@ public class AdvancedRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(shadowMapClearingNode, 1, shadowMapNode, 1);
         renderGraph.addNode(shadowMapNode);
 
-        Node deferredMainLightNode = renderGraph.findNode("BasicRendering:deferredMainLightNode");
+        Node deferredMainLightNode = renderGraph.findNode("CoreRendering:deferredMainLightNode");
         renderGraph.connectFbo(shadowMapNode, 1, deferredMainLightNode, 1);
     }
 
     private void addAmbientOcclusion() {
-        Node opaqueObjectsNode = renderGraph.findNode("BasicRendering:opaqueObjectsNode");
+        Node opaqueObjectsNode = renderGraph.findNode("CoreRendering:opaqueObjectsNode");
         Node opaqueBlocksNode = renderGraph.findAka("opaqueBlocks");
         Node alphaRejectBlocksNode = renderGraph.findAka("alphaRejectBlocks");
         Node applyDeferredLightingNode = renderGraph.findAka("applyDeferredLighting");
@@ -170,19 +170,19 @@ public class AdvancedRenderingModule extends ModuleRendering {
 
     private void addLightShafts() {
         // Light shafts
-        Node simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
+        Node simpleBlendMaterialsNode = renderGraph.findNode("CoreRendering:simpleBlendMaterialsNode");
 
         LightShaftsNode lightShaftsNode = new LightShaftsNode("lightShaftsNode", providingModule, context);
         renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, lightShaftsNode, 1);
         renderGraph.addNode(lightShaftsNode);
 
-        Node initialPostProcessing = renderGraph.findNode("BasicRendering:initialPostProcessingNode");
+        Node initialPostProcessing = renderGraph.findNode("CoreRendering:initialPostProcessingNode");
         renderGraph.connectFbo(lightShaftsNode, 1, initialPostProcessing, 1);
     }
 
     private void addBloomNodes() {
         // Bloom Effect: one high-pass filter and three blur passes
-        Node simpleBlendMaterialsNode = renderGraph.findNode("BasicRendering:simpleBlendMaterialsNode");
+        Node simpleBlendMaterialsNode = renderGraph.findNode("CoreRendering:simpleBlendMaterialsNode");
 
         Node highPassNode = new HighPassNode("highPassNode", providingModule, context);
         renderGraph.connectBufferPair(simpleBlendMaterialsNode, 1, highPassNode, 1);
@@ -217,7 +217,7 @@ public class AdvancedRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(quarterScaleBlurredBloomNode, 1, one8thScaleBlurredBloomNode, 1);
         renderGraph.addNode(one8thScaleBlurredBloomNode);
 
-        Node initialPostProcessing = renderGraph.findNode("BasicRendering:initialPostProcessingNode");
+        Node initialPostProcessing = renderGraph.findNode("CoreRendering:initialPostProcessingNode");
         renderGraph.connectFbo(one8thScaleBlurredBloomNode, 1, initialPostProcessing, 2);
     }
 
