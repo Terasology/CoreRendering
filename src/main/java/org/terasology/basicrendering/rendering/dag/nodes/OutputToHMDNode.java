@@ -15,7 +15,7 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import jopenvr.JOpenVRLibrary;
+//import jopenvr.JOpenVRLibrary;
 import org.lwjgl.opengl.GL11;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
@@ -69,7 +69,7 @@ public class OutputToHMDNode extends ConditionDependentNode {
             leftEyeFbo = requiresFbo(new FboConfig(LEFT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
             rightEyeFbo = requiresFbo(new FboConfig(RIGHT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
             finalFbo = displayResolutionDependentFBOs.get(FINAL_BUFFER);
-
+/* TODO: Re-enable when we try to get OpenVR working again. Disabled due to a natives issue with
             vrProvider.texType[0].handle = leftEyeFbo.getColorBufferTextureId();
             vrProvider.texType[0].eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
             vrProvider.texType[0].eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
@@ -78,7 +78,7 @@ public class OutputToHMDNode extends ConditionDependentNode {
             vrProvider.texType[1].eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
             vrProvider.texType[1].eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
             vrProvider.texType[1].write();
-
+*/
             addDesiredStateChange(new EnableMaterial(DEFAULT_TEXTURED_MATERIAL_URN));
         }
     }
