@@ -16,7 +16,7 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.Sphere;
+import org.terasology.rendering.primitives.Sphere;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
