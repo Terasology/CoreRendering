@@ -202,7 +202,6 @@ public class DeferredPointLightsNode extends AbstractNode {
 
                 Vector3f lightPositionRelativeToCamera = new Vector3f();
                 lightPositionInTeraCoords.sub(activeCamera.getPosition(),lightPositionRelativeToCamera);
-//                lightPositionRelativeToCamera.sub(lightPositionInTeraCoords, JomlUtil.from(activeCamera.getPosition()));
 
                 if (lightIsRenderable(lightComponent, lightPositionRelativeToCamera)) {
                     lightGeometryMaterial.setCamera(activeCamera);
