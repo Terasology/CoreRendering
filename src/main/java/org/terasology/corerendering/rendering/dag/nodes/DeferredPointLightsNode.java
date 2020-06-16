@@ -15,6 +15,8 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 import org.terasology.assets.ResourceUrn;
@@ -27,8 +29,6 @@ import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
@@ -148,7 +148,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         // above: rendering distance must be higher than distance from the camera or the light is ignored
 
         // No matter what, we ignore lights that are not in the camera frustrum
-        lightIsRenderable &= activeCamera.getViewFrustum().intersects(lightPositionRelativeToCamera, lightComponent.lightAttenuationRange);
+        lightIsRenderable &= activeCamera.getViewFrustum().intersects(JomlUtil.from(lightPositionRelativeToCamera), lightComponent.lightAttenuationRange);
         // TODO: (above) what about lights just off-frame? They might light up in-frame surfaces.
 
         return lightIsRenderable;
@@ -169,7 +169,7 @@ public class DeferredPointLightsNode extends AbstractNode {
 
         // Specific Shader Parameters
 
-        cameraPosition = JomlUtil.from(activeCamera.getPosition());
+        cameraPosition = activeCamera.getPosition();
 
         // TODO: This is necessary right now because activateFeature removes all material parameters.
         // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters through it.
@@ -187,7 +187,7 @@ public class DeferredPointLightsNode extends AbstractNode {
             lightGeometryMaterial.setMatrix4("lightViewProjMatrix", new org.joml.Matrix4f(lightCamera.getViewProjectionMatrix()).transpose(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", new org.joml.Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
 
-            activeCameraToLightSpace.sub(cameraPosition, JomlUtil.from(lightCamera.getPosition()));
+            cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
         }
 
@@ -198,10 +198,10 @@ public class DeferredPointLightsNode extends AbstractNode {
 
             if (lightComponent.lightType == LightComponent.LightType.POINT) {
                 LocationComponent locationComponent = entity.getComponent(LocationComponent.class);
-                final Vector3f lightPositionInTeraCoords = locationComponent.getWorldPosition();
+                final Vector3f lightPositionInTeraCoords = JomlUtil.from(locationComponent.getWorldPosition());
 
                 Vector3f lightPositionRelativeToCamera = new Vector3f();
-                lightPositionRelativeToCamera.sub(lightPositionInTeraCoords, JomlUtil.from(activeCamera.getPosition()));
+                lightPositionInTeraCoords.sub(activeCamera.getPosition(),lightPositionRelativeToCamera);
 
                 if (lightIsRenderable(lightComponent, lightPositionRelativeToCamera)) {
                     lightGeometryMaterial.setCamera(activeCamera);
@@ -217,13 +217,13 @@ public class DeferredPointLightsNode extends AbstractNode {
                         lightComponent.lightAttenuationFalloff, 0.0f, 0.0f, true);
 
                     // setting shader parameters for the light position in camera space
-                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera);
-                    JomlUtil.from(activeCamera.getViewMatrix()).transformPoint(lightPositionInViewSpace);
+                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(new Matrix4f(activeCamera.getViewMatrix()).transpose());
+
                     lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
 
                     // set the size and location of the sphere to be rendered via shader parameters
                     Matrix4f modelMatrix = new Matrix4f();
-                    modelMatrix.set(lightComponent.lightAttenuationRange); // scales the modelview matrix, effectively scales the light sphere
+                    modelMatrix.scale(lightComponent.lightAttenuationRange); // scales the modelview matrix, effectively scales the light sphere
                     modelMatrix.setTranslation(lightPositionRelativeToCamera); // effectively moves the light sphere in the right position relative to camera
                     lightGeometryMaterial.setMatrix4("modelMatrix", modelMatrix, true);
 

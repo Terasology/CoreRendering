@@ -196,7 +196,7 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         if (localReflectionsAreEnabled) {
             prePostMaterial.setMatrix4("invProjMatrix", new Matrix4f(activeCamera.getInverseProjectionMatrix()).transpose(), true);
-            prePostMaterial.setMatrix4("projMatrix", new Matrix4f(activeCamera.getProjectionMatrix()).transpose(), true);
+            prePostMaterial.setMatrix4("projMatrix", activeCamera.getProjectionMatrix(), true);
         }
 
         if (outlineIsEnabled) {
