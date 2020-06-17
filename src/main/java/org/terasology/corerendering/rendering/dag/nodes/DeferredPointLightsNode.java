@@ -217,7 +217,7 @@ public class DeferredPointLightsNode extends AbstractNode {
                         lightComponent.lightAttenuationFalloff, 0.0f, 0.0f, true);
 
                     // setting shader parameters for the light position in camera space
-                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(new Matrix4f(activeCamera.getViewMatrix()).transpose());
+                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(activeCamera.getViewMatrix());
 
                     lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
 
