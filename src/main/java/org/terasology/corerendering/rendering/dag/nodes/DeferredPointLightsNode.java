@@ -184,8 +184,8 @@ public class DeferredPointLightsNode extends AbstractNode {
         }
 
         if (renderingConfig.isDynamicShadows()) {
-            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", new org.joml.Matrix4f(lightCamera.getViewProjectionMatrix()).transpose(), true);
-            lightGeometryMaterial.setMatrix4("invViewProjMatrix", new org.joml.Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
+            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
+            lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
 
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
@@ -217,7 +217,7 @@ public class DeferredPointLightsNode extends AbstractNode {
                         lightComponent.lightAttenuationFalloff, 0.0f, 0.0f, true);
 
                     // setting shader parameters for the light position in camera space
-                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(new Matrix4f(activeCamera.getViewMatrix()).transpose());
+                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(activeCamera.getViewMatrix());
 
                     lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
 

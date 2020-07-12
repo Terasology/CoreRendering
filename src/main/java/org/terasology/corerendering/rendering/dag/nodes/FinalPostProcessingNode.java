@@ -163,8 +163,8 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         }
 
         if (isMotionBlurEnabled) {
-            postMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
-            postMaterial.setMatrix4("prevViewProjMatrix", new Matrix4f(activeCamera.getPrevViewProjectionMatrix()).transpose(), true);
+            postMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
+            postMaterial.setMatrix4("prevViewProjMatrix", activeCamera.getPrevViewProjectionMatrix(), true);
         }
 
         renderFullscreenQuad();

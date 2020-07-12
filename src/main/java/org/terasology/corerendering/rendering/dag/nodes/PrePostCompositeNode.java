@@ -205,7 +205,7 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
         }
 
         if (volumetricFogIsEnabled) {
-            prePostMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
+            prePostMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             prePostMaterial.setFloat3("volumetricFogSettings", 1f, volumetricFogGlobalDensity, volumetricFogHeightFalloff, true);
         }
 

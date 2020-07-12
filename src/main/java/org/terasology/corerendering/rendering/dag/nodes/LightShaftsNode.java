@@ -161,7 +161,7 @@ public class LightShaftsNode extends ConditionDependentNode {
 
         sunPositionWorldSpace4.set(sunDirection.x * 10000.0f, sunDirection.y * 10000.0f, sunDirection.z * 10000.0f, 1.0f);
         sunPositionScreenSpace.set(sunPositionWorldSpace4);
-        new Matrix4f(activeCamera.getViewProjectionMatrix()).transpose().transform(sunPositionScreenSpace);
+        activeCamera.getViewProjectionMatrix().transform(sunPositionScreenSpace);
 
         sunPositionScreenSpace.x /= sunPositionScreenSpace.w;
         sunPositionScreenSpace.y /= sunPositionScreenSpace.w;
