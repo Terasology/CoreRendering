@@ -183,9 +183,9 @@ public class DeferredMainLightNode extends AbstractNode {
 
         if (renderingConfig.isDynamicShadows()) {
             lightCamera = coreRendering.getLightCamera();
-            cameraPosition.sub(lightCamera.getPosition(),activeCameraToLightSpace);
+            cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
             lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
-            lightGeometryMaterial.setMatrix4("invViewProjMatrix",activeCamera.getInverseViewProjectionMatrix(), true);
+            lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace, true);
         }
 
