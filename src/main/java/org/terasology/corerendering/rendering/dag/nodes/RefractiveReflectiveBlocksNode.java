@@ -16,12 +16,12 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
-import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
@@ -239,7 +239,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
         // Common Shader Parameters
 
-        sunDirection = JomlUtil.from(backdropProvider.getSunDirection(false));
+        sunDirection = backdropProvider.getSunDirection(false);
 
         chunkMaterial.setFloat("daylight", backdropProvider.getDaylight(), true);
         chunkMaterial.setFloat("swimming", activeCamera.isUnderWater() ? 1.0f : 0.0f, true);
@@ -292,7 +292,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = new Vector3f(JomlUtil.from(chunk.getPosition()));
+                final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(REFRACTIVE, chunkPosition, cameraPosition);

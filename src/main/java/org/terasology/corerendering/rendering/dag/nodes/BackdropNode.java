@@ -15,14 +15,14 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingDebugConfig;
 import org.terasology.context.Context;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector4f;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;

@@ -145,10 +145,10 @@ public class LightShaftsNode extends ConditionDependentNode {
         // This is a temporary solution to sun causing light shafts even at night.
 
         if (days < 0.25f || days > 0.75f) {
-            sunDirection = JomlUtil.from(backdropProvider.getSunDirection(true));
+            sunDirection = backdropProvider.getSunDirection(true);
             exposure = exposureNight;
         } else {
-            sunDirection = JomlUtil.from(backdropProvider.getSunDirection(false));
+            sunDirection = backdropProvider.getSunDirection(false);
             exposure = exposureDay;
         }
 
@@ -159,7 +159,7 @@ public class LightShaftsNode extends ConditionDependentNode {
         lightShaftsMaterial.setFloat("weight", weight, true);
         lightShaftsMaterial.setFloat("decay", decay, true);
 
-        sunPositionWorldSpace4.set(sunDirection.x * 10000.0f, sunDirection.y * 10000.0f, sunDirection.z * 10000.0f, 1.0f);
+        sunPositionWorldSpace4.set(-sunDirection.x * 10000.0f, -sunDirection.y * 10000.0f, -sunDirection.z * 10000.0f, 1.0f);
         sunPositionScreenSpace.set(sunPositionWorldSpace4);
         activeCamera.getViewProjectionMatrix().transform(sunPositionScreenSpace);
 
