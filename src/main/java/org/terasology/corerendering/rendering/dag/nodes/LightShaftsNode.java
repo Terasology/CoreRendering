@@ -15,7 +15,6 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.terasology.assets.ResourceUrn;
@@ -23,7 +22,6 @@ import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
-import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
