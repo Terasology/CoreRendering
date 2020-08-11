@@ -191,12 +191,12 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         // Shader Parameters
 
-        prePostMaterial.setFloat("viewingDistance", renderingConfig.getViewDistance().getChunkDistance().x * 8.0f, true);
+        prePostMaterial.setFloat("viewingDistance", renderingConfig.getViewDistance().getChunkDistance().x() * 8.0f, true);
         prePostMaterial.setFloat3("cameraParameters", activeCamera.getzNear(), activeCamera.getzFar(), 0.0f, true);
 
         if (localReflectionsAreEnabled) {
-            prePostMaterial.setMatrix4("invProjMatrix", new Matrix4f(activeCamera.getInverseProjectionMatrix()).transpose(), true);
-            prePostMaterial.setMatrix4("projMatrix", new Matrix4f(activeCamera.getProjectionMatrix()).transpose(), true);
+            prePostMaterial.setMatrix4("invProjMatrix", activeCamera.getInverseProjectionMatrix(), true);
+            prePostMaterial.setMatrix4("projMatrix", activeCamera.getProjectionMatrix(), true);
         }
 
         if (outlineIsEnabled) {
@@ -205,7 +205,7 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
         }
 
         if (volumetricFogIsEnabled) {
-            prePostMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
+            prePostMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             prePostMaterial.setFloat3("volumetricFogSettings", 1f, volumetricFogGlobalDensity, volumetricFogHeightFalloff, true);
         }
 

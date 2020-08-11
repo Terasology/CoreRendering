@@ -118,7 +118,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         addDesiredStateChange(new EnableMaterial(POST_MATERIAL_URN));
 
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
-        FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(new SimpleUri("fbo.finalBuffer"), FULL_SCALE, FBO.Type.DEFAULT));
+        FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(new SimpleUri("engine:fbo.finalBuffer"), FULL_SCALE, FBO.Type.DEFAULT));
         addOutputFboConnection(1, finalBuffer);
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
@@ -164,8 +164,8 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         }
 
         if (isMotionBlurEnabled) {
-            postMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
-            postMaterial.setMatrix4("prevViewProjMatrix", new Matrix4f(activeCamera.getPrevViewProjectionMatrix()).transpose(), true);
+            postMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
+            postMaterial.setMatrix4("prevViewProjMatrix", activeCamera.getPrevViewProjectionMatrix(), true);
         }
 
         renderFullscreenQuad();
