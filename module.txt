@@ -1,6 +1,6 @@
 {
     "id": "CoreRendering",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "isReleaseManaged": true,
     "author": "The Terasology Foundation",
     "displayName": "Core Rendering",
