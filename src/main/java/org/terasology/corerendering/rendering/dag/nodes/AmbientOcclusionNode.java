@@ -25,6 +25,7 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
+import org.terasology.nui.properties.Range;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.rendering.assets.texture.TextureData;
@@ -36,7 +37,6 @@ import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
@@ -154,8 +154,8 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
 
         ssaoMaterial.setFloat4("ssaoSettings", ssaoStrength, ssaoRad, 0.0f, 0.0f, true);
 
-        ssaoMaterial.setMatrix4("invProjMatrix", new org.joml.Matrix4f(activeCamera.getInverseProjectionMatrix()).transpose(), true);
-        ssaoMaterial.setMatrix4("projMatrix", new org.joml.Matrix4f(activeCamera.getProjectionMatrix()).transpose(), true);
+        ssaoMaterial.setMatrix4("invProjMatrix", activeCamera.getInverseProjectionMatrix(), true);
+        ssaoMaterial.setMatrix4("projMatrix", activeCamera.getProjectionMatrix(), true);
 
         ssaoMaterial.setFloat2("texelSize", 1.0f / outputFboWidth, 1.0f / outputFboHeight, true);
         ssaoMaterial.setFloat2("noiseTexelSize", NOISE_TEXEL_SIZE, NOISE_TEXEL_SIZE, true);

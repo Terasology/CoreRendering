@@ -24,11 +24,12 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
+import org.terasology.nui.properties.Range;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.texture.TextureUtil;
 import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.AbstractNode;
+import org.terasology.rendering.dag.StateChange;
 import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
@@ -36,7 +37,6 @@ import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.rendering.dag.stateChanges.SetInputTexture3D;
 import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.nui.properties.Range;
 import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.opengl.FboConfig;
 import org.terasology.rendering.opengl.ScreenGrabber;
@@ -48,12 +48,13 @@ import org.terasology.utilities.random.Random;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-//import static org.terasology.rendering.dag.nodes.LateBlurNode.SECOND_LATE_BLUR_FBO_URI;
-//import static org.terasology.rendering.dag.nodes.ToneMappingNode.TONE_MAPPING_FBO_URI;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
+
+//import static org.terasology.rendering.dag.nodes.LateBlurNode.SECOND_LATE_BLUR_FBO_URI;
+//import static org.terasology.rendering.dag.nodes.ToneMappingNode.TONE_MAPPING_FBO_URI;
 
 /**
  * An instance of this class adds depth of field blur, motion blur and film grain to the rendering
@@ -163,8 +164,8 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         }
 
         if (isMotionBlurEnabled) {
-            postMaterial.setMatrix4("invViewProjMatrix", new Matrix4f(activeCamera.getInverseViewProjectionMatrix()).transpose(), true);
-            postMaterial.setMatrix4("prevViewProjMatrix", new Matrix4f(activeCamera.getPrevViewProjectionMatrix()).transpose(), true);
+            postMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
+            postMaterial.setMatrix4("prevViewProjMatrix", activeCamera.getPrevViewProjectionMatrix(), true);
         }
 
         renderFullscreenQuad();
