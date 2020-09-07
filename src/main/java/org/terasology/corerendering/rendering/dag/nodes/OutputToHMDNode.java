@@ -16,13 +16,14 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 //import jopenvr.JOpenVRLibrary;
+
 import org.lwjgl.opengl.GL11;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.rendering.dag.ConditionDependentNode;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.opengl.FBO;

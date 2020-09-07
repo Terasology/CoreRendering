@@ -15,24 +15,22 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.terasology.assets.ResourceUrn;
-import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
+import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.engine.module.rendering.RenderingModuleRegistry;
-import org.terasology.math.JomlUtil;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.AbstractNode;
+import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.rendering.dag.stateChanges.BindFbo;
 import org.terasology.rendering.dag.stateChanges.DisableDepthTest;
 import org.terasology.rendering.dag.stateChanges.EnableBlending;
