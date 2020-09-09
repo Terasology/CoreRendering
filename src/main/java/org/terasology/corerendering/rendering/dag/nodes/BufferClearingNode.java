@@ -1,53 +1,44 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.context.Context;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.opengl.BaseFboManager;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.opengl.BaseFboManager;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
 
 import static org.lwjgl.opengl.GL11.glClear;
 
 /**
- * Instances of this node clear specific buffers attached to an FBOs, in accordance to a clearing mask.
- * Normally this means that all the pixels in the buffers selected by the mask are reset to a default value.
- *
- * This class could be inherited by a more specific class that sets the default values, via (yet to be written)
- * state changes.
+ * Instances of this node clear specific buffers attached to an FBOs, in accordance to a clearing mask. Normally this
+ * means that all the pixels in the buffers selected by the mask are reset to a default value.
+ * <p>
+ * This class could be inherited by a more specific class that sets the default values, via (yet to be written) state
+ * changes.
  */
 public class BufferClearingNode extends AbstractNode {
-    private int clearingMask;
+    private final int clearingMask;
     private FBO fbo;
+
     /**
-     * Constructs the node by requesting the creation (if necessary) of the FBO to be cleared
-     * and by requesting for this FBO to be bound by the time process() gets executed. Also
-     * stores the clearing mask, for use in process().
+     * Constructs the node by requesting the creation (if necessary) of the FBO to be cleared and by requesting for this
+     * FBO to be bound by the time process() gets executed. Also stores the clearing mask, for use in process().
      *
-     * @param fboConfig an FboConfig object characterizing the FBO to act upon, if necessary prompting its creation.
-     * @param fboManager an instance implementing the BaseFboManager interface, used to retrieve and bind the FBO.
-     * @param clearingMask a glClear(int)-compatible mask, selecting which FBO-attached buffers to clear,
-     *                      i.e. "GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT". This argument can't be zero.
-     *                      Non GL_*_BIT values will be accepted but might eventually generate an opengl error.
+     * @param fboConfig an FboConfig object characterizing the FBO to act upon, if necessary prompting its
+     *         creation.
+     * @param fboManager an instance implementing the BaseFboManager interface, used to retrieve and bind the
+     *         FBO.
+     * @param clearingMask a glClear(int)-compatible mask, selecting which FBO-attached buffers to clear, i.e.
+     *         "GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT". This argument can't be zero. Non GL_*_BIT values will be
+     *         accepted but might eventually generate an opengl error.
      * @throws IllegalArgumentException if fboConfig, fboManager are null and if clearingMask is zero.
-     */@Deprecated
-    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
+     */
+    @Deprecated
+    public BufferClearingNode(String nodeUri, Name providingModule, Context context, FboConfig fboConfig,
+                              BaseFboManager fboManager, int clearingMask) {
         super(nodeUri, providingModule, context);
 
         boolean argumentsAreValid = validateArguments(fboConfig, fboManager, clearingMask);
@@ -64,6 +55,7 @@ public class BufferClearingNode extends AbstractNode {
 
     /**
      * For passing the FBO by renderGraph.connectInputFbo
+     *
      * @param nodeUri
      * @param context
      * @param clearingMask

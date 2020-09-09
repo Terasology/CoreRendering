@@ -1,46 +1,31 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.opengl.PBO;
+import org.terasology.engine.rendering.opengl.ScreenGrabber;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.math.TeraMath;
-import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.opengl.PBO;
-import org.terasology.rendering.opengl.ScreenGrabber;
 
 import java.nio.ByteBuffer;
 
 /**
- * An instance of this node takes advantage of a downsampled version of the scene,
- * calculates its relative luminance (1) and updates the exposure parameter of the
- * ScreenGrabber accordingly.
- *
- * Notice that while this node takes advantage of the content of an FBO, it
- * doesn't actually render anything.
- *
+ * An instance of this node takes advantage of a downsampled version of the scene, calculates its relative luminance (1)
+ * and updates the exposure parameter of the ScreenGrabber accordingly.
+ * <p>
+ * Notice that while this node takes advantage of the content of an FBO, it doesn't actually render anything.
+ * <p>
  * (1) See https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance
  */
 public class UpdateExposureNode extends AbstractNode {
@@ -48,30 +33,30 @@ public class UpdateExposureNode extends AbstractNode {
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
-    private float hdrExposureDefault = 2.5f;
+    private final float hdrExposureDefault = 2.5f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
-    private float hdrMaxExposure = 8.0f;
+    private final float hdrMaxExposure = 8.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
-    private float hdrMaxExposureNight = 8.0f;
+    private final float hdrMaxExposureNight = 8.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
-    private float hdrMinExposure = 1.0f;
+    private final float hdrMinExposure = 1.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 4.0f)
-    private float hdrTargetLuminance = 1.0f;
+    private final float hdrTargetLuminance = 1.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 0.5f)
-    private float hdrExposureAdjustmentSpeed = 0.05f;
+    private final float hdrExposureAdjustmentSpeed = 0.05f;
 
-    private BackdropProvider backdropProvider;
-    private ScreenGrabber screenGrabber;
+    private final BackdropProvider backdropProvider;
+    private final ScreenGrabber screenGrabber;
 
-    private RenderingConfig renderingConfig;
+    private final RenderingConfig renderingConfig;
+    private final PBO writeOnlyPbo;   // PBOs are 1x1 pixels buffers used to read GPU data back into the CPU.
     private int downSampledSceneId;
-    private PBO writeOnlyPbo;   // PBOs are 1x1 pixels buffers used to read GPU data back into the CPU.
-                                // This data is then used in the context of eye adaptation.
+    // This data is then used in the context of eye adaptation.
 
     public UpdateExposureNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -90,9 +75,9 @@ public class UpdateExposureNode extends AbstractNode {
     }
 
     /**
-     * If Eye Adaptation is enabled, given the 1-pixel output of the downSamplerNode,
-     * calculates the relative luminance of the scene and updates the exposure accordingly.
-     *
+     * If Eye Adaptation is enabled, given the 1-pixel output of the downSamplerNode, calculates the relative luminance
+     * of the scene and updates the exposure accordingly.
+     * <p>
      * If Eye Adaptation is disabled, sets the exposure to default day/night values.
      */
     // TODO: verify if this can be achieved entirely in the GPU, during tone mapping perhaps?
@@ -109,9 +94,9 @@ public class UpdateExposureNode extends AbstractNode {
                 return;
             }
 
-            float red   = (pixels.get(2) & 0xFF) / 255.f;
+            float red = (pixels.get(2) & 0xFF) / 255.f;
             float green = (pixels.get(1) & 0xFF) / 255.f;
-            float blue  = (pixels.get(0) & 0xFF) / 255.f;
+            float blue = (pixels.get(0) & 0xFF) / 255.f;
 
             // See: https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance for the constants below.
             float currentSceneLuminance = 0.2126f * red + 0.7152f * green + 0.0722f * blue;
@@ -134,7 +119,8 @@ public class UpdateExposureNode extends AbstractNode {
                 targetExposure = hdrMinExposure;
             }
 
-            screenGrabber.setExposure(TeraMath.lerp(screenGrabber.getExposure(), targetExposure, hdrExposureAdjustmentSpeed));
+            screenGrabber.setExposure(TeraMath.lerp(screenGrabber.getExposure(), targetExposure,
+                    hdrExposureAdjustmentSpeed));
 
             PerformanceMonitor.endActivity();
         } else {

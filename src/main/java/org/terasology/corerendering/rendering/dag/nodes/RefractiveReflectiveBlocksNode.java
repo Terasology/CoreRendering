@@ -1,77 +1,61 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.StateChange;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.nodes.RefractiveReflectiveBlocksNodeProxy;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.primitives.ChunkMesh;
+import org.terasology.engine.rendering.world.RenderQueuesHelper;
+import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.chunks.RenderableChunk;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.assets.shader.ShaderProgramFeature;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.nodes.RefractiveReflectiveBlocksNodeProxy;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.RenderQueuesHelper;
-import org.terasology.rendering.world.WorldRenderer;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.PRE_FBO_REGENERATION;
-import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.REFRACTIVE;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.PRE_FBO_REGENERATION;
+import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.REFRACTIVE;
 
 /**
  * This node renders refractive/reflective blocks, i.e. water blocks.
- *
- * Reflections always include the sky but may or may not include the landscape,
- * depending on the "Reflections" video setting. Any other object currently
- * reflected is an artifact.
- *
- * Refractions distort the blocks behind the refracting surface, i.e. the bottom
- * of a lake seen from above water or the landscape above water when the player is underwater.
- * Refractions are currently always enabled.
- *
- * Note: a third "Reflections" video setting enables Screen-space Reflections (SSR),
- * an experimental feature. It produces initially appealing reflections but rotating the
- * camera partially spoils the effect showing its limits.
+ * <p>
+ * Reflections always include the sky but may or may not include the landscape, depending on the "Reflections" video
+ * setting. Any other object currently reflected is an artifact.
+ * <p>
+ * Refractions distort the blocks behind the refracting surface, i.e. the bottom of a lake seen from above water or the
+ * landscape above water when the player is underwater. Refractions are currently always enabled.
+ * <p>
+ * Note: a third "Reflections" video setting enables Screen-space Reflections (SSR), an experimental feature. It
+ * produces initially appealing reflections but rotating the camera partially spoils the effect showing its limits.
  */
 public class RefractiveReflectiveBlocksNode extends AbstractNode implements PropertyChangeListener {
     public static final SimpleUri REFRACTIVE_REFLECTIVE_FBO_URI = new SimpleUri("engine:fbo.sceneReflectiveRefractive");
-
+    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
     // TODO: rename to more meaningful/precise variable names, like waveAmplitude or waveHeight.
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 2.0f)
@@ -94,60 +78,48 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 5.0f)
     public static float waterOffsetY;
-
-    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
-
-    private RenderQueuesHelper renderQueues;
-    private WorldRenderer worldRenderer;
-    private BackdropProvider backdropProvider;
-    private RenderingConfig renderingConfig;
-    private WorldProvider worldProvider;
-
+    private final RenderQueuesHelper renderQueues;
+    private final WorldRenderer worldRenderer;
+    private final BackdropProvider backdropProvider;
+    private final RenderingConfig renderingConfig;
+    private final WorldProvider worldProvider;
+    private final Material chunkMaterial;
+    private final SubmersibleCamera activeCamera;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 2.0f)
+    private final float waveOverallScale = 1.0f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float waterRefraction = 0.04f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 0.1f)
+    private final float waterFresnelBias = 0.01f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 10.0f)
+    private final float waterFresnelPow = 2.5f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 1.0f, max = 100.0f)
+    private final float waterNormalBias = 10.0f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float waterTint = 0.24f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1024.0f)
+    private final float waterSpecExp = 200.0f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 0.5f)
+    private final float parallaxBias = 0.25f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 0.50f)
+    private final float parallaxScale = 0.5f;
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
-
-    private Material chunkMaterial;
-
     private FBO lastUpdatedGBuffer;
     private FBO refractiveReflectiveFbo;
-
-    private SubmersibleCamera activeCamera;
-
     private boolean normalMappingIsEnabled;
     private boolean parallaxMappingIsEnabled;
     private boolean animatedWaterIsEnabled;
-
     private StateChange setTerrainNormalsInputTexture;
     private StateChange setTerrainHeightInputTexture;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 2.0f)
-    private float waveOverallScale = 1.0f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float waterRefraction = 0.04f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.1f)
-    private float waterFresnelBias = 0.01f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 10.0f)
-    private float waterFresnelPow = 2.5f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 1.0f, max = 100.0f)
-    private float waterNormalBias = 10.0f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float waterTint = 0.24f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1024.0f)
-    private float waterSpecExp = 200.0f;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.5f)
-    private float parallaxBias = 0.25f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.50f)
-    private float parallaxScale = 0.5f;
-
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f sunDirection;
 
@@ -156,7 +128,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
         // TODO This is a temporary hack, see RefractiveReflectiveBlocksNodeProxy's doc
         RefractiveReflectiveBlocksNodeProxy.updateWaterAttributes(waveIntensity, waveIntensityFalloff, waveSize,
-                                                                  waveSizeFalloff, waveSpeed, waveSpeedFalloff, waterOffsetY);
+                waveSizeFalloff, waveSpeed, waveSpeedFalloff, waterOffsetY);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);
@@ -183,7 +155,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
     public void setDependencies(Context context) {
 
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
-        lastUpdatedGBuffer =  bufferPairConnection.getBufferPair().getPrimaryFbo();
+        lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
         addOutputBufferPairConnection(1, bufferPairConnection);
 
         refractiveReflectiveFbo = getInputFboData(1);
@@ -201,16 +173,25 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         addDesiredStateChange(new BindFbo(refractiveReflectiveFbo));
         addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:terrain", CHUNK_MATERIAL_URN, "textureAtlas"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:effects", CHUNK_MATERIAL_URN, "textureEffects"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN, "textureWater"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN, "textureWaterNormal"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN, "textureWaterNormalAlt"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:terrain", CHUNK_MATERIAL_URN,
+                "textureAtlas"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:effects", CHUNK_MATERIAL_URN,
+                "textureEffects"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN,
+                "textureWater"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN,
+                "textureWaterNormal"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN,
+                "textureWaterNormalAlt"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
 
-        setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal", CHUNK_MATERIAL_URN, "textureAtlasNormal");
-        setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN, "textureAtlasHeight");
+        setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal",
+                CHUNK_MATERIAL_URN, "textureAtlasNormal");
+        setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN,
+                "textureAtlasHeight");
 
         if (normalMappingIsEnabled) {
             addDesiredStateChange(setTerrainNormalsInputTexture);
@@ -223,12 +204,11 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
     /**
      * This method is where the actual rendering of refractive/reflective blocks takes place.
-     *
+     * <p>
      * Also takes advantage of the two methods
-     *
-     * - WorldRenderer.increaseTrianglesCount(int)
-     * - WorldRenderer.increaseNotReadyChunkCount(int)
-     *
+     * <p>
+     * - WorldRenderer.increaseTrianglesCount(int) - WorldRenderer.increaseNotReadyChunkCount(int)
+     * <p>
      * to publish some statistics over its own activity.
      */
     @Override
@@ -249,7 +229,8 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         // Specific Shader Parameters
 
         // TODO: This is necessary right now because activateFeature removes all material parameters.
-        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters through it.
+        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters
+        //  through it.
         chunkMaterial.setInt("textureAtlas", 0, true);
         chunkMaterial.setInt("textureEffects", 1, true);
         chunkMaterial.setInt("textureWater", 2, true);
@@ -266,7 +247,8 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         }
 
         chunkMaterial.setFloat4("lightingSettingsFrag", 0, 0, waterSpecExp, 0, true);
-        chunkMaterial.setFloat4("waterSettingsFrag", waterNormalBias, waterRefraction, waterFresnelBias, waterFresnelPow, true);
+        chunkMaterial.setFloat4("waterSettingsFrag", waterNormalBias, waterRefraction, waterFresnelBias,
+                waterFresnelPow, true);
         chunkMaterial.setFloat4("alternativeWaterSettingsFrag", waterTint, 0, 0, 0, true);
 
         if (animatedWaterIsEnabled) {

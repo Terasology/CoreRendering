@@ -1,45 +1,32 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 //import jopenvr.JOpenVRLibrary;
 
 import org.lwjgl.opengl.GL11;
-import org.terasology.config.Config;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.openvrprovider.OpenVRProvider;
+import org.terasology.engine.rendering.world.WorldRenderer.RenderingStage;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.openvrprovider.OpenVRProvider;
-import org.terasology.rendering.world.WorldRenderer.RenderingStage;
 
 import static org.lwjgl.opengl.EXTFramebufferObject.GL_FRAMEBUFFER_EXT;
 import static org.lwjgl.opengl.EXTFramebufferObject.glBindFramebufferEXT;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 public class OutputToHMDNode extends ConditionDependentNode {
     private static final SimpleUri LEFT_EYE_FBO_URI = new SimpleUri("engine:fbo.leftEye");
@@ -47,7 +34,7 @@ public class OutputToHMDNode extends ConditionDependentNode {
     private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");
     // TODO: make these configurable options
 
-    private OpenVRProvider vrProvider;
+    private final OpenVRProvider vrProvider;
 
     private FBO leftEyeFbo;
     private FBO rightEyeFbo;
@@ -65,10 +52,13 @@ public class OutputToHMDNode extends ConditionDependentNode {
 
         // TODO: Consider reworking this, since it might cause problems later, when we support switching vr in-game.
         if (this.isEnabled()) {
-            DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
+            DisplayResolutionDependentFbo displayResolutionDependentFBOs =
+                    context.get(DisplayResolutionDependentFbo.class);
 
-            leftEyeFbo = requiresFbo(new FboConfig(LEFT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
-            rightEyeFbo = requiresFbo(new FboConfig(RIGHT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer(), displayResolutionDependentFBOs);
+            leftEyeFbo = requiresFbo(new FboConfig(LEFT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer(),
+                    displayResolutionDependentFBOs);
+            rightEyeFbo = requiresFbo(new FboConfig(RIGHT_EYE_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT).useDepthBuffer()
+                    , displayResolutionDependentFBOs);
             finalFbo = displayResolutionDependentFBOs.get(FINAL_BUFFER);
 /* TODO: Re-enable when we try to get OpenVR working again. Disabled due to a natives issue with
             vrProvider.texType[0].handle = leftEyeFbo.getColorBufferTextureId();

@@ -1,89 +1,73 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
 import org.terasology.corerendering.rendering.CoreRenderingModule;
-import org.terasology.engine.module.rendering.RenderingModuleRegistry;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.module.rendering.RenderingModuleRegistry;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.DisableDepthTest;
+import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
+import org.terasology.engine.rendering.dag.stateChanges.SetFboWriteMask;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.logic.LightComponent;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
+import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.world.WorldProvider;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.assets.shader.ShaderProgramFeature;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.DisableDepthTest;
-import org.terasology.rendering.dag.stateChanges.EnableBlending;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetBlendFunction;
-import org.terasology.rendering.dag.stateChanges.SetFboWriteMask;
-import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.logic.LightComponent;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
-import org.terasology.rendering.world.WorldRenderer;
-import org.terasology.world.WorldProvider;
 
 import static org.lwjgl.opengl.GL11.GL_ONE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_COLOR;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 
 // TODO: have this node and the shadowmap node handle multiple directional lights
 
 /**
- * This class is integral to the deferred rendering process.
- * It renders the main light (sun/moon) as a directional light, a type of light emitting parallel rays as is
- * appropriate for astronomical light sources.
- *
- * This achieved by blending a single color into each pixel of the light accumulation buffer, the single
- * color being dependent only on the angle between the camera and the light direction.
- *
- * Eventually the content of the light accumulation buffer is combined with other buffers to correctly
- * light up the 3d scene.
+ * This class is integral to the deferred rendering process. It renders the main light (sun/moon) as a directional
+ * light, a type of light emitting parallel rays as is appropriate for astronomical light sources.
+ * <p>
+ * This achieved by blending a single color into each pixel of the light accumulation buffer, the single color being
+ * dependent only on the angle between the camera and the light direction.
+ * <p>
+ * Eventually the content of the light accumulation buffer is combined with other buffers to correctly light up the 3d
+ * scene.
  */
 public class DeferredMainLightNode extends AbstractNode {
     private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("engine:prog.lightGeometryPass");
 
-    private BackdropProvider backdropProvider;
-    private RenderingConfig renderingConfig;
-    private WorldProvider worldProvider;
-    private CoreRenderingModule coreRendering;
+    private final BackdropProvider backdropProvider;
+    private final RenderingConfig renderingConfig;
+    private final WorldProvider worldProvider;
+    private final CoreRenderingModule coreRendering;
 
-    private LightComponent mainLightComponent = new LightComponent();
-
+    private final LightComponent mainLightComponent = new LightComponent();
+    private final SubmersibleCamera activeCamera;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Vector3f activeCameraToLightSpace = new Vector3f();
     private Material lightGeometryMaterial;
-
-    private SubmersibleCamera activeCamera;
     private Camera lightCamera;
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f cameraPosition;
-    @SuppressWarnings("FieldCanBeLocal")
-    private Vector3f activeCameraToLightSpace = new Vector3f();
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f mainLightInViewSpace = new Vector3f();
 
@@ -121,18 +105,24 @@ public class DeferredMainLightNode extends AbstractNode {
 
         initMainDirectionalLight();
 
-        ShadowMapResolutionDependentFbo shadowMapResolutionDependentFBOs = context.get(ShadowMapResolutionDependentFbo.class);
+        ShadowMapResolutionDependentFbo shadowMapResolutionDependentFBOs =
+                context.get(ShadowMapResolutionDependentFbo.class);
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
 
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
         if (renderingConfig.isDynamicShadows()) {
-            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(1), DepthStencilTexture, shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
+            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(1), DepthStencilTexture,
+                    shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
 
             if (renderingConfig.isCloudShadows()) {
-                addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:perlinNoiseTileable", LIGHT_GEOMETRY_MATERIAL_URN, "texSceneClouds"));
+                addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:perlinNoiseTileable",
+                        LIGHT_GEOMETRY_MATERIAL_URN, "texSceneClouds"));
             }
         }
     }
@@ -146,8 +136,8 @@ public class DeferredMainLightNode extends AbstractNode {
     }
 
     /**
-     * Renders the main light (sun/moon) as a uniformly colored full-screen quad.
-     * This gets blended into the existing data stored in the light accumulation buffer.
+     * Renders the main light (sun/moon) as a uniformly colored full-screen quad. This gets blended into the existing
+     * data stored in the light accumulation buffer.
      */
     @Override
     public void process() {
@@ -166,7 +156,8 @@ public class DeferredMainLightNode extends AbstractNode {
         activeCamera.getViewMatrix().transformPosition(mainLightInViewSpace);
 
         // TODO: This is necessary right now because activateFeature removes all material parameters.
-        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters through it.
+        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters
+        //  through it.
         lightGeometryMaterial.setInt("texSceneOpaqueDepth", 0, true);
         lightGeometryMaterial.setInt("texSceneOpaqueNormals", 1, true);
         lightGeometryMaterial.setInt("texSceneOpaqueLightBuffer", 2, true);
@@ -192,11 +183,11 @@ public class DeferredMainLightNode extends AbstractNode {
 
         lightGeometryMaterial.setFloat3("lightViewPos", mainLightInViewSpace, true);
         lightGeometryMaterial.setFloat3("lightColorDiffuse", mainLightComponent.lightColorDiffuse.x,
-            mainLightComponent.lightColorDiffuse.y, mainLightComponent.lightColorDiffuse.z, true);
+                mainLightComponent.lightColorDiffuse.y, mainLightComponent.lightColorDiffuse.z, true);
         lightGeometryMaterial.setFloat3("lightColorAmbient", mainLightComponent.lightColorAmbient.x,
-            mainLightComponent.lightColorAmbient.y, mainLightComponent.lightColorAmbient.z, true);
+                mainLightComponent.lightColorAmbient.y, mainLightComponent.lightColorAmbient.z, true);
         lightGeometryMaterial.setFloat3("lightProperties", mainLightComponent.lightAmbientIntensity,
-            mainLightComponent.lightDiffuseIntensity, mainLightComponent.lightSpecularPower, true);
+                mainLightComponent.lightDiffuseIntensity, mainLightComponent.lightSpecularPower, true);
 
         // Actual Node Processing
 

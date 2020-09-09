@@ -1,18 +1,5 @@
-/*
- * Copyright 2020 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.corerendering.rendering;
 
@@ -24,25 +11,25 @@ import org.terasology.corerendering.rendering.dag.nodes.HazeNode;
 import org.terasology.corerendering.rendering.dag.nodes.HighPassNode;
 import org.terasology.corerendering.rendering.dag.nodes.LightShaftsNode;
 import org.terasology.corerendering.rendering.dag.nodes.ShadowMapNode;
-import org.terasology.context.Context;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.ModuleRendering;
-import org.terasology.rendering.dag.Node;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.opengl.fbms.ImmutableFbo;
-import org.terasology.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.ModuleRendering;
+import org.terasology.engine.rendering.dag.Node;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.opengl.fbms.ImmutableFbo;
+import org.terasology.engine.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
 
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_16TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_32TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.QUARTER_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_16TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_32TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.QUARTER_SCALE;
 
 public class AdvancedRenderingModule extends ModuleRendering {
-    private static int initializationPriority = 2;
+    private static final int initializationPriority = 2;
 
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
     private ShadowMapResolutionDependentFbo shadowMapResolutionDependentFbo;
@@ -87,11 +74,11 @@ public class AdvancedRenderingModule extends ModuleRendering {
         // Node lastUpdatedGBufferClearingNode = renderGraph.findAka("lastUpdatedGBufferClearing");
 
         FboConfig intermediateHazeConfig = new FboConfig(HazeNode.INTERMEDIATE_HAZE_FBO_URI, ONE_16TH_SCALE,
-            FBO.Type.DEFAULT);
+                FBO.Type.DEFAULT);
         FBO intermediateHazeFbo = displayResolutionDependentFbo.request(intermediateHazeConfig);
 
         HazeNode intermediateHazeNode = new HazeNode("intermediateHazeNode", providingModule, context,
-            intermediateHazeFbo);
+                intermediateHazeFbo);
         // TODO I introduce new BufferPairConnection but I have to fetch it from the old system. This must be removed
         //  when every node uses new system
         // make this implicit
@@ -101,9 +88,9 @@ public class AdvancedRenderingModule extends ModuleRendering {
         //                                                                          .getGBufferPair().getStaleFbo()));
         renderGraph.connectBufferPair(backdropNode, 1, intermediateHazeNode, 1);
         intermediateHazeNode.addInputFboConnection(1,
-            backdropNode.getOutputBufferPairConnection(1).getBufferPair().getPrimaryFbo());
+                backdropNode.getOutputBufferPairConnection(1).getBufferPair().getPrimaryFbo());
         intermediateHazeNode.addOutputBufferPairConnection(1,
-            backdropNode.getOutputBufferPairConnection(1).getBufferPair());
+                backdropNode.getOutputBufferPairConnection(1).getBufferPair());
         renderGraph.addNode(intermediateHazeNode);
 
         FboConfig finalHazeConfig = new FboConfig(HazeNode.FINAL_HAZE_FBO_URI, ONE_32TH_SCALE, FBO.Type.DEFAULT);
@@ -133,8 +120,8 @@ public class AdvancedRenderingModule extends ModuleRendering {
     private void addShadowMap() {
         FboConfig shadowMapConfig = new FboConfig(ShadowMapNode.SHADOW_MAP_FBO_URI, FBO.Type.NO_COLOR).useDepthBuffer();
         BufferClearingNode shadowMapClearingNode = new BufferClearingNode("shadowMapClearingNode", providingModule,
-            context,
-            shadowMapConfig, shadowMapResolutionDependentFbo, GL_DEPTH_BUFFER_BIT);
+                context,
+                shadowMapConfig, shadowMapResolutionDependentFbo, GL_DEPTH_BUFFER_BIT);
         renderGraph.addNode(shadowMapClearingNode);
 
         shadowMapNode = new ShadowMapNode("shadowMapNode", providingModule, context);
@@ -159,7 +146,7 @@ public class AdvancedRenderingModule extends ModuleRendering {
         renderGraph.addNode(ambientOcclusionNode);
 
         Node blurredAmbientOcclusionNode = new BlurredAmbientOcclusionNode("blurredAmbientOcclusionNode",
-            providingModule, context);
+                providingModule, context);
         renderGraph.connectBufferPair(ambientOcclusionNode, 1, blurredAmbientOcclusionNode, 1);
         renderGraph.connectFbo(ambientOcclusionNode, 1, blurredAmbientOcclusionNode, 1);
         renderGraph.addNode(blurredAmbientOcclusionNode);
@@ -193,27 +180,27 @@ public class AdvancedRenderingModule extends ModuleRendering {
 
         // TODO once everything is new system based, update halfscaleblurrednode's input obtaining
         BloomBlurNode halfScaleBlurredBloomNode = new BloomBlurNode("halfScaleBlurredBloomNode", providingModule,
-            context, halfScaleBloomFbo);
+                context, halfScaleBloomFbo);
         // halfScaleBlurredBloomNode.addInputFboConnection(1, displayResolutionDependentFbo.get(HighPassNode
         // .HIGH_PASS_FBO_URI));
         renderGraph.connectFbo(highPassNode, 1, halfScaleBlurredBloomNode, 1);
         renderGraph.addNode(halfScaleBlurredBloomNode);
 
         FboConfig quarterScaleBloomConfig = new FboConfig(BloomBlurNode.QUARTER_SCALE_FBO_URI, QUARTER_SCALE,
-            FBO.Type.DEFAULT);
+                FBO.Type.DEFAULT);
         FBO quarterScaleBloomFbo = displayResolutionDependentFbo.request(quarterScaleBloomConfig);
 
         BloomBlurNode quarterScaleBlurredBloomNode = new BloomBlurNode("quarterScaleBlurredBloomNode",
-            providingModule, context, quarterScaleBloomFbo);
+                providingModule, context, quarterScaleBloomFbo);
         renderGraph.connectFbo(halfScaleBlurredBloomNode, 1, quarterScaleBlurredBloomNode, 1);
         renderGraph.addNode(quarterScaleBlurredBloomNode);
 
         FboConfig one8thScaleBloomConfig = new FboConfig(BloomBlurNode.ONE_8TH_SCALE_FBO_URI, ONE_8TH_SCALE,
-            FBO.Type.DEFAULT);
+                FBO.Type.DEFAULT);
         FBO one8thScaleBloomFbo = displayResolutionDependentFbo.request(one8thScaleBloomConfig);
 
         BloomBlurNode one8thScaleBlurredBloomNode = new BloomBlurNode("one8thScaleBlurredBloomNode", providingModule,
-            context, one8thScaleBloomFbo);
+                context, one8thScaleBloomFbo);
         renderGraph.connectFbo(quarterScaleBlurredBloomNode, 1, one8thScaleBlurredBloomNode, 1);
         renderGraph.addNode(one8thScaleBlurredBloomNode);
 

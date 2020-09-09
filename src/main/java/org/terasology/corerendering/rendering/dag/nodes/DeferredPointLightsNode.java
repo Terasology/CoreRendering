@@ -1,57 +1,44 @@
-/*
- * Copyright 2020 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
 import org.terasology.corerendering.rendering.CoreRenderingModule;
-import org.terasology.engine.module.rendering.RenderingModuleRegistry;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.module.rendering.RenderingModuleRegistry;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.math.JomlUtil;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.DisableDepthTest;
+import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
+import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
+import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
+import org.terasology.engine.rendering.dag.stateChanges.SetFboWriteMask;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.logic.LightComponent;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.world.WorldProvider;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.assets.shader.ShaderProgramFeature;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.DisableDepthTest;
-import org.terasology.rendering.dag.stateChanges.EnableBlending;
-import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.SetBlendFunction;
-import org.terasology.rendering.dag.stateChanges.SetFacesToCull;
-import org.terasology.rendering.dag.stateChanges.SetFboWriteMask;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.logic.LightComponent;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.world.WorldRenderer;
-import org.terasology.world.WorldProvider;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
 import static org.lwjgl.opengl.GL11.GL_ONE;
@@ -60,33 +47,28 @@ import static org.lwjgl.opengl.GL11.glCallList;
 import static org.lwjgl.opengl.GL11.glEndList;
 import static org.lwjgl.opengl.GL11.glGenLists;
 import static org.lwjgl.opengl.GL11.glNewList;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
 
 /**
- * Instances of this class are integral to the deferred rendering process.
- * They render point lights as spheres, into the light accumulation buffer
- * (the spheres have a radius proportional to each light's attenuation radius).
- * Data from the light accumulation buffer is eventually combined with the
- * content of other buffers to correctly light up the scene.
+ * Instances of this class are integral to the deferred rendering process. They render point lights as spheres, into the
+ * light accumulation buffer (the spheres have a radius proportional to each light's attenuation radius). Data from the
+ * light accumulation buffer is eventually combined with the content of other buffers to correctly light up the scene.
  */
 public class DeferredPointLightsNode extends AbstractNode {
     private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("engine:prog.lightGeometryPass");
     private static int lightSphereDisplayList = -1;
 
-    private EntityManager entityManager;
-    private RenderingConfig renderingConfig;
-    private WorldProvider worldProvider;
-
+    private final EntityManager entityManager;
+    private final RenderingConfig renderingConfig;
+    private final WorldProvider worldProvider;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Vector3f activeCameraToLightSpace = new Vector3f();
     private Material lightGeometryMaterial;
-
     private SubmersibleCamera activeCamera;
     private Camera lightCamera;
-
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f cameraPosition;
-    @SuppressWarnings("FieldCanBeLocal")
-    private Vector3f activeCameraToLightSpace = new Vector3f();
 
     public DeferredPointLightsNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -103,7 +85,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         WorldRenderer worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
         lightCamera = ((CoreRenderingModule) context.get(RenderingModuleRegistry.class)
-                        .getModuleRenderingByClass(CoreRenderingModule.class)).getLightCamera();
+                .getModuleRenderingByClass(CoreRenderingModule.class)).getLightCamera();
 
         addDesiredStateChange(new LookThrough(activeCamera));
 
@@ -118,7 +100,7 @@ public class DeferredPointLightsNode extends AbstractNode {
 
         addDesiredStateChange(new DisableDepthTest());
 
-        BufferPairConnection bufferPairConnection =  getInputBufferPairConnection(1);
+        BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
         FBO lastUpdatedGBuffer = bufferPairConnection.getBufferPair().getPrimaryFbo();
         // TODO: make sure to read from the lastUpdatedGBuffer and write to the staleGBuffer.
         addDesiredStateChange(new BindFbo(lastUpdatedGBuffer));
@@ -128,8 +110,10 @@ public class DeferredPointLightsNode extends AbstractNode {
         initLightSphereDisplayList();
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, NormalsTexture,
+                displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
     }
 
     private void initLightSphereDisplayList() {
@@ -148,7 +132,8 @@ public class DeferredPointLightsNode extends AbstractNode {
         // above: rendering distance must be higher than distance from the camera or the light is ignored
 
         // No matter what, we ignore lights that are not in the camera frustrum
-        lightIsRenderable &= activeCamera.getViewFrustum().intersects(JomlUtil.from(lightPositionRelativeToCamera), lightComponent.lightAttenuationRange);
+        lightIsRenderable &= activeCamera.getViewFrustum().intersects(JomlUtil.from(lightPositionRelativeToCamera),
+                lightComponent.lightAttenuationRange);
         // TODO: (above) what about lights just off-frame? They might light up in-frame surfaces.
 
         return lightIsRenderable;
@@ -156,10 +141,10 @@ public class DeferredPointLightsNode extends AbstractNode {
 
     /**
      * Iterates over all available point lights and renders them as spheres into the light accumulation buffer.
-     *
-     * Furthermore, lights that are further from the camera than their set rendering distance are ignored,
-     * while lights with a rendering distance set to 0.0 are always considered. However, only lights within
-     * the camera's field of view (frustrum) are rendered.
+     * <p>
+     * Furthermore, lights that are further from the camera than their set rendering distance are ignored, while lights
+     * with a rendering distance set to 0.0 are always considered. However, only lights within the camera's field of
+     * view (frustrum) are rendered.
      */
     @Override
     public void process() {
@@ -172,7 +157,8 @@ public class DeferredPointLightsNode extends AbstractNode {
         cameraPosition = activeCamera.getPosition();
 
         // TODO: This is necessary right now because activateFeature removes all material parameters.
-        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters through it.
+        // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters
+        //  through it.
         lightGeometryMaterial.setInt("texSceneOpaqueDepth", 0, true);
         lightGeometryMaterial.setInt("texSceneOpaqueNormals", 1, true);
 
@@ -188,7 +174,8 @@ public class DeferredPointLightsNode extends AbstractNode {
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
 
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
-            lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
+            lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x,
+                    activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
         }
 
         // Actual Node Processing
@@ -201,30 +188,34 @@ public class DeferredPointLightsNode extends AbstractNode {
                 final Vector3f lightPositionInTeraCoords = JomlUtil.from(locationComponent.getWorldPosition());
 
                 Vector3f lightPositionRelativeToCamera = new Vector3f();
-                lightPositionInTeraCoords.sub(activeCamera.getPosition(),lightPositionRelativeToCamera);
+                lightPositionInTeraCoords.sub(activeCamera.getPosition(), lightPositionRelativeToCamera);
 
                 if (lightIsRenderable(lightComponent, lightPositionRelativeToCamera)) {
                     lightGeometryMaterial.setCamera(activeCamera);
 
                     // setting shader parameters regarding the light's properties
                     lightGeometryMaterial.setFloat3("lightColorDiffuse", lightComponent.lightColorDiffuse.x,
-                        lightComponent.lightColorDiffuse.y, lightComponent.lightColorDiffuse.z, true);
+                            lightComponent.lightColorDiffuse.y, lightComponent.lightColorDiffuse.z, true);
                     lightGeometryMaterial.setFloat3("lightColorAmbient", lightComponent.lightColorAmbient.x,
-                        lightComponent.lightColorAmbient.y, lightComponent.lightColorAmbient.z, true);
+                            lightComponent.lightColorAmbient.y, lightComponent.lightColorAmbient.z, true);
                     lightGeometryMaterial.setFloat3("lightProperties", lightComponent.lightAmbientIntensity,
-                        lightComponent.lightDiffuseIntensity, lightComponent.lightSpecularPower, true);
+                            lightComponent.lightDiffuseIntensity, lightComponent.lightSpecularPower, true);
                     lightGeometryMaterial.setFloat4("lightExtendedProperties", lightComponent.lightAttenuationRange,
-                        lightComponent.lightAttenuationFalloff, 0.0f, 0.0f, true);
+                            lightComponent.lightAttenuationFalloff, 0.0f, 0.0f, true);
 
                     // setting shader parameters for the light position in camera space
-                    Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(activeCamera.getViewMatrix());
+                    Vector3f lightPositionInViewSpace =
+                            new Vector3f(lightPositionRelativeToCamera).mulPosition(activeCamera.getViewMatrix());
 
-                    lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
+                    lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x,
+                            lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
 
                     // set the size and location of the sphere to be rendered via shader parameters
                     Matrix4f modelMatrix = new Matrix4f();
-                    modelMatrix.scale(lightComponent.lightAttenuationRange); // scales the modelview matrix, effectively scales the light sphere
-                    modelMatrix.setTranslation(lightPositionRelativeToCamera); // effectively moves the light sphere in the right position relative to camera
+                    modelMatrix.scale(lightComponent.lightAttenuationRange); // scales the modelview matrix,
+                    // effectively scales the light sphere
+                    modelMatrix.setTranslation(lightPositionRelativeToCamera); // effectively moves the light sphere
+                    // in the right position relative to camera
                     lightGeometryMaterial.setMatrix4("modelMatrix", modelMatrix, true);
 
                     glCallList(lightSphereDisplayList); // draws the light sphere

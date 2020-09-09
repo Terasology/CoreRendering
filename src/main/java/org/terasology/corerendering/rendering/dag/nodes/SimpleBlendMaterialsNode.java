@@ -1,55 +1,42 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.context.Context;
-import org.terasology.engine.ComponentSystemManager;
-import org.terasology.entitySystem.systems.RenderSystem;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.ComponentSystemManager;
+import org.terasology.engine.entitySystem.systems.RenderSystem;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
+import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
+import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
-import org.terasology.rendering.dag.stateChanges.EnableBlending;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.SetBlendFunction;
-import org.terasology.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 
 /**
  * An instance of this class renders and blends semi-transparent objects into the content of the existing g-buffer.
- *
- * Notice that this is handled in the process() method by calling the renderAlphaBlend() method of registered
- * instances implementing the RenderSystem interface.
- *
- * Theoretically the same results could be achieved by rendering all meshes in one go, keeping blending
- * always enabled and relying on the alpha channel of the textures associated with a given mesh. In practice
- * blending is an expensive operation and it wouldn't be good performance-wise to keep it always enabled.
- *
- * Also, a number of previous nodes rely on unambiguous meaning for the depth values in the gbuffers,
- * but this node temporarily disable writing to the depth buffer - what value should be written to it,
- * the distance to the semi-transparent surface or what's already stored in the depth buffer? As such
- * semi-transparent objects are handled here, after nodes relying on the depth buffer have done their job.
+ * <p>
+ * Notice that this is handled in the process() method by calling the renderAlphaBlend() method of registered instances
+ * implementing the RenderSystem interface.
+ * <p>
+ * Theoretically the same results could be achieved by rendering all meshes in one go, keeping blending always enabled
+ * and relying on the alpha channel of the textures associated with a given mesh. In practice blending is an expensive
+ * operation and it wouldn't be good performance-wise to keep it always enabled.
+ * <p>
+ * Also, a number of previous nodes rely on unambiguous meaning for the depth values in the gbuffers, but this node
+ * temporarily disable writing to the depth buffer - what value should be written to it, the distance to the
+ * semi-transparent surface or what's already stored in the depth buffer? As such semi-transparent objects are handled
+ * here, after nodes relying on the depth buffer have done their job.
  */
 public class SimpleBlendMaterialsNode extends AbstractNode {
-    private ComponentSystemManager componentSystemManager;
+    private final ComponentSystemManager componentSystemManager;
 
     public SimpleBlendMaterialsNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -92,10 +79,10 @@ public class SimpleBlendMaterialsNode extends AbstractNode {
 
     /**
      * Iterates over registered RenderSystem instances and call their renderAlphaBlend() method.
-     *
-     * This leaves great freedom to RenderSystem implementations, but also the responsibility to
-     * leave the OpenGL state in the way they found it - otherwise the next system or the next
-     * render node might not be able to function properly.
+     * <p>
+     * This leaves great freedom to RenderSystem implementations, but also the responsibility to leave the OpenGL state
+     * in the way they found it - otherwise the next system or the next render node might not be able to function
+     * properly.
      */
     @Override
     public void process() {

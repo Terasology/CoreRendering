@@ -1,114 +1,88 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.StateChange;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.dependencyConnections.DependencyConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.dependencyConnections.DependencyConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.world.WorldRenderer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.LightAccumulationTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 
 /**
- * An instance of this class takes advantage of the content of a number of previously filled buffers
- * to add screen-space ambient occlusion (SSAO), outlines, reflections [1], atmospheric haze and volumetric fog
- *
- * As this node does not quite use 3D geometry and only relies on 2D sources and a 2D output buffer, it
- * could be argued that, despite its name, it represents the first step of the PostProcessing portion
- * of the rendering engine. This line of thinking draws a parallel from the film industry where
- * Post-Processing (or Post-Production) is everything that happens -after- the footage for the film
- * has been shot on stage or on location.
- *
+ * An instance of this class takes advantage of the content of a number of previously filled buffers to add screen-space
+ * ambient occlusion (SSAO), outlines, reflections [1], atmospheric haze and volumetric fog
+ * <p>
+ * As this node does not quite use 3D geometry and only relies on 2D sources and a 2D output buffer, it could be argued
+ * that, despite its name, it represents the first step of the PostProcessing portion of the rendering engine. This line
+ * of thinking draws a parallel from the film industry where Post-Processing (or Post-Production) is everything that
+ * happens -after- the footage for the film has been shot on stage or on location.
+ * <p>
  * [1] And refractions? To be verified.
  */
 public class PrePostCompositeNode extends AbstractNode implements PropertyChangeListener {
     private static final ResourceUrn PRE_POST_MATERIAL_URN = new ResourceUrn("engine:prog.prePostComposite");
-
+    private final WorldRenderer worldRenderer;
+    private final SubmersibleCamera activeCamera;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.001f, max = 0.005f)
+    private final float outlineDepthThreshold = 0.001f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float outlineThickness = 0.65f;
+    // TODO : Consider a more descriptive name for this variable.
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float hazeLength = 1.0f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float hazeStrength = 0.25f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 1.0f)
+    private final float hazeThreshold = 0.8f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 0.1f)
+    private final float volumetricFogGlobalDensity = 0.005f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = -0.1f, max = 0.1f)
+    private final float volumetricFogHeightFalloff = -0.01f;
     private RenderingConfig renderingConfig;
-    private WorldRenderer worldRenderer;
-    private SubmersibleCamera activeCamera;
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
-
     private Material prePostMaterial;
-
     private int textureSlot = 0;
-
     private boolean localReflectionsAreEnabled;
-
     private boolean ssaoIsEnabled;
     private int texSsaoSlot = -1;
-
     private boolean outlineIsEnabled;
-
     private boolean hazeIsEnabled;
     private int texHazeSlot = -1;
-
     private boolean volumetricFogIsEnabled;
-
     private StateChange setReflectiveRefractiveNormalsInputTexture;
     private StateChange setSsaoInputTexture;
     private StateChange setEdgesInputTexture;
     private StateChange setHazeInputTexture;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.001f, max = 0.005f)
-    private float outlineDepthThreshold = 0.001f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float outlineThickness = 0.65f;
-
-    // TODO : Consider a more descriptive name for this variable.
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float hazeLength = 1.0f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float hazeStrength = 0.25f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 1.0f)
-    private float hazeThreshold = 0.8f;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.1f)
-    private float volumetricFogGlobalDensity = 0.005f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = -0.1f, max = 0.1f)
-    private float volumetricFogHeightFalloff = -0.01f;
 
     public PrePostCompositeNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -124,7 +98,8 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
         // Add new instance of swapped bufferPair as output
-        addOutputBufferPairConnection(1, bufferPairConnection.getSwappedCopy(DependencyConnection.Type.OUTPUT, this.getUri()));
+        addOutputBufferPairConnection(1, bufferPairConnection.getSwappedCopy(DependencyConnection.Type.OUTPUT,
+                this.getUri()));
 
         addDesiredStateChange(new EnableMaterial(PRE_POST_MATERIAL_URN));
         addDesiredStateChange(new BindFbo(bufferPairConnection.getBufferPair().getSecondaryFbo()));
@@ -147,25 +122,36 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaque"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueNormals"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractive"));
-        setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractiveNormals");
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), ColorTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractive"));
+        setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4),
+                NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN,
+                "texSceneReflectiveRefractiveNormals");
 
-        setEdgesInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texEdges");
+        setEdgesInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texEdges");
 
 
         if (localReflectionsAreEnabled) {
-            // setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData(4), NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneReflectiveRefractiveNormals");
+            // setReflectiveRefractiveNormalsInputTexture = new SetInputTextureFromFbo(textureSlot++, getInputFboData
+            // (4), NormalsTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN,
+            // "texSceneReflectiveRefractiveNormals");
             addDesiredStateChange(setReflectiveRefractiveNormalsInputTexture);
         }
         if (ssaoIsEnabled) {
             if (texSsaoSlot < 0) {
                 texSsaoSlot = textureSlot++;
             }
-            setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
+            setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture,
+                    displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
             addDesiredStateChange(setSsaoInputTexture);
         }
         if (outlineIsEnabled) {
@@ -175,14 +161,15 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
             if (texHazeSlot < 0) {
                 texHazeSlot = textureSlot++;
             }
-            setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
+            setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture,
+                    displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
             addDesiredStateChange(setHazeInputTexture);
         }
     }
 
     /**
-     * Called every frame, the shader program used by this method only composites per-pixel information from a number
-     * of buffers and renders it into a full-screen quad, which is the only piece of geometry processed.
+     * Called every frame, the shader program used by this method only composites per-pixel information from a number of
+     * buffers and renders it into a full-screen quad, which is the only piece of geometry processed.
      */
     @Override
     public void process() {
@@ -190,7 +177,8 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         // Shader Parameters
 
-        prePostMaterial.setFloat("viewingDistance", renderingConfig.getViewDistance().getChunkDistance().x() * 8.0f, true);
+        prePostMaterial.setFloat("viewingDistance", renderingConfig.getViewDistance().getChunkDistance().x() * 8.0f,
+                true);
         prePostMaterial.setFloat3("cameraParameters", activeCamera.getzNear(), activeCamera.getzFar(), 0.0f, true);
 
         if (localReflectionsAreEnabled) {
@@ -205,14 +193,16 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
         if (volumetricFogIsEnabled) {
             prePostMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
-            prePostMaterial.setFloat3("volumetricFogSettings", 1f, volumetricFogGlobalDensity, volumetricFogHeightFalloff, true);
+            prePostMaterial.setFloat3("volumetricFogSettings", 1f, volumetricFogGlobalDensity,
+                    volumetricFogHeightFalloff, true);
         }
 
         if (hazeIsEnabled) {
             prePostMaterial.setFloat4("skyInscatteringSettingsFrag", 0, hazeStrength, hazeLength, hazeThreshold, true);
         }
 
-        // TODO: We never set the "fogWorldPosition" uniform in prePostComposite_frag.glsl . Either use it, or remove it.
+        // TODO: We never set the "fogWorldPosition" uniform in prePostComposite_frag.glsl . Either use it, or remove
+        //  it.
 
         // Actual Node Processing
 
@@ -241,7 +231,8 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
                     if (texSsaoSlot < 0) {
                         texSsaoSlot = textureSlot++;
                     }
-                    setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
+                    setSsaoInputTexture = new SetInputTextureFromFbo(texSsaoSlot, getInputFboData(1), ColorTexture,
+                            displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSsao");
                     addDesiredStateChange(setSsaoInputTexture);
                 } else {
                     removeDesiredStateChange(setSsaoInputTexture);
@@ -264,7 +255,8 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
                     if (texHazeSlot < 0) {
                         texHazeSlot = textureSlot++;
                     }
-                    setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture, displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
+                    setHazeInputTexture = new SetInputTextureFromFbo(texHazeSlot, getInputFboData(3), ColorTexture,
+                            displayResolutionDependentFbo, PRE_POST_MATERIAL_URN, "texSceneSkyBand");
                     addDesiredStateChange(setHazeInputTexture);
                 } else {
                     removeDesiredStateChange(setHazeInputTexture);
