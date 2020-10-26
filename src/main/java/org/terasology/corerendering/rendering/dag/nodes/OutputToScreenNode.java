@@ -15,10 +15,10 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.lwjgl.opengl.Display;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
+import org.terasology.engine.subsystem.DisplayDevice;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.dag.ConditionDependentNode;
@@ -38,6 +38,7 @@ public class OutputToScreenNode extends ConditionDependentNode {
     private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");
 
     private DisplayResolutionDependentFbo displayResolutionDependentFBOs;
+    private DisplayDevice displayDevice;
 
     private FBO lastUpdatedGBuffer;
     private FBO staleGBuffer;
@@ -48,7 +49,7 @@ public class OutputToScreenNode extends ConditionDependentNode {
         super(nodeUri, providingModule, context);
 
         displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
-
+        displayDevice = context.get(DisplayDevice.class);
         requiresCondition(() -> worldRenderer.getCurrentRenderStage() == MONO || worldRenderer.getCurrentRenderStage() == LEFT_EYE);
 
     }
@@ -69,7 +70,7 @@ public class OutputToScreenNode extends ConditionDependentNode {
         // The way things are set-up right now, we can have FBOs that are not the same size as the display (if scale != 100%).
         // However, when drawing the final image to the screen, we always want the viewport to match the size of display,
         // and not that of some FBO. Hence, we are manually setting the viewport via glViewport over here.
-        glViewport(0, 0, Display.getWidth(), Display.getHeight());
+        glViewport(0, 0, displayDevice.getWidth(), displayDevice.getHeight());
         renderFullscreenQuad();
         PerformanceMonitor.endActivity();
     }

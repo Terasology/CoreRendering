@@ -15,9 +15,9 @@
  */
 package org.terasology.corerendering.rendering;
 
-import org.lwjgl.opengl.Display;
 import org.terasology.corerendering.rendering.dag.nodes.*;
 import org.terasology.context.Context;
+import org.terasology.engine.subsystem.DisplayDevice;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.dag.Node;
 import org.terasology.rendering.dag.RenderGraph;
@@ -52,6 +52,7 @@ public class CoreRenderingModule extends ModuleRendering {
     private ImmutableFbo immutableFbo;
 
     private ShadowMapNode shadowMapNode;
+    private DisplayDevice displayDevice;
 
     private static int initializationPriority = 1;
 
@@ -76,6 +77,7 @@ public class CoreRenderingModule extends ModuleRendering {
         context.put(ShadowMapResolutionDependentFbo.class, shadowMapResolutionDependentFbo);
 
         displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
+        displayDevice = context.get(DisplayDevice.class);
 
         addGBufferClearingNodes(renderGraph);
 
@@ -106,7 +108,7 @@ public class CoreRenderingModule extends ModuleRendering {
         // SwappableFBO gBufferPair = displayResolutionDependentFbo.getGBufferPair();
         // TODO leave this here?
         FBO.Dimensions fullScale = new FBO.Dimensions();
-        fullScale.setDimensions(Display.getWidth(), Display.getHeight());
+        fullScale.setDimensions(displayDevice.getWidth(), displayDevice.getHeight());
 
         SwappableFBO legacyGBuffers = displayResolutionDependentFbo.getGBufferPair();
 
