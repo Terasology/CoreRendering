@@ -26,7 +26,6 @@ import org.terasology.math.TeraMath;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.dag.AbstractNode;
 import org.terasology.rendering.opengl.PBO;
 import org.terasology.rendering.opengl.ScreenGrabber;
@@ -48,13 +47,10 @@ public class UpdateExposureNode extends AbstractNode {
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
-    private float hdrExposureDefault = 2.5f;
+    private float hdrExposureDefault = 5f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
     private float hdrMaxExposure = 8.0f;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 10.0f)
-    private float hdrMaxExposureNight = 8.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
     private float hdrMinExposure = 1.0f;
@@ -65,7 +61,6 @@ public class UpdateExposureNode extends AbstractNode {
     @Range(min = 0.0f, max = 0.5f)
     private float hdrExposureAdjustmentSpeed = 0.05f;
 
-    private BackdropProvider backdropProvider;
     private ScreenGrabber screenGrabber;
 
     private RenderingConfig renderingConfig;
@@ -76,7 +71,6 @@ public class UpdateExposureNode extends AbstractNode {
     public UpdateExposureNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
 
-        backdropProvider = context.get(BackdropProvider.class);
         screenGrabber = context.get(ScreenGrabber.class);
 
         renderingConfig = context.get(Config.class).getRendering();
@@ -124,10 +118,6 @@ public class UpdateExposureNode extends AbstractNode {
 
             float maxExposure = hdrMaxExposure;
 
-            if (backdropProvider.getDaylight() == 0.0) {
-                maxExposure = hdrMaxExposureNight;
-            }
-
             if (targetExposure > maxExposure) {
                 targetExposure = maxExposure;
             } else if (targetExposure < hdrMinExposure) {
@@ -138,11 +128,7 @@ public class UpdateExposureNode extends AbstractNode {
 
             PerformanceMonitor.endActivity();
         } else {
-            if (backdropProvider.getDaylight() == 0.0) {
-                screenGrabber.setExposure(hdrMaxExposureNight);
-            } else {
-                screenGrabber.setExposure(hdrExposureDefault);
-            }
+            screenGrabber.setExposure(hdrExposureDefault);
         }
     }
 }
