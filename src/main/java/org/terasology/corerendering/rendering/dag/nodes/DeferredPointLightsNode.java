@@ -28,7 +28,6 @@ import org.terasology.engine.module.rendering.RenderingModuleRegistry;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.rendering.assets.material.Material;
@@ -148,7 +147,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         // above: rendering distance must be higher than distance from the camera or the light is ignored
 
         // No matter what, we ignore lights that are not in the camera frustrum
-        lightIsRenderable &= activeCamera.getViewFrustum().intersects(JomlUtil.from(lightPositionRelativeToCamera), lightComponent.lightAttenuationRange);
+        lightIsRenderable &= activeCamera.getViewFrustum().intersects(lightPositionRelativeToCamera, lightComponent.lightAttenuationRange);
         // TODO: (above) what about lights just off-frame? They might light up in-frame surfaces.
 
         return lightIsRenderable;
@@ -198,7 +197,7 @@ public class DeferredPointLightsNode extends AbstractNode {
 
             if (lightComponent.lightType == LightComponent.LightType.POINT) {
                 LocationComponent locationComponent = entity.getComponent(LocationComponent.class);
-                final Vector3f lightPositionInTeraCoords = JomlUtil.from(locationComponent.getWorldPosition());
+                final Vector3f lightPositionInTeraCoords = locationComponent.getWorldPosition(new Vector3f());
 
                 Vector3f lightPositionRelativeToCamera = new Vector3f();
                 lightPositionInTeraCoords.sub(activeCamera.getPosition(),lightPositionRelativeToCamera);
