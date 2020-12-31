@@ -15,7 +15,6 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.joml.Matrix4f;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
@@ -52,9 +51,6 @@ import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.F
 import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-
-//import static org.terasology.rendering.dag.nodes.LateBlurNode.SECOND_LATE_BLUR_FBO_URI;
-//import static org.terasology.rendering.dag.nodes.ToneMappingNode.TONE_MAPPING_FBO_URI;
 
 /**
  * An instance of this class adds depth of field blur, motion blur and film grain to the rendering
