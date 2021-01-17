@@ -16,12 +16,12 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.config.RenderingDebugConfig;
 import org.terasology.context.Context;
-import org.terasology.math.JomlUtil;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
@@ -196,7 +196,7 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = JomlUtil.from(chunk.getPosition().toVector3f());
+                final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(ALPHA_REJECT, chunkPosition, cameraPosition);
