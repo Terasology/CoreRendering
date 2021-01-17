@@ -15,6 +15,7 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
@@ -22,7 +23,6 @@ import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
@@ -193,17 +193,18 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         ssaoSamples = BufferUtils.createFloatBuffer(SSAO_KERNEL_ELEMENTS * 3);
 
         for (int i = 0; i < SSAO_KERNEL_ELEMENTS; ++i) {
-            Vector3f vec = new Vector3f();
-            vec.x = randomGenerator.nextFloat(-1.0f, 1.0f);
-            vec.y = randomGenerator.nextFloat(-1.0f, 1.0f);
-            vec.z = randomGenerator.nextFloat();
+            Vector3f vec = new Vector3f(
+                    randomGenerator.nextFloat(-1.0f, 1.0f),
+                    randomGenerator.nextFloat(-1.0f, 1.0f),
+                    randomGenerator.nextFloat()
+            );
 
             vec.normalize();
-            vec.scale(randomGenerator.nextFloat(0.0f, 1.0f));
+            vec.mul(randomGenerator.nextFloat(0.0f, 1.0f));
             float scale = i / (float) SSAO_KERNEL_ELEMENTS;
             scale = TeraMath.lerp(0.25f, 1.0f, scale * scale);
 
-            vec.scale(scale);
+            vec.mul(scale);
 
             ssaoSamples.put(vec.x);
             ssaoSamples.put(vec.y);
@@ -219,7 +220,10 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
             ByteBuffer noiseValues = BufferUtils.createByteBuffer(SSAO_NOISE_SIZE * SSAO_NOISE_SIZE * 4);
 
             for (int i = 0; i < SSAO_NOISE_SIZE * SSAO_NOISE_SIZE; ++i) {
-                Vector3f noiseVector = new Vector3f(randomGenerator.nextFloat(-1.0f, 1.0f), randomGenerator.nextFloat(-1.0f, 1.0f), 0.0f);
+                Vector3f noiseVector = new Vector3f(
+                        randomGenerator.nextFloat(-1.0f, 1.0f),
+                        randomGenerator.nextFloat(-1.0f, 1.0f),
+                        0.0f);
                 noiseVector.normalize();
 
                 noiseValues.put((byte) ((noiseVector.x * 0.5 + 0.5) * 255.0f));
