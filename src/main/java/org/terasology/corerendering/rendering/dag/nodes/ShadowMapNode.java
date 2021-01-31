@@ -16,12 +16,12 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
 import org.terasology.context.Context;
 import org.terasology.engine.SimpleUri;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
@@ -171,7 +171,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
                 if (chunk.hasMesh()) {
                     final ChunkMesh chunkMesh = chunk.getMesh();
-                    final Vector3f chunkPosition = new Vector3f(JomlUtil.from(chunk.getPosition()));
+                    final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
 
                     numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
 
