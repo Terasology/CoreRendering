@@ -46,6 +46,7 @@ import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.WorldRenderer;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.LodChunk;
 import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
@@ -207,7 +208,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
-                    renderChunkBoundingBox(chunk, chunkPosition, cameraPosition);
+                    new AABBRenderer(chunk.getAABB()).render();
                 }
 
             } else {
@@ -219,21 +220,6 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
         worldRenderer.increaseNotReadyChunkCount(numberOfChunksThatAreNotReadyYet);
 
         PerformanceMonitor.endActivity();
-    }
-
-    private void renderChunkBoundingBox(RenderableChunk chunk, Vector3f chunkPosition, Vector3fc cameraPosition) {
-        GL11.glPushMatrix();
-
-        // chunkPositionRelativeToCamera = chunkCoordinates * chunkDimensions - cameraCoordinate
-        final Vector3f chunkPositionRelativeToCamera =
-                new Vector3f(chunkPosition.x * ChunkConstants.SIZE_X - cameraPosition.x(),
-                        chunkPosition.y * ChunkConstants.SIZE_Y - cameraPosition.y(),
-                        chunkPosition.z * ChunkConstants.SIZE_Z - cameraPosition.z());
-        GL11.glTranslatef(chunkPositionRelativeToCamera.x, chunkPositionRelativeToCamera.y, chunkPositionRelativeToCamera.z);
-
-        new AABBRenderer(chunk.getAABB()).renderLocally(1f);
-
-        GL11.glPopMatrix(); // Resets the matrix stack after the rendering of a chunk.
     }
 
     @Override
