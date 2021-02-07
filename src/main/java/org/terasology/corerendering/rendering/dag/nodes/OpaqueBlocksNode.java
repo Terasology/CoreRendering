@@ -1,23 +1,9 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.joml.Vector3i;
 import org.lwjgl.opengl.GL11;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
@@ -45,7 +31,7 @@ import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.WorldRenderer;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
@@ -201,7 +187,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
+                final Vector3f chunkPosition = new Vector3f(chunk.getPosition());
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
@@ -226,9 +212,9 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         // chunkPositionRelativeToCamera = chunkCoordinates * chunkDimensions - cameraCoordinate
         final Vector3f chunkPositionRelativeToCamera =
-                new Vector3f(chunkPosition.x * ChunkConstants.SIZE_X - cameraPosition.x(),
-                        chunkPosition.y * ChunkConstants.SIZE_Y - cameraPosition.y(),
-                        chunkPosition.z * ChunkConstants.SIZE_Z - cameraPosition.z());
+                new Vector3f(chunkPosition.x * Chunks.SIZE_X - cameraPosition.x(),
+                        chunkPosition.y * Chunks.SIZE_Y - cameraPosition.y(),
+                        chunkPosition.z * Chunks.SIZE_Z - cameraPosition.z());
         GL11.glTranslatef(chunkPositionRelativeToCamera.x, chunkPositionRelativeToCamera.y, chunkPositionRelativeToCamera.z);
 
         new AABBRenderer(chunk.getAABB()).renderLocally(1f);
