@@ -62,6 +62,7 @@ import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
  * of the scene.
  */
 public class FinalPostProcessingNode extends AbstractNode implements PropertyChangeListener {
+    public static final SimpleUri POST_FBO_URI = new SimpleUri("engine:fbo.finalBuffer");
     private static final ResourceUrn POST_MATERIAL_URN = new ResourceUrn("engine:prog.post");
 
     private WorldRenderer worldRenderer;
@@ -114,7 +115,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         addDesiredStateChange(new EnableMaterial(POST_MATERIAL_URN));
 
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
-        FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(new SimpleUri("engine:fbo.finalBuffer"), FULL_SCALE, FBO.Type.DEFAULT));
+        FBO finalBuffer = displayResolutionDependentFbo.request(new FboConfig(POST_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT));
         addOutputFboConnection(1, finalBuffer);
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
