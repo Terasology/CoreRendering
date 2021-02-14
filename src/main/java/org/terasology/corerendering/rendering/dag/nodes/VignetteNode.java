@@ -49,7 +49,6 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
     private SubmersibleCamera activeCamera;
 
     private Material vignetteMaterial;
-
     private boolean vignetteIsEnabled;
 
     // TODO: figure where from to set this variable
@@ -59,18 +58,21 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
 
     public VignetteNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
-
         worldProvider = context.get(WorldProvider.class);
-
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
+    }
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
+    @Override
+    public void setDependencies(Context context) {
+        addDesiredStateChange(new EnableMaterial(VIGNETTE_MATERIAL_URN));
+        setVignetteInputTexture = new SetInputTexture2D(1, "engine:vignette", VIGNETTE_MATERIAL_URN,
+                "texVignette");
 
-        FBO finalBuffer = displayResolutionDependentFBOs.get(FINAL_BUFFER);
+        DisplayResolutionDependentFbo displayResolution = context.get(DisplayResolutionDependentFbo.class);
+        FBO finalBuffer = displayResolution.get(FINAL_BUFFER);
         addDesiredStateChange(new BindFbo(finalBuffer));
         addDesiredStateChange(new SetViewportToSizeOf(finalBuffer));
-
         addDesiredStateChange(new EnableMaterial(VIGNETTE_MATERIAL_URN));
 
         vignetteMaterial = getMaterial(VIGNETTE_MATERIAL_URN);
@@ -81,7 +83,7 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
 
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, POST_FBO_URI, ColorTexture,
-                displayResolutionDependentFBOs, VIGNETTE_MATERIAL_URN, "texScene"));
+                displayResolution, VIGNETTE_MATERIAL_URN, "texScene"));
 
         setVignetteInputTexture = new SetInputTexture2D(textureSlot++, "engine:vignette", VIGNETTE_MATERIAL_URN,
                 "texVignette");
@@ -89,13 +91,7 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
         if (vignetteIsEnabled) {
             addDesiredStateChange(setVignetteInputTexture);
         }
-    }
 
-    @Override
-    public void setDependencies(Context context) {
-        addDesiredStateChange(new EnableMaterial(VIGNETTE_MATERIAL_URN));
-        setVignetteInputTexture = new SetInputTexture2D(1, "engine:vignette", VIGNETTE_MATERIAL_URN,
-                "texVignette");
     }
 
     /**
