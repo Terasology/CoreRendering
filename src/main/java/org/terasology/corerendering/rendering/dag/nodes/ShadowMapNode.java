@@ -38,7 +38,7 @@ import org.terasology.engine.rendering.world.RenderableWorld;
 import org.terasology.engine.world.chunks.RenderableChunk;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.math.TeraMath;
+
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -96,6 +96,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
     @Override
     public void setDependencies(Context context) {
+        shadowMapMaterial = getMaterial(SHADOW_MAP_MATERIAL_URN);
+
         FBO shadowMapFbo = getInputFboData(1);
         addOutputFboConnection(1, shadowMapFbo);
         addDesiredStateChange(new BindFbo(shadowMapFbo));
@@ -157,8 +159,9 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
             PerformanceMonitor.startActivity("rendering/" + getUri());
 
             // Actual Node Processing
-
             positionShadowMapCamera(); // TODO: extract these calculation into a separate node.
+            shadowMapCamera.updateMatrices();
+            shadowMapMaterial.setMatrix4("lightSpaceMatrix", shadowMapCamera.getViewProjectionMatrix(), true);
 
             int numberOfRenderedTriangles = 0;
             int numberOfChunksThatAreNotReadyYet = 0;
@@ -195,10 +198,10 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
         // The shadow projected onto the ground must move in in light-space texel-steps, to avoid causing flickering.
         // That's why we first convert it to the previous frame's light-space coordinates and then back to world-space.
-        shadowMapCamera.getViewProjectionMatrix().transformPosition(mainLightPosition); // to light-space
-        mainLightPosition.set(TeraMath.fastFloor(mainLightPosition.x / texelSize) * texelSize, 0.0f,
-                              TeraMath.fastFloor(mainLightPosition.z / texelSize) * texelSize);
-        shadowMapCamera.getInverseViewProjectionMatrix().transformPosition(mainLightPosition); // back to world-space
+//        shadowMapCamera.getViewProjectionMatrix().transformPosition(mainLightPosition); // to light-space
+//        mainLightPosition.set(TeraMath.fastFloor(mainLightPosition.x / texelSize) * texelSize, 0.0f,
+//                              TeraMath.fastFloor(mainLightPosition.z / texelSize) * texelSize);
+//        shadowMapCamera.getInverseViewProjectionMatrix().transformPosition(mainLightPosition); // back to world-space
 
         // This is what causes the shadow map to change infrequently, to prevent flickering.
         // Notice that this is different from what is done above, which is about spatial steps
@@ -211,6 +214,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
         mainLightPosition.add(offsetFromPlayer);
         shadowMapCamera.getPosition().set(mainLightPosition);
 
+
         // Finally, we adjust the shadow map camera to look toward the player
         Vector3f fromLightToPlayerDirection = new Vector3f(quantizedMainLightDirection);
         fromLightToPlayerDirection.mul(-1.0f);
@@ -220,8 +224,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     }
 
     private Vector3f getQuantizedMainLightDirection(float stepSize) {
-        float mainLightAngle = (float) Math.floor((double) backdropProvider.getSunPositionAngle() * stepSize) / stepSize + 0.0001f;
-        Vector3f mainLightDirection = new Vector3f(0.0f, (float) Math.cos(mainLightAngle), (float) Math.sin(mainLightAngle));
+//        float mainLightAngle = (float) Math.floor((double) backdropProvider.getSunPositionAngle() * stepSize) / stepSize + 0.0001f;
+        Vector3f mainLightDirection = new Vector3f(0.0f, (float) Math.cos(backdropProvider.getSunPositionAngle()), (float) Math.sin(backdropProvider.getSunPositionAngle()));
 
         // When the sun goes under the horizon we flip the vector, to provide the moon direction, and viceversa.
         if (mainLightDirection.y < 0.0f) {
