@@ -15,8 +15,8 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.config.Config;
 import org.terasology.config.RenderingConfig;
@@ -25,6 +25,7 @@ import org.terasology.engine.SimpleUri;
 import org.terasology.math.TeraMath;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
+import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.backdrop.BackdropProvider;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.OrthographicCamera;
@@ -38,6 +39,7 @@ import org.terasology.rendering.opengl.FBO;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.RenderableWorld;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
@@ -63,6 +65,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("engine:prog.shadowMap");
     private static final int SHADOW_FRUSTUM_BOUNDS = 500;
     private static final float STEP_SIZE = 50f;
+    private Material shadowMapMaterial;
 
     public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, -SHADOW_FRUSTUM_BOUNDS);
 
@@ -75,6 +78,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
     public ShadowMapNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
+        shadowMapMaterial = getMaterial(SHADOW_MAP_MATERIAL_URN);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);
@@ -162,18 +166,25 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
             int numberOfChunksThatAreNotReadyYet = 0;
 
             final Vector3f cameraPosition = shadowMapCamera.getPosition();
+            shadowMapMaterial.setMatrix4("projection", shadowMapCamera.getProjectionMatrix(), true);
 
-            shadowMapCamera.lookThrough();
-
+            Matrix4f modelViewMatrix = new Matrix4f();
+            Matrix4f model = new Matrix4f();
             // FIXME: storing chunksOpaqueShadow or a mechanism for requesting a chunk queue for nodes which calls renderChunks method?
             while (renderQueues.chunksOpaqueShadow.size() > 0) {
                 RenderableChunk chunk = renderQueues.chunksOpaqueShadow.poll();
 
                 if (chunk.hasMesh()) {
                     final ChunkMesh chunkMesh = chunk.getMesh();
-                    final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
+                    final Vector3f chunkPosition = new Vector3f(chunk.getPosition());
+                    model.setTranslation(
+                            chunkPosition.x() * Chunks.SIZE_X - cameraPosition.x(),
+                            chunkPosition.y() * Chunks.SIZE_Y - cameraPosition.y(),
+                            chunkPosition.z() * Chunks.SIZE_Z - cameraPosition.z());
+                    modelViewMatrix.set(shadowMapCamera.getViewMatrix()).mul(model);
 
-                    numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
+                    shadowMapMaterial.setMatrix4("modelView", modelViewMatrix, true);
+                    numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 
                 } else {
                     numberOfChunksThatAreNotReadyYet++;
