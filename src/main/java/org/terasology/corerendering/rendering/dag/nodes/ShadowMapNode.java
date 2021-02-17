@@ -36,7 +36,6 @@ import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.RenderableWorld;
 import org.terasology.world.chunks.Chunks;
@@ -173,18 +172,14 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
             // FIXME: storing chunksOpaqueShadow or a mechanism for requesting a chunk queue for nodes which calls renderChunks method?
             while (renderQueues.chunksOpaqueShadow.size() > 0) {
                 RenderableChunk chunk = renderQueues.chunksOpaqueShadow.poll();
-
                 if (chunk.hasMesh()) {
-                    final ChunkMesh chunkMesh = chunk.getMesh();
-                    final Vector3f chunkPosition = new Vector3f(chunk.getPosition());
                     model.setTranslation(
-                            chunkPosition.x() * Chunks.SIZE_X - cameraPosition.x(),
-                            chunkPosition.y() * Chunks.SIZE_Y - cameraPosition.y(),
-                            chunkPosition.z() * Chunks.SIZE_Z - cameraPosition.z());
+                            chunk.getPosition().x() * Chunks.SIZE_X - cameraPosition.x(),
+                            chunk.getPosition().y() * Chunks.SIZE_Y - cameraPosition.y(),
+                            chunk.getPosition().z() * Chunks.SIZE_Z - cameraPosition.z());
                     modelViewMatrix.set(shadowMapCamera.getViewMatrix()).mul(model);
-
                     shadowMapMaterial.setMatrix4("modelView", modelViewMatrix, true);
-                    numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
+                    numberOfRenderedTriangles += chunk.getMesh().render(OPAQUE);
 
                 } else {
                     numberOfChunksThatAreNotReadyYet++;
