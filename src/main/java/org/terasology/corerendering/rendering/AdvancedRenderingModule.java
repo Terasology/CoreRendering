@@ -24,22 +24,22 @@ import org.terasology.corerendering.rendering.dag.nodes.HazeNode;
 import org.terasology.corerendering.rendering.dag.nodes.HighPassNode;
 import org.terasology.corerendering.rendering.dag.nodes.LightShaftsNode;
 import org.terasology.corerendering.rendering.dag.nodes.ShadowMapNode;
-import org.terasology.context.Context;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.ModuleRendering;
-import org.terasology.rendering.dag.Node;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.opengl.fbms.ImmutableFbo;
-import org.terasology.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.ModuleRendering;
+import org.terasology.engine.rendering.dag.Node;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.opengl.fbms.ImmutableFbo;
+import org.terasology.engine.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
 
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_16TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_32TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.QUARTER_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_16TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_32TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.ONE_8TH_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.QUARTER_SCALE;
 
 public class AdvancedRenderingModule extends ModuleRendering {
     private static int initializationPriority = 2;

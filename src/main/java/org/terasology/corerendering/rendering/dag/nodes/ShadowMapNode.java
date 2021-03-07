@@ -18,32 +18,32 @@ package org.terasology.corerendering.rendering.dag.nodes;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
 import org.terasology.math.TeraMath;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.cameras.OrthographicCamera;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.RenderQueuesHelper;
-import org.terasology.rendering.world.RenderableWorld;
-import org.terasology.world.chunks.RenderableChunk;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.OrthographicCamera;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.primitives.ChunkMesh;
+import org.terasology.engine.rendering.world.RenderQueuesHelper;
+import org.terasology.engine.rendering.world.RenderableWorld;
+import org.terasology.engine.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
+import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
  * This node class generates a shadow map used by the lighting step to determine what's in sight of
