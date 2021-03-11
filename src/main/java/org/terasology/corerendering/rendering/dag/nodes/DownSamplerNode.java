@@ -16,21 +16,21 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.assets.ResourceUrn;
-import org.terasology.context.Context;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.BaseFboManager;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.BaseFboManager;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 
 /**
  * Instances of this class take the content of the color attachment of an input FBO
