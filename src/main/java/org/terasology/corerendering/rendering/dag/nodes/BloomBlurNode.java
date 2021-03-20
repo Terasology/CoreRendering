@@ -15,12 +15,12 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
 import org.terasology.naming.Name;
-import org.terasology.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FBO;
 
 /**
  * If bloom is enabled via the rendering settings, this method generates the blurred images needed

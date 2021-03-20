@@ -16,23 +16,23 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.assets.ResourceUrn;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.engine.subsystem.DisplayDevice;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.core.subsystem.DisplayDevice;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.StateChange;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 
 import static org.lwjgl.opengl.GL11.glViewport;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.world.WorldRenderer.RenderingStage.LEFT_EYE;
-import static org.terasology.rendering.world.WorldRenderer.RenderingStage.MONO;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage.LEFT_EYE;
+import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage.MONO;
 
 public class OutputToScreenNode extends ConditionDependentNode {
     private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");

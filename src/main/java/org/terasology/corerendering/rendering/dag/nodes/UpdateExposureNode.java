@@ -19,16 +19,16 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
 import org.terasology.math.TeraMath;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.opengl.PBO;
-import org.terasology.rendering.opengl.ScreenGrabber;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.opengl.PBO;
+import org.terasology.engine.rendering.opengl.ScreenGrabber;
 
 import java.nio.ByteBuffer;
 

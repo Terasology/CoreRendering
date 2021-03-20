@@ -16,21 +16,21 @@
 package org.terasology.corerendering.rendering;
 
 import org.terasology.corerendering.rendering.dag.nodes.*;
-import org.terasology.context.Context;
-import org.terasology.engine.subsystem.DisplayDevice;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.Node;
-import org.terasology.rendering.dag.RenderGraph;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.subsystem.DisplayDevice;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.Node;
+import org.terasology.engine.rendering.dag.RenderGraph;
 
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPair;
-import org.terasology.rendering.dag.ModuleRendering;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.SwappableFBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.opengl.fbms.ImmutableFbo;
-import org.terasology.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPair;
+import org.terasology.engine.rendering.dag.ModuleRendering;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.SwappableFBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.opengl.fbms.ImmutableFbo;
+import org.terasology.engine.rendering.opengl.fbms.ShadowMapResolutionDependentFbo;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -42,8 +42,8 @@ import static org.terasology.corerendering.rendering.dag.nodes.DownSamplerForExp
 import static org.terasology.corerendering.rendering.dag.nodes.DownSamplerForExposureNode.FBO_8X8_CONFIG;
 import static org.terasology.corerendering.rendering.dag.nodes.LateBlurNode.FIRST_LATE_BLUR_FBO_URI;
 import static org.terasology.corerendering.rendering.dag.nodes.LateBlurNode.SECOND_LATE_BLUR_FBO_URI;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.ScalingFactors.HALF_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
 
 public class CoreRenderingModule extends ModuleRendering {
 
@@ -100,6 +100,8 @@ public class CoreRenderingModule extends ModuleRendering {
         addInitialPostProcessingNodes(renderGraph);
 
         addFinalPostProcessingNodes(renderGraph);
+
+        addVignetteNode(renderGraph);
 
         addOutputNodes(renderGraph);
     }
@@ -359,6 +361,14 @@ public class CoreRenderingModule extends ModuleRendering {
         renderGraph.addNode(finalPostProcessingNode);
 
         // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);
+    }
+
+    private void addVignetteNode(RenderGraph renderGraph) {
+        Node finalPostProcessingNode = renderGraph.findNode("CoreRendering:finalPostProcessingNode");
+
+        VignetteNode vignetteNode = new VignetteNode("vignetteNode", providingModule, context);
+        renderGraph.addNode(vignetteNode);
+        renderGraph.connectFbo(finalPostProcessingNode, 1, vignetteNode, 1);
     }
 
     private void addOutputNodes(RenderGraph renderGraph) {

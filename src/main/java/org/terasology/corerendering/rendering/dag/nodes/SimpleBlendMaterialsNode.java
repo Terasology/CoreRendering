@@ -15,20 +15,20 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.context.Context;
-import org.terasology.engine.ComponentSystemManager;
-import org.terasology.entitySystem.systems.RenderSystem;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.ComponentSystemManager;
+import org.terasology.engine.entitySystem.systems.RenderSystem;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.DisableDepthWriting;
-import org.terasology.rendering.dag.stateChanges.EnableBlending;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.SetBlendFunction;
-import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
+import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
+import org.terasology.engine.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;

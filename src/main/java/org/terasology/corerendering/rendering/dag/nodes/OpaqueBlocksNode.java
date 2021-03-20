@@ -1,57 +1,43 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.config.RenderingDebugConfig;
-import org.terasology.context.Context;
-import org.terasology.math.JomlUtil;
-import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.config.RenderingDebugConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.AABBRenderer;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.WireframeCapable;
-import org.terasology.rendering.dag.WireframeTrigger;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
-import org.terasology.rendering.dag.stateChanges.SetWireframe;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.RenderQueuesHelper;
-import org.terasology.rendering.world.WorldRenderer;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.ChunkConstants;
-import org.terasology.world.chunks.RenderableChunk;
+import org.terasology.engine.rendering.AABBRenderer;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.StateChange;
+import org.terasology.engine.rendering.dag.WireframeCapable;
+import org.terasology.engine.rendering.dag.WireframeTrigger;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
+import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
+import org.terasology.engine.rendering.primitives.ChunkMesh;
+import org.terasology.engine.rendering.world.RenderQueuesHelper;
+import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.chunks.Chunks;
+import org.terasology.engine.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
+import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
  * This node renders the opaque blocks in the world.
@@ -201,7 +187,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = JomlUtil.from(chunk.getPosition().toVector3f());
+                final Vector3f chunkPosition = new Vector3f(chunk.getPosition());
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
@@ -220,7 +206,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         PerformanceMonitor.endActivity();
     }
-
+    
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();

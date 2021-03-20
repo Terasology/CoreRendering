@@ -15,35 +15,36 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.math.JomlUtil;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.OrthographicCamera;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.world.RenderQueuesHelper;
+import org.terasology.engine.rendering.world.RenderableWorld;
+import org.terasology.engine.world.chunks.Chunks;
+import org.terasology.engine.world.chunks.RenderableChunk;
 import org.terasology.math.TeraMath;
-import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.naming.Name;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.cameras.OrthographicCamera;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.RenderQueuesHelper;
-import org.terasology.rendering.world.RenderableWorld;
-import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
+import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
  * This node class generates a shadow map used by the lighting step to determine what's in sight of
@@ -63,6 +64,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("engine:prog.shadowMap");
     private static final int SHADOW_FRUSTUM_BOUNDS = 500;
     private static final float STEP_SIZE = 50f;
+    private Material shadowMapMaterial;
 
     public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, -SHADOW_FRUSTUM_BOUNDS);
 
@@ -75,6 +77,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
     public ShadowMapNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
+        shadowMapMaterial = getMaterial(SHADOW_MAP_MATERIAL_URN);
 
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);
@@ -162,18 +165,21 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
             int numberOfChunksThatAreNotReadyYet = 0;
 
             final Vector3f cameraPosition = shadowMapCamera.getPosition();
+            shadowMapMaterial.setMatrix4("projection", shadowMapCamera.getProjectionMatrix(), true);
 
-            shadowMapCamera.lookThrough();
-
+            Matrix4f modelViewMatrix = new Matrix4f();
+            Matrix4f model = new Matrix4f();
             // FIXME: storing chunksOpaqueShadow or a mechanism for requesting a chunk queue for nodes which calls renderChunks method?
             while (renderQueues.chunksOpaqueShadow.size() > 0) {
                 RenderableChunk chunk = renderQueues.chunksOpaqueShadow.poll();
-
                 if (chunk.hasMesh()) {
-                    final ChunkMesh chunkMesh = chunk.getMesh();
-                    final Vector3f chunkPosition = new Vector3f(JomlUtil.from(chunk.getPosition()));
-
-                    numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
+                    model.setTranslation(
+                            chunk.getPosition().x() * Chunks.SIZE_X - cameraPosition.x(),
+                            chunk.getPosition().y() * Chunks.SIZE_Y - cameraPosition.y(),
+                            chunk.getPosition().z() * Chunks.SIZE_Z - cameraPosition.z());
+                    modelViewMatrix.set(shadowMapCamera.getViewMatrix()).mul(model);
+                    shadowMapMaterial.setMatrix4("modelView", modelViewMatrix, true);
+                    numberOfRenderedTriangles += chunk.getMesh().render(OPAQUE);
 
                 } else {
                     numberOfChunksThatAreNotReadyYet++;
