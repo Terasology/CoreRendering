@@ -46,7 +46,6 @@ import org.terasology.rendering.world.RenderQueuesHelper;
 import org.terasology.rendering.world.WorldRenderer;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.chunks.ChunkConstants;
-import org.terasology.world.chunks.LodChunk;
 import org.terasology.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
