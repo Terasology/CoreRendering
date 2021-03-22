@@ -19,7 +19,7 @@ import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.engine.rendering.opengl.BaseFboManager;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.FboConfig;

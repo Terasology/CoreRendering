@@ -17,7 +17,7 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.terasology.assets.ResourceUrn;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
@@ -39,7 +39,7 @@ import org.terasology.engine.rendering.world.RenderableWorld;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.chunks.RenderableChunk;
 import org.terasology.math.TeraMath;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

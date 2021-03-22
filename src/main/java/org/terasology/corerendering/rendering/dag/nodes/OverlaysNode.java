@@ -15,14 +15,14 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.assets.ResourceUrn;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.ComponentSystemManager;
 import org.terasology.engine.entitySystem.systems.RenderSystem;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;

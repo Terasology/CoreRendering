@@ -16,7 +16,7 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.context.Context;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.opengl.BaseFboManager;

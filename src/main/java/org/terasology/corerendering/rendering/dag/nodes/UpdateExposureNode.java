@@ -24,7 +24,7 @@ import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.math.TeraMath;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.opengl.PBO;
