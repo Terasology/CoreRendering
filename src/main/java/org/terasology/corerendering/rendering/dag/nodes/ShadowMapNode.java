@@ -173,10 +173,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
             while (renderQueues.chunksOpaqueShadow.size() > 0) {
                 RenderableChunk chunk = renderQueues.chunksOpaqueShadow.poll();
                 if (chunk.hasMesh()) {
-                    model.setTranslation(
-                            chunk.getPosition().x() * Chunks.SIZE_X - cameraPosition.x(),
-                            chunk.getPosition().y() * Chunks.SIZE_Y - cameraPosition.y(),
-                            chunk.getPosition().z() * Chunks.SIZE_Z - cameraPosition.z());
+                    model.setTranslation(chunk.getRenderPosition().sub(cameraPosition));
                     modelViewMatrix.set(shadowMapCamera.getViewMatrix()).mul(model);
                     shadowMapMaterial.setMatrix4("modelView", modelViewMatrix, true);
                     numberOfRenderedTriangles += chunk.getMesh().render(OPAQUE);
