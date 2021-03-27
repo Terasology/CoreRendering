@@ -11,8 +11,6 @@ import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.AABBRenderer;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
@@ -33,6 +31,8 @@ import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.chunks.RenderableChunk;
+import org.terasology.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -187,7 +187,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = new Vector3f(chunk.getPosition());
+                final Vector3f chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
@@ -206,7 +206,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         PerformanceMonitor.endActivity();
     }
-    
+
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();

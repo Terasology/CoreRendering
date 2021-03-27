@@ -292,7 +292,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
+                final Vector3f chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(REFRACTIVE, chunkPosition, cameraPosition);
