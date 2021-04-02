@@ -193,7 +193,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
-                    renderChunkBoundingBox(chunk, chunkPosition, cameraPosition);
+                    new AABBRenderer(chunk.getAABB()).render();
                 }
 
             } else {
@@ -205,21 +205,6 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
         worldRenderer.increaseNotReadyChunkCount(numberOfChunksThatAreNotReadyYet);
 
         PerformanceMonitor.endActivity();
-    }
-
-    private void renderChunkBoundingBox(RenderableChunk chunk, Vector3f chunkPosition, Vector3fc cameraPosition) {
-        GL11.glPushMatrix();
-
-        // chunkPositionRelativeToCamera = chunkCoordinates * chunkDimensions - cameraCoordinate
-        final Vector3f chunkPositionRelativeToCamera =
-                new Vector3f(chunkPosition.x - cameraPosition.x(),
-                        chunkPosition.y - cameraPosition.y(),
-                        chunkPosition.z - cameraPosition.z());
-        GL11.glTranslatef(chunkPositionRelativeToCamera.x, chunkPositionRelativeToCamera.y, chunkPositionRelativeToCamera.z);
-
-        new AABBRenderer(chunk.getAABB()).renderLocally(1f);
-
-        GL11.glPopMatrix(); // Resets the matrix stack after the rendering of a chunk.
     }
 
     @Override
