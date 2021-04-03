@@ -4,12 +4,10 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
@@ -23,6 +21,8 @@ import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

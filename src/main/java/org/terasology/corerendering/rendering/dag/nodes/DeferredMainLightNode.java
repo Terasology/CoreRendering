@@ -16,14 +16,14 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
-import org.terasology.assets.ResourceUrn;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.engine.core.module.rendering.RenderingModuleRegistry;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;

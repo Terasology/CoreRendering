@@ -21,7 +21,6 @@ import org.terasology.engine.context.Context;
 import org.terasology.engine.core.ComponentSystemManager;
 import org.terasology.engine.entitySystem.systems.RenderSystem;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -31,6 +30,7 @@ import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.gestalt.naming.Name;
 
 /**
  * This node renders the opaque (as opposed to semi-transparent)
