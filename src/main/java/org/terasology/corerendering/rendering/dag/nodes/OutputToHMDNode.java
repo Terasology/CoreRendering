@@ -15,14 +15,11 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-//import jopenvr.JOpenVRLibrary;
 import org.lwjgl.opengl.GL11;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.engine.rendering.opengl.FBO;
@@ -30,6 +27,8 @@ import org.terasology.engine.rendering.opengl.FboConfig;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.openvrprovider.OpenVRProvider;
 import org.terasology.engine.rendering.world.WorldRenderer.RenderingStage;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 
 import static org.lwjgl.opengl.EXTFramebufferObject.GL_FRAMEBUFFER_EXT;
 import static org.lwjgl.opengl.EXTFramebufferObject.glBindFramebufferEXT;
