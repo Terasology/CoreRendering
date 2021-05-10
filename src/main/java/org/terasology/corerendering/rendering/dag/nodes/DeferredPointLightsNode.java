@@ -147,7 +147,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         // above: rendering distance must be higher than distance from the camera or the light is ignored
 
         // No matter what, we ignore lights that are not in the camera frustrum
-        lightIsRenderable &= activeCamera.getViewFrustum().intersects(lightPositionRelativeToCamera, lightComponent.lightAttenuationRange);
+        lightIsRenderable &= activeCamera.getViewFrustum().testSphere(lightPositionRelativeToCamera, lightComponent.lightAttenuationRange);
         // TODO: (above) what about lights just off-frame? They might light up in-frame surfaces.
 
         return lightIsRenderable;
