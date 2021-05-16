@@ -25,6 +25,7 @@ import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.texture.TextureUtil;
 import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.dag.AbstractNode;
@@ -41,6 +42,7 @@ import org.terasology.engine.rendering.opengl.FboConfig;
 import org.terasology.engine.rendering.opengl.ScreenGrabber;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.engine.utilities.random.FastRandom;
 import org.terasology.engine.utilities.random.Random;
 
@@ -49,7 +51,6 @@ import java.beans.PropertyChangeListener;
 
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 
 /**
@@ -87,6 +88,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
 
     private StateChange setBlurTexture;
     private StateChange setNoiseTexture;
+    private Mesh renderQuad;
 
     private final int noiseTextureSize = 1024;
 
@@ -108,6 +110,9 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         renderingConfig.subscribe(RenderingConfig.BLUR_INTENSITY, this);
         addOutputFboConnection(1);
         addOutputBufferPairConnection(1);
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -165,8 +170,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
             postMaterial.setMatrix4("prevViewProjMatrix", activeCamera.getPrevViewProjectionMatrix(), true);
         }
 
-        renderFullscreenQuad();
-
+        this.renderQuad.render();
         if (screenGrabber.isTakingScreenshot()) {
             screenGrabber.saveScreenshot();
         }
