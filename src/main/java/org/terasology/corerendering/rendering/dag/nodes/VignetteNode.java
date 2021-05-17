@@ -9,6 +9,7 @@ import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
@@ -20,6 +21,7 @@ import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
@@ -29,7 +31,6 @@ import java.beans.PropertyChangeListener;
 
 import static org.terasology.corerendering.rendering.dag.nodes.FinalPostProcessingNode.POST_FBO_URI;
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 /**
@@ -49,6 +50,7 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
     private SubmersibleCamera activeCamera;
 
     private Material vignetteMaterial;
+    private Mesh renderQuad;
 
     private boolean vignetteIsEnabled;
 
@@ -89,6 +91,9 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
         if (vignetteIsEnabled) {
             addDesiredStateChange(setVignetteInputTexture);
         }
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -116,7 +121,7 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
 
         // Actual Node Processing
 
-        renderFullscreenQuad();
+        renderQuad.render();
 
         PerformanceMonitor.endActivity();
     }
