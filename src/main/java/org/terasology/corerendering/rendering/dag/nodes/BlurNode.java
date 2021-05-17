@@ -15,6 +15,8 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
@@ -26,7 +28,6 @@ import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.engine.rendering.opengl.FBO;
 
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 
 /**
  * A BlurNode takes the content of the color buffer attached to the input FBO and generates
@@ -41,6 +42,7 @@ public class BlurNode extends ConditionDependentNode {
 
     private FBO inputFbo;
     private FBO outputFbo;
+    private Mesh renderQuad;
 
     /**
      * Constructs a BlurNode instance.
@@ -56,6 +58,8 @@ public class BlurNode extends ConditionDependentNode {
         // TODO not sure this can be in here, it's its own out, so maybe this can stay
         this.outputFbo = outputFbo;
         addOutputFboConnection(1);
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -83,7 +87,7 @@ public class BlurNode extends ConditionDependentNode {
         // TODO: binding the color buffer of an FBO should also be done in its own StateChange implementation
        inputFbo.bindTexture();
 
-       renderFullscreenQuad();
+        renderQuad.render();
 
        PerformanceMonitor.endActivity();
     }
