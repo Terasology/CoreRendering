@@ -55,8 +55,6 @@ public class ToneMappingNode extends AbstractNode {
 
         screenGrabber = context.get(ScreenGrabber.class);
         addOutputFboConnection(1);
-
-
         this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
                 .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
