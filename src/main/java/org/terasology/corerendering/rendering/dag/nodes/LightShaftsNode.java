@@ -1,22 +1,11 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
@@ -41,7 +30,6 @@ import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
 
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
 
 /**
@@ -64,6 +52,7 @@ public class LightShaftsNode extends ConditionDependentNode {
     private WorldProvider worldProvider;
     private Material lightShaftsMaterial;
     private float exposure;
+    private Mesh renderQuad;
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
@@ -101,6 +90,9 @@ public class LightShaftsNode extends ConditionDependentNode {
 
         addOutputFboConnection(1);
         addOutputBufferPairConnection(1);
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -173,7 +165,7 @@ public class LightShaftsNode extends ConditionDependentNode {
 
         // The source code for this method is quite short because everything happens in the shader and its setup.
         // In particular see the class ShaderParametersLightShafts and resource lightShafts_frag.glsl
-        renderFullscreenQuad();
+        this.renderQuad.render();
 
         PerformanceMonitor.endActivity();
     }
