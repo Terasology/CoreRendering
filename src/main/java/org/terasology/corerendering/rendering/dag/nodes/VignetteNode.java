@@ -99,8 +99,6 @@ public class VignetteNode  extends AbstractNode implements PropertyChangeListene
                 .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
-    }
-
     /**
      * Renders a quad, in turn filling the InitialPostProcessingNode.VIGNETTE_FBO_URI.
      */
