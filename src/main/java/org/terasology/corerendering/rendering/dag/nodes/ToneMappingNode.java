@@ -1,40 +1,28 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.assets.ResourceUrn;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.dag.AbstractNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.ScreenGrabber;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.dag.AbstractNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.ScreenGrabber;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 
 /**
  * The exposure calculated earlier in the rendering process is used by an instance
@@ -60,11 +48,15 @@ public class ToneMappingNode extends AbstractNode {
     @Range(min = 0.0f, max = 100.0f)
     private float whitePoint = 9f;
 
+    private Mesh renderQuad;
+
     public ToneMappingNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
 
         screenGrabber = context.get(ScreenGrabber.class);
         addOutputFboConnection(1);
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -103,8 +95,7 @@ public class ToneMappingNode extends AbstractNode {
         toneMappingMaterial.setFloat("whitePoint", whitePoint, true);
 
         // Actual Node Processing
-
-        renderFullscreenQuad();
+        this.renderQuad.render();
 
         PerformanceMonitor.endActivity();
     }

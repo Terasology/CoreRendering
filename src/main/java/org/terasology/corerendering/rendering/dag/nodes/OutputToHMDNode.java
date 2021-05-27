@@ -15,30 +15,29 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-//import jopenvr.JOpenVRLibrary;
 import org.lwjgl.opengl.GL11;
-import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.openvrprovider.OpenVRProvider;
-import org.terasology.rendering.world.WorldRenderer.RenderingStage;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.openvrprovider.OpenVRProvider;
+import org.terasology.engine.rendering.world.WorldRenderer.RenderingStage;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 
 import static org.lwjgl.opengl.EXTFramebufferObject.GL_FRAMEBUFFER_EXT;
 import static org.lwjgl.opengl.EXTFramebufferObject.glBindFramebufferEXT;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 public class OutputToHMDNode extends ConditionDependentNode {
     private static final SimpleUri LEFT_EYE_FBO_URI = new SimpleUri("engine:fbo.leftEye");

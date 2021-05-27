@@ -17,38 +17,38 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.assets.shader.ShaderProgramFeature;
-import org.terasology.rendering.backdrop.BackdropProvider;
-import org.terasology.rendering.cameras.SubmersibleCamera;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.StateChange;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableFaceCulling;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.LookThrough;
-import org.terasology.rendering.dag.stateChanges.ReflectedCamera;
-import org.terasology.rendering.dag.stateChanges.SetFacesToCull;
-import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.RenderQueuesHelper;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.RenderableChunk;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
+import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.StateChange;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
+import org.terasology.engine.rendering.dag.stateChanges.ReflectedCamera;
+import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.rendering.primitives.ChunkMesh;
+import org.terasology.engine.rendering.world.RenderQueuesHelper;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.chunks.RenderableChunk;
 
 import java.beans.PropertyChangeEvent;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
-import static org.terasology.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
+import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
  * An instance of this class is responsible for rendering a reflected landscape into the
@@ -199,7 +199,7 @@ public class WorldReflectionNode extends ConditionDependentNode {
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = new Vector3f(chunk.getPosition(new Vector3i()));
+                final Vector3f chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);

@@ -1,59 +1,46 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.assets.texture.Texture;
+import org.terasology.engine.rendering.assets.texture.TextureData;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.engine.utilities.random.FastRandom;
+import org.terasology.engine.utilities.random.Random;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.math.TeraMath;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
 import org.terasology.nui.properties.Range;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.assets.texture.Texture;
-import org.terasology.rendering.assets.texture.TextureData;
-import org.terasology.rendering.cameras.Camera;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.dependencyConnections.BufferPairConnection;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTexture2D;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
-import org.terasology.utilities.Assets;
-import org.terasology.utilities.random.FastRandom;
-import org.terasology.utilities.random.Random;
 
 import java.beans.PropertyChangeEvent;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.Optional;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
 
 /**
  * Instances of this node work in tandem with instances of the BlurredAmbientOcclusionNode class.
@@ -97,6 +84,7 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
     private final Random randomGenerator = new FastRandom();
 
     private FloatBuffer ssaoSamples;
+    private Mesh renderQuad;
 
     public AmbientOcclusionNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -108,6 +96,10 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         requiresCondition(renderingConfig::isSsao);
         addOutputFboConnection(1);
         addOutputBufferPairConnection(1);
+
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -162,7 +154,7 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
 
         ssaoMaterial.setFloat3("ssaoSamples", ssaoSamples);
 
-        renderFullscreenQuad();
+        this.renderQuad.render();
 
         PerformanceMonitor.endActivity();
     }

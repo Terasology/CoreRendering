@@ -15,29 +15,29 @@
  */
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.assets.ResourceUrn;
-import org.terasology.config.Config;
-import org.terasology.config.RenderingConfig;
-import org.terasology.context.Context;
-import org.terasology.engine.SimpleUri;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.naming.Name;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.dag.ConditionDependentNode;
-import org.terasology.rendering.dag.stateChanges.BindFbo;
-import org.terasology.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo;
-import org.terasology.rendering.dag.stateChanges.SetViewportToSizeOf;
-import org.terasology.rendering.opengl.FBO;
-import org.terasology.rendering.opengl.FboConfig;
-import org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.config.Config;
+import org.terasology.engine.config.RenderingConfig;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.dag.ConditionDependentNode;
+import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
+import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
+import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
+import org.terasology.engine.rendering.opengl.FBO;
+import org.terasology.engine.rendering.opengl.FboConfig;
+import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 
 import java.beans.PropertyChangeEvent;
 
-import static org.terasology.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
-import static org.terasology.rendering.opengl.ScalingFactors.FULL_SCALE;
-import static org.terasology.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
+import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
+import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
+import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
+import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.POST_FBO_REGENERATION;
 
 /**
  * Instances of this node work in tandem with instances of the AmbientOcclusionNode class.
