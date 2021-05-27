@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.config.Config;
@@ -20,6 +7,8 @@ import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
@@ -43,7 +32,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 
 /**
@@ -74,14 +62,9 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
     private StateChange setBloomInputTexture;
 
     @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.1f)
-    private float aberrationOffsetX;
-    @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 0.1f)
-    private float aberrationOffsetY;
-    @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 1.0f)
     private float bloomFactor = 0.5f;
+    private Mesh renderQuad;
 
     public InitialPostProcessingNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -99,6 +82,9 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         addOutputFboConnection(1);
         addOutputBufferPairConnection(1);
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -161,11 +147,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
             initialPostMaterial.setFloat("bloomFactor", bloomFactor, true);
         }
 
-        initialPostMaterial.setFloat2("aberrationOffset", aberrationOffsetX, aberrationOffsetY, true);
-
         // Actual Node Processing
-
-        renderFullscreenQuad();
+        this.renderQuad.render();
 
         PerformanceMonitor.endActivity();
     }
