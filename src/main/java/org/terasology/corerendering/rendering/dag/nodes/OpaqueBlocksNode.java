@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
-import org.lwjgl.opengl.GL11;
-import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.config.RenderingDebugConfig;
@@ -29,8 +28,8 @@ import org.terasology.engine.rendering.primitives.ChunkMesh;
 import org.terasology.engine.rendering.world.RenderQueuesHelper;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
-import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.chunks.RenderableChunk;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
 
@@ -177,10 +176,14 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         // Actual Node Processing
 
-        final org.joml.Vector3f cameraPosition = activeCamera.getPosition();
+        final Vector3f cameraPosition = activeCamera.getPosition();
 
         int numberOfRenderedTriangles = 0;
         int numberOfChunksThatAreNotReadyYet = 0;
+
+        Matrix4f modelViewMatrix = new Matrix4f();
+        Matrix4f model = new Matrix4f();
+        Matrix3f normalMatrix = new Matrix3f();
 
         while (renderQueues.chunksOpaque.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksOpaque.poll();
@@ -190,7 +193,15 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
                 final Vector3f chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-                numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
+
+                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
+                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
+                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
+                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
+
+
+                numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
                     new AABBRenderer(chunk.getAABB()).render();

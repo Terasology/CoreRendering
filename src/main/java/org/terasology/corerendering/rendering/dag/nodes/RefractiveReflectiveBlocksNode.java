@@ -1,30 +1,15 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
-import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
@@ -45,6 +30,9 @@ import org.terasology.engine.rendering.world.RenderQueuesHelper;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.chunks.RenderableChunk;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -287,6 +275,9 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
         final Vector3f cameraPosition = activeCamera.getPosition();
 
+        Matrix4f modelViewMatrix = new Matrix4f();
+        Matrix4f model = new Matrix4f();
+        Matrix3f normalMatrix = new Matrix3f();
         while (renderQueues.chunksAlphaBlend.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksAlphaBlend.poll();
 
@@ -294,8 +285,14 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
                 final ChunkMesh chunkMesh = chunk.getMesh();
                 final Vector3f chunkPosition = chunk.getRenderPosition();
 
+                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
+                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
+                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
+                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
+
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-                numberOfRenderedTriangles += chunkMesh.render(REFRACTIVE, chunkPosition, cameraPosition);
+                numberOfRenderedTriangles += chunkMesh.render(REFRACTIVE);
 
             } else {
                 numberOfChunksThatAreNotReadyYet++;
