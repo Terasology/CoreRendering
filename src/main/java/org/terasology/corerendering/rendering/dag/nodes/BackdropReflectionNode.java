@@ -1,35 +1,16 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
+import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
-import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.primitives.Sphere;
-import org.terasology.engine.utilities.Assets;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.engine.context.Context;
-import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
-import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
@@ -42,10 +23,11 @@ import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
-import static org.lwjgl.opengl.GL11.glEndList;
-import static org.lwjgl.opengl.GL11.glGenLists;
-import static org.lwjgl.opengl.GL11.glNewList;
 import static org.terasology.corerendering.rendering.dag.nodes.BackdropNode.getAllWeatherZenith;
 
 /**
@@ -68,9 +50,6 @@ public class BackdropReflectionNode extends AbstractNode {
     private static final int STACKS = 128;
 
     private BackdropProvider backdropProvider;
-
-    private int skySphere = -1;
-
     private Material skyMaterial;
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -122,7 +101,6 @@ public class BackdropReflectionNode extends AbstractNode {
         SubmersibleCamera activeCamera = renderer.getActiveCamera();
         addDesiredStateChange(new ReflectedCamera(activeCamera));
         addDesiredStateChange(new LookThroughNormalized(activeCamera));
-//        initSkysphere();
 
         FBO reflectedFbo = getInputFboData(1);
         addDesiredStateChange(new BindFbo(reflectedFbo));
@@ -172,19 +150,7 @@ public class BackdropReflectionNode extends AbstractNode {
         // Actual Node Processing
 
         sphereMesh.render();
-//        glCallList(skySphere); // Draws the skysphere
 
         PerformanceMonitor.endActivity();
-    }
-
-    private void initSkysphere() {
-        Sphere sphere = new Sphere();
-        sphere.setTextureFlag(true);
-
-        skySphere = glGenLists(1);
-
-        glNewList(skySphere, GL11.GL_COMPILE);
-        sphere.draw(RADIUS, SLICES, STACKS);
-        glEndList();
     }
 }
