@@ -17,20 +17,18 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
-import org.terasology.engine.rendering.primitives.Sphere;
-import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
-import org.terasology.corerendering.rendering.CoreRenderingModule;
 import org.terasology.engine.core.module.rendering.RenderingModuleRegistry;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.naming.Name;
 import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
@@ -50,15 +48,14 @@ import org.terasology.engine.rendering.logic.LightComponent;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.engine.world.WorldProvider;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
 import static org.lwjgl.opengl.GL11.GL_ONE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_COLOR;
-import static org.lwjgl.opengl.GL11.glCallList;
-import static org.lwjgl.opengl.GL11.glEndList;
-import static org.lwjgl.opengl.GL11.glGenLists;
-import static org.lwjgl.opengl.GL11.glNewList;
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.DepthStencilTexture;
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.NormalsTexture;
 
@@ -71,7 +68,6 @@ import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFr
  */
 public class DeferredPointLightsNode extends AbstractNode {
     private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("engine:prog.lightGeometryPass");
-    private static int lightSphereDisplayList = -1;
 
     private EntityManager entityManager;
     private RenderingConfig renderingConfig;
@@ -86,6 +82,7 @@ public class DeferredPointLightsNode extends AbstractNode {
     private Vector3f cameraPosition;
     @SuppressWarnings("FieldCanBeLocal")
     private Vector3f activeCameraToLightSpace = new Vector3f();
+    private final Mesh unitSphereMesh;
 
     public DeferredPointLightsNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -93,6 +90,11 @@ public class DeferredPointLightsNode extends AbstractNode {
         renderingConfig = context.get(Config.class).getRendering();
         worldProvider = context.get(WorldProvider.class);
         entityManager = context.get(EntityManager.class);
+        unitSphereMesh = Assets.generateAsset(
+                new SphereBuilder().
+                        setRadius(1.0f).
+                        setHorizontalCuts(8).
+                        setVerticalCuts(8).build(), Mesh.class);
 
         addOutputFboConnection(1);
     }
@@ -124,20 +126,10 @@ public class DeferredPointLightsNode extends AbstractNode {
         addOutputFboConnection(1, lastUpdatedGBuffer);
         addDesiredStateChange(new SetFboWriteMask(lastUpdatedGBuffer, false, false, true));
 
-        initLightSphereDisplayList();
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         int textureSlot = 0;
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
         addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
-    }
-
-    private void initLightSphereDisplayList() {
-        lightSphereDisplayList = glGenLists(1);
-        Sphere sphere = new Sphere();
-
-        glNewList(lightSphereDisplayList, GL11.GL_COMPILE);
-        sphere.draw(1, 8, 8);
-        glEndList();
     }
 
     private boolean lightIsRenderable(LightComponent lightComponent, Vector3f lightPositionRelativeToCamera) {
@@ -226,7 +218,7 @@ public class DeferredPointLightsNode extends AbstractNode {
                     modelMatrix.setTranslation(lightPositionRelativeToCamera); // effectively moves the light sphere in the right position relative to camera
                     lightGeometryMaterial.setMatrix4("modelMatrix", modelMatrix, true);
 
-                    glCallList(lightSphereDisplayList); // draws the light sphere
+                    unitSphereMesh.render();
                 }
             }
         }
