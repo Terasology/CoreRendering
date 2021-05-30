@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.config.Config;
@@ -22,13 +9,12 @@ import org.terasology.engine.core.ComponentSystemManager;
 import org.terasology.engine.entitySystem.systems.RenderSystem;
 import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;
-import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.gestalt.assets.ResourceUrn;
@@ -59,7 +45,6 @@ public class OverlaysNode extends AbstractNode implements WireframeCapable {
     @Override
     public void setDependencies(Context context) {
         SubmersibleCamera playerCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(playerCamera));
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
