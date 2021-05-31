@@ -185,6 +185,7 @@ public class WorldReflectionNode extends ConditionDependentNode {
         Matrix4f modelViewMatrix = new Matrix4f();
         Matrix4f model = new Matrix4f();
         Matrix3f normalMatrix = new Matrix3f();
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
 
         while (renderQueues.chunksOpaqueReflection.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksOpaqueReflection.poll();
@@ -195,10 +196,11 @@ public class WorldReflectionNode extends ConditionDependentNode {
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
 
-                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
                 modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
                 chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
-                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
                 chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 

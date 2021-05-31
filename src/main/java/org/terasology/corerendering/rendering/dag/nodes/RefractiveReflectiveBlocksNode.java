@@ -277,7 +277,10 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
 
         Matrix4f modelViewMatrix = new Matrix4f();
         Matrix4f model = new Matrix4f();
-        Matrix3f normalMatrix = new Matrix3f();
+        Matrix3f normalMat = new Matrix3f();
+
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
+
         while (renderQueues.chunksAlphaBlend.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksAlphaBlend.poll();
 
@@ -285,11 +288,12 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
                 final ChunkMesh chunkMesh = chunk.getMesh();
                 final Vector3f chunkPosition = chunk.getRenderPosition();
 
-                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
                 modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
                 chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
-                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
-                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMat), true);
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
                 numberOfRenderedTriangles += chunkMesh.render(REFRACTIVE);

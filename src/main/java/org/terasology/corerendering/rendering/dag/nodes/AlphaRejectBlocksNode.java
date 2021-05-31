@@ -183,6 +183,7 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
         Matrix4f modelViewMatrix = new Matrix4f();
         Matrix4f model = new Matrix4f();
         Matrix3f normalMatrix = new Matrix3f();
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
 
         while (renderQueues.chunksAlphaReject.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksAlphaReject.poll();
@@ -192,12 +193,14 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
                 final Vector3fc chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
-                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
-                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
-                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
-                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
 
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
+                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
+
+                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
                 numberOfRenderedTriangles += chunkMesh.render(ALPHA_REJECT);
 
             } else {

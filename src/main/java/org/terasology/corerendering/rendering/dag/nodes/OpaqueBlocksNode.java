@@ -5,6 +5,7 @@ package org.terasology.corerendering.rendering.dag.nodes;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.config.RenderingDebugConfig;
@@ -184,23 +185,22 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
         Matrix4f modelViewMatrix = new Matrix4f();
         Matrix4f model = new Matrix4f();
         Matrix3f normalMatrix = new Matrix3f();
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
 
         while (renderQueues.chunksOpaque.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksOpaque.poll();
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = chunk.getRenderPosition();
+                final Vector3fc chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-
-                model.setTranslation(chunkPosition.sub(cameraPosition, new Vector3f()));
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
                 modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
                 chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
-                chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
                 chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
-
-
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
