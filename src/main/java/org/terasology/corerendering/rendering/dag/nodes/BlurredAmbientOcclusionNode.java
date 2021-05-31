@@ -61,8 +61,6 @@ public class BlurredAmbientOcclusionNode extends ConditionDependentNode {
         requiresCondition(renderingConfig::isSsao);
         addOutputFboConnection(1);
 
-
-
         this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
                 .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
