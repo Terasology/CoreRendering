@@ -204,7 +204,9 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
                 numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
-                    new AABBRenderer(chunk.getAABB()).render();
+                    try (AABBRenderer renderer = new AABBRenderer(chunk.getAABB())) {
+                        renderer.render();
+                    }
                 }
 
             } else {
