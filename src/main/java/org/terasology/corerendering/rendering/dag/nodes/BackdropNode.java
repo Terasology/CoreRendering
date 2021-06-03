@@ -1,28 +1,17 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
-import org.terasology.engine.rendering.primitives.Sphere;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
@@ -46,10 +35,6 @@ import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.world.WorldRenderer;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
-import static org.lwjgl.opengl.GL11.glCallList;
-import static org.lwjgl.opengl.GL11.glEndList;
-import static org.lwjgl.opengl.GL11.glGenLists;
-import static org.lwjgl.opengl.GL11.glNewList;
 
 /**
  * Renders the backdrop.
@@ -69,7 +54,6 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     private WorldRenderer worldRenderer;
     private BackdropProvider backdropProvider;
 
-    private int skySphere = -1;
     private SetWireframe wireframeStateChange;
 
     private Material skyMaterial;
@@ -92,6 +76,9 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     @SuppressWarnings("FieldCanBeLocal")
     private float turbidity;
 
+    private final Mesh sphereMesh;
+    SphereBuilder builder = new SphereBuilder();
+
     public BackdropNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
 
@@ -101,8 +88,12 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
 
         skyMaterial = getMaterial(SKY_MATERIAL_URN);
 
-        // addOutputFboConnection(1);
-        // addOutputBufferPairConnection(1);
+        sphereMesh = Assets.generateAsset(builder
+                        .setVerticalCuts(SLICES)
+                        .setHorizontalCuts(STACKS)
+                        .setRadius(RADIUS)
+                        .setTextured(true).build(),
+                Mesh.class);
     }
 
     @Override
@@ -111,7 +102,7 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
         SubmersibleCamera activeCamera = worldRenderer.getActiveCamera();
         addDesiredStateChange(new LookThroughNormalized(activeCamera));
 
-        initSkysphere(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS);
+        sphereMesh.reload(builder.setRadius(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS).build());
 
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();
         new WireframeTrigger(renderingDebugConfig, this);
@@ -177,22 +168,14 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
         skyMaterial.setFloat("colorExp", backdropProvider.getColorExp(), true);
         skyMaterial.setFloat4("skySettings", sunExponent, moonExponent, skyDaylightBrightness, skyNightBrightness, true);
 
-        // Actual Node Processing
+        Camera camera = worldRenderer.getActiveCamera();
+        skyMaterial.setMatrix4("projectionMatrix", camera.getProjectionMatrix());
+        skyMaterial.setMatrix4("modelViewMatrix", camera.getNormViewMatrix());
 
-        glCallList(skySphere); // Draws the skysphere
+        // Actual Node Processing
+        sphereMesh.render();
 
         PerformanceMonitor.endActivity();
-    }
-
-    private void initSkysphere(float sphereRadius) {
-        Sphere sphere = new Sphere();
-        sphere.setTextureFlag(true);
-
-        skySphere = glGenLists(1);
-
-        glNewList(skySphere, GL11.GL_COMPILE);
-        sphere.draw(sphereRadius, SLICES, STACKS);
-        glEndList();
     }
 
     static Vector3f getAllWeatherZenith(float thetaSunAngle, float turbidity) {
