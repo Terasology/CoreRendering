@@ -94,9 +94,6 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
                         .setRadius(RADIUS)
                         .setTextured(true).build(),
                 Mesh.class);
-
-        // addOutputFboConnection(1);
-        // addOutputBufferPairConnection(1);
     }
 
     @Override
