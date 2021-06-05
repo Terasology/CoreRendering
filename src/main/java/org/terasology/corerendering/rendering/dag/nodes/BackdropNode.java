@@ -26,7 +26,6 @@ import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThroughNormalized;
 import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
 import org.terasology.engine.rendering.dag.stateChanges.SetFboWriteMask;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
@@ -100,7 +99,6 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
         SubmersibleCamera activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThroughNormalized(activeCamera));
 
         sphereMesh.reload(builder.setRadius(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS).build());
 

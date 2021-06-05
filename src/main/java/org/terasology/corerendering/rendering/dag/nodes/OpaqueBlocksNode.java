@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.lwjgl.opengl.GL11;
-import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.config.RenderingDebugConfig;
@@ -22,15 +22,14 @@ import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConne
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.primitives.ChunkMesh;
 import org.terasology.engine.rendering.world.RenderQueuesHelper;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
-import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.chunks.RenderableChunk;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.nui.properties.Range;
 
@@ -84,7 +83,6 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
     public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         // IF wireframe is enabled the WireframeTrigger will remove the face culling state change
         // from the set of desired state changes.
@@ -177,20 +175,31 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
 
         // Actual Node Processing
 
-        final org.joml.Vector3f cameraPosition = activeCamera.getPosition();
+        final Vector3f cameraPosition = activeCamera.getPosition();
 
         int numberOfRenderedTriangles = 0;
         int numberOfChunksThatAreNotReadyYet = 0;
+
+        Matrix4f modelViewMatrix = new Matrix4f();
+        Matrix4f model = new Matrix4f();
+        Matrix3f normalMatrix = new Matrix3f();
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
 
         while (renderQueues.chunksOpaque.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksOpaque.poll();
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = chunk.getRenderPosition();
+                final Vector3fc chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-                numberOfRenderedTriangles += chunkMesh.render(OPAQUE, chunkPosition, cameraPosition);
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
+                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
+                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
+                numberOfRenderedTriangles += chunkMesh.render(OPAQUE);
 
                 if (renderingDebugConfig.isRenderChunkBoundingBoxes()) {
                     try (AABBRenderer renderer = new AABBRenderer(chunk.getAABB())) {
