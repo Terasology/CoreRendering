@@ -39,7 +39,6 @@ import org.terasology.engine.rendering.dag.stateChanges.DisableDepthTest;
 import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
 import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
 import org.terasology.engine.rendering.dag.stateChanges.SetFboWriteMask;
@@ -105,8 +104,6 @@ public class DeferredPointLightsNode extends AbstractNode {
         activeCamera = worldRenderer.getActiveCamera();
         lightCamera = ((CoreRenderingModule) context.get(RenderingModuleRegistry.class)
                         .getModuleRenderingByClass(CoreRenderingModule.class)).getLightCamera();
-
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         lightGeometryMaterial = getMaterial(LIGHT_GEOMETRY_MATERIAL_URN);
         addDesiredStateChange(new EnableMaterial(LIGHT_GEOMETRY_MATERIAL_URN));

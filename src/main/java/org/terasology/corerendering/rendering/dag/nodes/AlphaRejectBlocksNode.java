@@ -21,7 +21,6 @@ import org.terasology.engine.rendering.dag.WireframeTrigger;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.primitives.ChunkMesh;
@@ -87,7 +86,6 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
     @Override
     public void setDependencies(Context context) {
         activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig =  context.get(Config.class).getRendering().getDebug();
