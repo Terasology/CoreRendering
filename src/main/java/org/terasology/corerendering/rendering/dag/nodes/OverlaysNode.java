@@ -14,7 +14,6 @@ import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.gestalt.naming.Name;
@@ -42,7 +41,6 @@ public class OverlaysNode extends AbstractNode implements WireframeCapable {
     @Override
     public void setDependencies(Context context) {
         SubmersibleCamera playerCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(playerCamera));
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();

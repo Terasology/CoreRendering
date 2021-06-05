@@ -22,7 +22,6 @@ import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConne
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.primitives.ChunkMesh;
@@ -84,7 +83,6 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
     public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
         activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         // IF wireframe is enabled the WireframeTrigger will remove the face culling state change
         // from the set of desired state changes.
