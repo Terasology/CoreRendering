@@ -175,7 +175,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         }
 
         if (renderingConfig.isDynamicShadows()) {
-            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
+            lightGeometryMaterial.setMatrix4("viewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
 
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
