@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
@@ -20,6 +7,7 @@ import org.terasology.engine.config.Config;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.engine.rendering.opengl.FBO;
@@ -27,6 +15,7 @@ import org.terasology.engine.rendering.opengl.FboConfig;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.openvrprovider.OpenVRProvider;
 import org.terasology.engine.rendering.world.WorldRenderer.RenderingStage;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 
@@ -35,17 +24,17 @@ import static org.lwjgl.opengl.EXTFramebufferObject.glBindFramebufferEXT;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo.FINAL_BUFFER;
 
 public class OutputToHMDNode extends ConditionDependentNode {
     private static final SimpleUri LEFT_EYE_FBO_URI = new SimpleUri("engine:fbo.leftEye");
     private static final SimpleUri RIGHT_EYE_FBO_URI = new SimpleUri("engine:fbo.rightEye");
-    private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");
+    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.outputPass");
     // TODO: make these configurable options
 
     private OpenVRProvider vrProvider;
+    private Mesh renderQuad;
 
     private FBO leftEyeFbo;
     private FBO rightEyeFbo;
@@ -78,8 +67,11 @@ public class OutputToHMDNode extends ConditionDependentNode {
             vrProvider.texType[1].eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
             vrProvider.texType[1].write();
 */
-            addDesiredStateChange(new EnableMaterial(DEFAULT_TEXTURED_MATERIAL_URN));
+            addDesiredStateChange(new EnableMaterial(OUTPUT_TEXTURED_MATERIAL_URN));
         }
+
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
     }
 
     @Override
@@ -106,13 +98,13 @@ public class OutputToHMDNode extends ConditionDependentNode {
                 vrProvider.updateState();
                 leftEyeFbo.bind();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                renderFullscreenQuad();
+                this.renderQuad.render();
                 break;
 
             case RIGHT_EYE:
                 rightEyeFbo.bind();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                renderFullscreenQuad();
+                this.renderQuad.render();
                 vrProvider.submitFrame();
                 GL11.glFinish();
                 break;

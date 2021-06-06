@@ -1,44 +1,33 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.core.subsystem.DisplayDevice;
 import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage.LEFT_EYE;
 import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage.MONO;
 
 public class OutputToScreenNode extends ConditionDependentNode {
-    private static final ResourceUrn DEFAULT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.defaultTextured");
+    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.outputPass");
 
     private DisplayResolutionDependentFbo displayResolutionDependentFBOs;
     private DisplayDevice displayDevice;
+    private Mesh renderQuad;
 
     private FBO lastUpdatedGBuffer;
     private FBO staleGBuffer;
@@ -51,13 +40,15 @@ public class OutputToScreenNode extends ConditionDependentNode {
         displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         displayDevice = context.get(DisplayDevice.class);
         requiresCondition(() -> worldRenderer.getCurrentRenderStage() == MONO || worldRenderer.getCurrentRenderStage() == LEFT_EYE);
+        this.renderQuad = Assets.get(new ResourceUrn("engine:ScreenQuad"), Mesh.class)
+                .orElseThrow(() -> new RuntimeException("Failed to resolve render Quad"));
 
     }
 
     @Override
     public void setDependencies(Context context) {
-        addDesiredStateChange(new EnableMaterial(DEFAULT_TEXTURED_MATERIAL_URN));
-        bindFbo = new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, DEFAULT_TEXTURED_MATERIAL_URN, "texture");
+        addDesiredStateChange(new EnableMaterial(OUTPUT_TEXTURED_MATERIAL_URN));
+        bindFbo = new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, OUTPUT_TEXTURED_MATERIAL_URN, "target");
         addDesiredStateChange(bindFbo);
 
         lastUpdatedGBuffer = getInputBufferPairConnection(1).getBufferPair().getPrimaryFbo();
@@ -71,7 +62,7 @@ public class OutputToScreenNode extends ConditionDependentNode {
         // However, when drawing the final image to the screen, we always want the viewport to match the size of display,
         // and not that of some FBO. Hence, we are manually setting the viewport via glViewport over here.
         glViewport(0, 0, displayDevice.getWidth(), displayDevice.getHeight());
-        renderFullscreenQuad();
+        this.renderQuad.render();
         PerformanceMonitor.endActivity();
     }
 
@@ -111,7 +102,7 @@ public class OutputToScreenNode extends ConditionDependentNode {
 
     private void setFbo(FBO fbo) {
         removeDesiredStateChange(bindFbo);
-        bindFbo = new SetInputTextureFromFbo(0, fbo, ColorTexture, displayResolutionDependentFBOs, DEFAULT_TEXTURED_MATERIAL_URN, "texture");
+        bindFbo = new SetInputTextureFromFbo(0, fbo, ColorTexture, displayResolutionDependentFBOs, OUTPUT_TEXTURED_MATERIAL_URN, "target");
         addDesiredStateChange(bindFbo);
         worldRenderer.requestTaskListRefresh();
     }

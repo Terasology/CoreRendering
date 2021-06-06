@@ -1,30 +1,16 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.Vector3fc;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
@@ -35,7 +21,6 @@ import org.terasology.engine.rendering.dag.WireframeTrigger;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.primitives.ChunkMesh;
@@ -43,6 +28,9 @@ import org.terasology.engine.rendering.world.RenderQueuesHelper;
 import org.terasology.engine.rendering.world.WorldRenderer;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.chunks.RenderableChunk;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -98,7 +86,6 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
     @Override
     public void setDependencies(Context context) {
         activeCamera = worldRenderer.getActiveCamera();
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig =  context.get(Config.class).getRendering().getDebug();
@@ -191,15 +178,28 @@ public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapa
         int numberOfRenderedTriangles = 0;
         int numberOfChunksThatAreNotReadyYet = 0;
 
+        Matrix4f modelViewMatrix = new Matrix4f();
+        Matrix4f model = new Matrix4f();
+        Matrix3f normalMatrix = new Matrix3f();
+        chunkMaterial.setMatrix4("projectionMatrix", activeCamera.getProjectionMatrix(), true);
+
         while (renderQueues.chunksAlphaReject.size() > 0) {
             RenderableChunk chunk = renderQueues.chunksAlphaReject.poll();
 
             if (chunk.hasMesh()) {
                 final ChunkMesh chunkMesh = chunk.getMesh();
-                final Vector3f chunkPosition = chunk.getRenderPosition();
+                final Vector3fc chunkPosition = chunk.getRenderPosition();
 
                 chunkMesh.updateMaterial(chunkMaterial, chunkPosition, chunk.isAnimated());
-                numberOfRenderedTriangles += chunkMesh.render(ALPHA_REJECT, chunkPosition, cameraPosition);
+
+                model.setTranslation(chunkPosition.x() - cameraPosition.x(),
+                        chunkPosition.y() - cameraPosition.y(),
+                        chunkPosition.z() - cameraPosition.z());
+                modelViewMatrix.set(activeCamera.getViewMatrix()).mul(model);
+
+                chunkMaterial.setMatrix4("modelViewMatrix", modelViewMatrix, true);
+                chunkMaterial.setMatrix3("normalMatrix", modelViewMatrix.normal(normalMatrix), true);
+                numberOfRenderedTriangles += chunkMesh.render(ALPHA_REJECT);
 
             } else {
                 numberOfChunksThatAreNotReadyYet++; // TODO: verify - should we count them only in ChunksOpaqueNode?
