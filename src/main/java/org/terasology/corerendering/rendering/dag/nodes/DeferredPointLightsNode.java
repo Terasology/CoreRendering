@@ -183,14 +183,7 @@ public class DeferredPointLightsNode extends AbstractNode {
                     .mul(lightCamera.getViewMatrix())
             );
 
-            lightGeometryMaterial.setMatrix4("lightProjMatrix", lightCamera.getViewProjectionMatrix(), true);
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
-            lightGeometryMaterial.setMatrix4("inverseViewMatrix", new Matrix4f(activeCamera.getViewMatrix()).invert());
-
-            lightGeometryMaterial.setMatrix4("invViewMatrix", new Matrix4f(activeCamera.getViewMatrix()).invert(), true);
-            lightGeometryMaterial.setMatrix4("invProjectionMatrix", new Matrix4f(activeCamera.getProjectionMatrix()).invert());
-
-
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
         }
