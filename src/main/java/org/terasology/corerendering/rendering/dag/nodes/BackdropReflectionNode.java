@@ -17,7 +17,6 @@ import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThroughNormalized;
 import org.terasology.engine.rendering.dag.stateChanges.ReflectedCamera;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
@@ -100,7 +99,6 @@ public class BackdropReflectionNode extends AbstractNode {
 
         SubmersibleCamera activeCamera = renderer.getActiveCamera();
         addDesiredStateChange(new ReflectedCamera(activeCamera));
-        addDesiredStateChange(new LookThroughNormalized(activeCamera));
 
         FBO reflectedFbo = getInputFboData(1);
         addDesiredStateChange(new BindFbo(reflectedFbo));

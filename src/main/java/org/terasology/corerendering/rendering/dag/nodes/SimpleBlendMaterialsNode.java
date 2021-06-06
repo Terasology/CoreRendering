@@ -26,7 +26,6 @@ import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConne
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
 import org.terasology.engine.rendering.dag.stateChanges.EnableBlending;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetBlendFunction;
 import org.terasology.engine.rendering.world.WorldRenderer;
 
@@ -62,7 +61,6 @@ public class SimpleBlendMaterialsNode extends AbstractNode {
     @Override
     public void setDependencies(Context context) {
         Camera playerCamera = context.get(WorldRenderer.class).getActiveCamera();
-        addDesiredStateChange(new LookThrough(playerCamera));
 
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
         addOutputBufferPairConnection(1, bufferPairConnection);

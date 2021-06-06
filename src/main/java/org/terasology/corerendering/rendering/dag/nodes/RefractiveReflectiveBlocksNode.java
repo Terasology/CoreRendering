@@ -20,7 +20,6 @@ import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConne
 import org.terasology.engine.rendering.dag.nodes.RefractiveReflectiveBlocksNodeProxy;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.engine.rendering.opengl.FBO;
@@ -185,7 +184,6 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         displayResolutionDependentFbo.subscribe(POST_FBO_REGENERATION, this);
 
 
-        addDesiredStateChange(new LookThrough(activeCamera));
         addDesiredStateChange(new BindFbo(refractiveReflectiveFbo));
         addDesiredStateChange(new EnableMaterial(CHUNK_MATERIAL_URN));
         int textureSlot = 0;

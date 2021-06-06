@@ -32,7 +32,6 @@ import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 
 import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo.FboTexturesTypes.ColorTexture;
-import static org.terasology.engine.rendering.opengl.OpenGLUtils.renderFullscreenQuad;
 
 /**
  * Instances of this class take the content of the color attachment of an input FBO

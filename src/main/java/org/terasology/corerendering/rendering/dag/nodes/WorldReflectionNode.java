@@ -18,7 +18,6 @@ import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
-import org.terasology.engine.rendering.dag.stateChanges.LookThrough;
 import org.terasology.engine.rendering.dag.stateChanges.ReflectedCamera;
 import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
 import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
@@ -101,7 +100,6 @@ public class WorldReflectionNode extends ConditionDependentNode {
     @Override
     public void setDependencies(Context context) {
         addDesiredStateChange(new ReflectedCamera(activeCamera)); // this has to go before the LookThrough state change
-        addDesiredStateChange(new LookThrough(activeCamera));
 
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         FBO reflectedFbo = getInputFboData(1);
