@@ -193,6 +193,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     }
 
     private void positionShadowMapCamera() {
+        shadowMapCamera.updateMatrices();
         // We begin by setting our light coordinates at the player coordinates, ignoring the player's altitude
         Vector3f mainLightPosition = new Vector3f(activeCamera.getPosition().x, 0.0f, activeCamera.getPosition().z); // world-space coordinates
 
@@ -219,7 +220,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
         fromLightToPlayerDirection.mul(-1.0f);
         shadowMapCamera.getViewingDirection().set(fromLightToPlayerDirection);
 
-        shadowMapCamera.update(worldRenderer.getSecondsSinceLastFrame());
+        shadowMapCamera.updateMatrices();
+
     }
 
 
