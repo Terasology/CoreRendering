@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Math;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL30;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
@@ -18,6 +20,7 @@ import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
 import org.terasology.engine.rendering.dag.stateChanges.EnableMaterial;
+import org.terasology.engine.rendering.dag.stateChanges.SetFacesToCull;
 import org.terasology.engine.rendering.dag.stateChanges.SetViewportToSizeOf;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.world.RenderQueuesHelper;
@@ -27,9 +30,11 @@ import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.math.TeraMath;
 
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import static org.lwjgl.opengl.GL11.GL_FRONT;
 import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.OPAQUE;
 
 /**
@@ -48,9 +53,9 @@ import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.O
 public class ShadowMapNode extends ConditionDependentNode implements PropertyChangeListener {
     public static final SimpleUri SHADOW_MAP_FBO_URI = new SimpleUri("engine:fbo.sceneShadowMap");
     private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("engine:prog.shadowMap");
-    private static final int SHADOW_FRUSTUM_BOUNDS = 500;
-    private static final float STEP_SIZE = 50f;
+    private static final int SHADOW_FRUSTUM_BOUNDS = 200;
     private Material shadowMapMaterial;
+    private static final float STEP_SIZE = 50f;
 
     public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, -SHADOW_FRUSTUM_BOUNDS);
 
@@ -59,7 +64,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private RenderQueuesHelper renderQueues;
 
     private SubmersibleCamera activeCamera;
-    private float texelSize;
+    private double texelSize;
 
     public ShadowMapNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
@@ -68,12 +73,15 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
         renderQueues = context.get(RenderQueuesHelper.class);
         backdropProvider = context.get(BackdropProvider.class);
         renderingConfig = context.get(Config.class).getRendering();
+        addDesiredStateChange(new SetFacesToCull(GL_FRONT));
 
         activeCamera = worldRenderer.getActiveCamera();
 
         context.get(RenderableWorld.class).setShadowMapCamera(shadowMapCamera);
+        shadowMapCamera.setzNear(-500.0f);
+        shadowMapCamera.setzFar(500.0f);
 
-        texelSize = 1.0f / renderingConfig.getShadowMapResolution() * 2.0f;
+        texelSize = calculateTexelSize(renderingConfig.getShadowMapResolution());
         renderingConfig.subscribe(RenderingConfig.SHADOW_MAP_RESOLUTION, this);
 
         requiresCondition(() -> renderingConfig.isDynamicShadows());
@@ -83,6 +91,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
     @Override
     public void setDependencies(Context context) {
+        shadowMapMaterial = getMaterial(SHADOW_MAP_MATERIAL_URN);
+
         FBO shadowMapFbo = getInputFboData(1);
         addOutputFboConnection(1, shadowMapFbo);
         addDesiredStateChange(new BindFbo(shadowMapFbo));
@@ -92,8 +102,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
         addDesiredStateChange(new EnableFaceCulling());
     }
 
-    private float calculateTexelSize(int shadowMapResolution) {
-        return 1.0f / shadowMapResolution * 2.0f; // the 2.0 multiplier is currently a mystery.
+    private double calculateTexelSize(int shadowMapResolution) {
+        return (1.0 / shadowMapResolution) * 2.0; // the 2.0 multiplier is currently a mystery.
     }
 
     /**
@@ -139,19 +149,23 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
      */
     @Override
     public void process() {
+
+        GL30.glViewport(0, 0, renderingConfig.getShadowMapResolution(), renderingConfig.getShadowMapResolution());
+        GL30.glEnable(GL30.GL_POLYGON_OFFSET_FILL);
+        GL30.glPolygonOffset(0,1);
+
         // TODO: remove this IF statement when VR is handled via parallel nodes, one per eye.
         if (worldRenderer.isFirstRenderingStageForCurrentFrame()) {
             PerformanceMonitor.startActivity("rendering/" + getUri());
 
             // Actual Node Processing
-
             positionShadowMapCamera(); // TODO: extract these calculation into a separate node.
+            shadowMapMaterial.setMatrix4("projectionMatrix", shadowMapCamera.getProjectionMatrix(), true);
 
             int numberOfRenderedTriangles = 0;
             int numberOfChunksThatAreNotReadyYet = 0;
 
             final Vector3f cameraPosition = shadowMapCamera.getPosition();
-            shadowMapMaterial.setMatrix4("projectionMatrix", shadowMapCamera.getProjectionMatrix(), true);
 
             Matrix4f modelViewMatrix = new Matrix4f();
             Matrix4f model = new Matrix4f();
@@ -174,19 +188,14 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
             PerformanceMonitor.endActivity();
         }
+        GL30.glDisable(GL30.GL_POLYGON_OFFSET_FILL);
+
+        GL30.glViewport(0, 0, renderingConfig.getWindowWidth(), renderingConfig.getWindowHeight());
     }
 
     private void positionShadowMapCamera() {
         // We begin by setting our light coordinates at the player coordinates, ignoring the player's altitude
         Vector3f mainLightPosition = new Vector3f(activeCamera.getPosition().x, 0.0f, activeCamera.getPosition().z); // world-space coordinates
-
-        // The shadow projected onto the ground must move in in light-space texel-steps, to avoid causing flickering.
-        // That's why we first convert it to the previous frame's light-space coordinates and then back to world-space.
-        shadowMapCamera.getViewProjectionMatrix().transformPosition(mainLightPosition); // to light-space
-        mainLightPosition.set(TeraMath.fastFloor(mainLightPosition.x / texelSize) * texelSize, 0.0f,
-                              TeraMath.fastFloor(mainLightPosition.z / texelSize) * texelSize);
-        shadowMapCamera.getInverseViewProjectionMatrix().transformPosition(mainLightPosition); // back to world-space
-
         // This is what causes the shadow map to change infrequently, to prevent flickering.
         // Notice that this is different from what is done above, which is about spatial steps
         // and is related to the player's position and texels.
@@ -194,21 +203,30 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
         // The shadow map camera is placed away from the player, in the direction of the main light.
         Vector3f offsetFromPlayer = new Vector3f(quantizedMainLightDirection);
-        offsetFromPlayer.mul(256.0f + 64.0f); // these hardcoded numbers are another mystery.
+        offsetFromPlayer.mul(64.0f); // these hardcoded numbers are another mystery.
         mainLightPosition.add(offsetFromPlayer);
-        shadowMapCamera.getPosition().set(mainLightPosition);
 
         // Finally, we adjust the shadow map camera to look toward the player
         Vector3f fromLightToPlayerDirection = new Vector3f(quantizedMainLightDirection);
         fromLightToPlayerDirection.mul(-1.0f);
+
+        shadowMapCamera.getPosition().set(mainLightPosition);
         shadowMapCamera.getViewingDirection().set(fromLightToPlayerDirection);
 
-        shadowMapCamera.update(worldRenderer.getSecondsSinceLastFrame());
+        // The shadow projected onto the ground must move in in light-space texel-steps, to avoid causing flickering.
+        // That's why we first convert it to the previous frame's light-space coordinates and then back to world-space.
+        shadowMapCamera.getViewProjectionMatrix().transformPosition(mainLightPosition); // to light-space
+        mainLightPosition.set(Math.floor(mainLightPosition.x / texelSize) * texelSize, 0.0f,Math.floor(mainLightPosition.z / texelSize) * texelSize);
+        shadowMapCamera.getInverseViewProjectionMatrix().transformPosition(mainLightPosition); // back to world-space
+        shadowMapCamera.getPosition().set(mainLightPosition);
+        shadowMapCamera.updateMatrices();
+
     }
 
+
     private Vector3f getQuantizedMainLightDirection(float stepSize) {
-        float mainLightAngle = (float) Math.floor((double) backdropProvider.getSunPositionAngle() * stepSize) / stepSize + 0.0001f;
-        Vector3f mainLightDirection = new Vector3f(0.0f, (float) Math.cos(mainLightAngle), (float) Math.sin(mainLightAngle));
+        float mainLightAngle = (float) (Math.floor((double) backdropProvider.getSunPositionAngle() * stepSize) / stepSize);
+        Vector3f mainLightDirection = new Vector3f(0.0f, Math.cos(mainLightAngle), Math.sin(mainLightAngle));
 
         // When the sun goes under the horizon we flip the vector, to provide the moon direction, and viceversa.
         if (mainLightDirection.y < 0.0f) {
@@ -217,4 +235,5 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
         return mainLightDirection;
     }
+
 }

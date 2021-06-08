@@ -163,6 +163,7 @@ public class DeferredPointLightsNode extends AbstractNode {
         // TODO: Remove this explicit binding once we get rid of activateFeature, or find a way to retain parameters through it.
         lightGeometryMaterial.setInt("texSceneOpaqueDepth", 0, true);
         lightGeometryMaterial.setInt("texSceneOpaqueNormals", 1, true);
+        lightGeometryMaterial.setMatrix4("viewProjMatrix", activeCamera.getViewProjectionMatrix());
 
         if (renderingConfig.isDynamicShadows()) {
             if (renderingConfig.isCloudShadows()) {
@@ -172,9 +173,17 @@ public class DeferredPointLightsNode extends AbstractNode {
         }
 
         if (renderingConfig.isDynamicShadows()) {
-            lightGeometryMaterial.setMatrix4("lightViewProjMatrix", lightCamera.getViewProjectionMatrix(), true);
-            lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
 
+            lightGeometryMaterial.setMatrix4("lightMatrix", new Matrix4f(
+                    0.5f,0.0f,0.0f,0.0f,
+                    0.0f,0.5f,0.0f,0.0f,
+                    0.0f,0.0f,0.5f,0.0f,
+                    0.5f,0.5f,0.5f,1.0f)
+                    .mul(lightCamera.getProjectionMatrix())
+                    .mul(lightCamera.getViewMatrix())
+            );
+
+            lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
             lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
         }
