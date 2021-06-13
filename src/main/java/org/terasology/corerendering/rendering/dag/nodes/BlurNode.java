@@ -21,7 +21,7 @@ import org.terasology.engine.rendering.opengl.FBO;
  * a blurred version of it in the color buffer attached to the output FBO.
  */
 public class BlurNode extends ConditionDependentNode {
-    private static final ResourceUrn BLUR_MATERIAL_URN = new ResourceUrn("engine:prog.blur");
+    private static final ResourceUrn BLUR_MATERIAL_URN = new ResourceUrn("CoreRendering:blur");
 
     protected float blurRadius;
 

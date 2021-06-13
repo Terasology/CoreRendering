@@ -30,7 +30,7 @@ import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFr
  * This node is integral to the deferred lighting technique.
  */
 public class ApplyDeferredLightingNode extends AbstractNode {
-    private static final ResourceUrn DEFERRED_LIGHTING_MATERIAL_URN = new ResourceUrn("engine:prog.lightBufferPass");
+    private static final ResourceUrn DEFERRED_LIGHTING_MATERIAL_URN = new ResourceUrn("CoreRendering:lightBufferPass");
     private Mesh renderQuad;
 
     public ApplyDeferredLightingNode(String nodeUri, Name providingModule, Context context) {

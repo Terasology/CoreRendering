@@ -52,7 +52,7 @@ import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.O
  * - https://docs.google.com/drawings/d/1Iz7MA8Y5q7yjxxcgZW-0antv5kgx6NYkvoInielbwGU/edit?usp=sharing
  */
 public class WorldReflectionNode extends ConditionDependentNode {
-    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
+    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("CoreRendering:chunk");
 
     private RenderQueuesHelper renderQueues;
     private BackdropProvider backdropProvider;

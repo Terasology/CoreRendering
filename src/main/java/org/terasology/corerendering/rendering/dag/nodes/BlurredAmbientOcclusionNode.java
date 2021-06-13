@@ -44,7 +44,7 @@ import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDepen
  */
 public class BlurredAmbientOcclusionNode extends ConditionDependentNode {
     public static final SimpleUri SSAO_BLURRED_FBO_URI = new SimpleUri("engine:fbo.ssaoBlurred");
-    private static final ResourceUrn SSAO_BLURRED_MATERIAL_URN = new ResourceUrn("engine:prog.ssaoBlur");
+    private static final ResourceUrn SSAO_BLURRED_MATERIAL_URN = new ResourceUrn("CoreRendering:ssaoBlur");
 
     private Material ssaoBlurredMaterial;
     private Mesh renderQuad;

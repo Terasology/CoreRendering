@@ -42,7 +42,7 @@ import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDepen
  * Requirements: https://github.com/MovingBlocks/Terasology/issues/3040
  */
 public class VignetteNode  extends AbstractNode implements PropertyChangeListener {
-    private static final ResourceUrn VIGNETTE_MATERIAL_URN = new ResourceUrn("engine:prog.vignette");
+    private static final ResourceUrn VIGNETTE_MATERIAL_URN = new ResourceUrn("CoreRendering:vignette");
 
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
