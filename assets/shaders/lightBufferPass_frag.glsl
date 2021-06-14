@@ -9,6 +9,10 @@ uniform sampler2D texSceneOpaqueDepth;
 uniform sampler2D texSceneOpaqueNormals;
 uniform sampler2D texSceneOpaqueLightBuffer;
 
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outNormal;
+layout(location = 2) out vec4 outLight;
+
 void main() {
     vec4 colorOpaque = texture(texSceneOpaque, v_uv0.xy);
     float depthOpaque = texture(texSceneOpaqueDepth, v_uv0.xy).r * 2.0 - 1.0;
@@ -28,11 +32,10 @@ void main() {
         colorOpaque.rgb += lightBufferOpaque.aaa;
     }
 
-    gl_FragData[0].rgba = colorOpaque.rgba;
-    gl_FragData[1].rgba = normalBuffer.rgba;
-    gl_FragData[2].rgb = blocklightColor.rgb;
-    gl_FragData[2].a = sunlightIntensity;
-
+    outColor.rgba = colorOpaque.rgba;
+    outNormal.rgba = normalBuffer.rgba;
+    outLight.rgb = blocklightColor.rgb;
+    outLight.a = sunlightIntensity;
 
     gl_FragDepth = depthOpaque * 0.5 + 0.5;
 }

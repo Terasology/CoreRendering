@@ -50,6 +50,10 @@ uniform vec3 volumetricFogSettings;
 uniform vec3 fogWorldPosition;
 #endif
 
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outNormal;
+layout(location = 2) out vec4 outLight;
+
 void main() {
     vec4 colorOpaque = texture(texSceneOpaque, v_uv0.xy);
     float depthOpaque = texture(texSceneOpaqueDepth, v_uv0.xy).r * 2.0 - 1.0;
@@ -164,8 +168,8 @@ void main() {
     float fade = clamp(1.0 - colorTransparent.a, 0.0, 1.0);
     vec4 color = mix(colorTransparent, colorOpaque, fade);
 
-    gl_FragData[0].rgba = color.rgba;
-    gl_FragData[1].rgba = normalOpaque.rgba;
-    gl_FragData[2].rgba = lightBufferOpaque.rgba;
+    outColor.rgba = color.rgba;
+    outNormal.rgba = normalOpaque.rgba;
+    outLight.rgba = lightBufferOpaque.rgba;
     gl_FragDepth = depthOpaque * 0.5 + 0.5;
 }

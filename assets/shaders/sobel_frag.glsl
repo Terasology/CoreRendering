@@ -12,8 +12,10 @@ uniform float texelHeight;
 uniform float pixelOffsetX;
 uniform float pixelOffsetY;
 
+layout(location = 0) out vec4 outColor;
+
 float fetchDepth(float x, float y) {
-    return linDepth(texture2D(texDepth, v_uv0.xy + vec2(x*texelWidth*pixelOffsetX, y*texelHeight*pixelOffsetY)).x);
+    return linDepth(texture(texDepth, v_uv0.xy + vec2(x*texelWidth*pixelOffsetX, y*texelHeight*pixelOffsetY)).x);
 }
 
 void main() {
@@ -32,5 +34,5 @@ void main() {
     gy = -1.0*depthMatrix[0][0]-2.0*depthMatrix[0][1]-1.0*depthMatrix[0][2]+1.0*depthMatrix[2][0]+2.0*depthMatrix[2][1]+1.0*depthMatrix[2][2];
 
     float result = sqrt(gx*gx + gy*gy);
-    gl_FragData[0].rgba = vec4(result, result, result, 1.0);
+    outColor.rgba = vec4(result, result, result, 1.0);
 }

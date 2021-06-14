@@ -20,16 +20,18 @@ uniform mat4 projMatrix;
 
 uniform vec3 ssaoSamples[SSAO_KERNEL_ELEMENTS];
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
-    float currentDepth = texture2D(texDepth, v_uv0.xy).x * 2.0 - 1.0;
+    float currentDepth = texture(texDepth, v_uv0.xy).x * 2.0 - 1.0;
 
     // Exclude the sky...
     if (epsilonEqualsOne(currentDepth)) {
-        gl_FragData[0].rgba = vec4(1.0);
+        outColor.rgba = vec4(1.0);
         return;
     }
 
-    vec3 normal = texture2D(texNormals, v_uv0.xy).xyz * 2.0 - 1.0;
+    vec3 normal = texture(texNormals, v_uv0.xy).xyz * 2.0 - 1.0;
 
     vec2 noiseScale = noiseTexelSize / texelSize;
     vec3 randomVec = texture(texNoise, v_uv0.xy * noiseScale).xyz * 2.0 - 1.0;
@@ -58,7 +60,7 @@ void main() {
         offset.xy = offset.xy * vec2(0.5) + vec2(0.5);
 
         // TODO: Holy... frustum ray and linearized depth - please!
-        sampleDepth = reconstructViewPos(texture2D(texDepth, offset.xy).r * 2.0 - 1.0, v_uv0.xy, invProjMatrix).z;
+        sampleDepth = reconstructViewPos(texture(texDepth, offset.xy).r * 2.0 - 1.0, v_uv0.xy, invProjMatrix).z;
         float depthDifference = abs(viewSpacePos.z - sampleDepth);
 
         float rangeCheck;
@@ -75,5 +77,5 @@ void main() {
 
     occlusion = 1.0 - occlusion / samplesTaken;
 
-    gl_FragData[0].rgba = vec4(pow(occlusion, ssaoStrength));
+    outColor.rgba = vec4(pow(occlusion, ssaoStrength));
 }

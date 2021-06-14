@@ -44,6 +44,8 @@ uniform vec4 lightExtendedProperties;
 
 uniform mat4 invProjMatrix;
 
+layout(location = 0) out vec4 outLight;
+
 void main() {
 
 #if defined (FEATURE_LIGHT_POINT)
@@ -54,10 +56,10 @@ void main() {
     vec2 projectedPos = vec2(0.0);
 #endif
 
-    vec4 normalBuffer = texture2D(texSceneOpaqueNormals, projectedPos.xy).rgba;
+    vec4 normalBuffer = texture(texSceneOpaqueNormals, projectedPos.xy).rgba;
     vec3 normal = normalize(normalBuffer.xyz * 2.0 - 1.0);
     float shininess = normalBuffer.a;
-    highp float depth = texture2D(texSceneOpaqueDepth, projectedPos.xy).r * 2.0 - 1.0;
+    highp float depth = texture(texSceneOpaqueDepth, projectedPos.xy).r * 2.0 - 1.0;
 
     vec3 lightDir;
     // TODO: Costly - would be nice to use Crytek's view frustum ray method at this point
@@ -98,7 +100,7 @@ void main() {
         // TODO: Add shader parameters for this...
         // Get the preconfigured value from the randomized texture, sampling a value from it to determine how much cloud shadow there will be.
         // Clamp the value so that clouds do not turn the surface black.
-        float cloudOcclusion = clamp(texture2D(texSceneClouds, (worldPosition.xz + cameraPosition.xz) * 0.005 + timeToTick(time, 0.002)).r * 10,0.6,1);
+        float cloudOcclusion = clamp(texture(texSceneClouds, (worldPosition.xz + cameraPosition.xz) * 0.005 + timeToTick(time, 0.002)).r * 10,0.6,1);
 
         // Combine the cloud shadow with the dynamic shadows
         shadowTerm *= rescaleRange(cloudOcclusion,0,1,0,shadowTerm);
@@ -138,7 +140,7 @@ void main() {
     vec3 color = ambTerm * lightColorAmbient;
     color *= lightColorDiffuse * lightDiffuseIntensity * lambTerm;
 #elif defined (FEATURE_LIGHT_DIRECTIONAL)
-    vec4 lightBuffer = texture2D(texSceneOpaqueLightBuffer, projectedPos.xy);
+    vec4 lightBuffer = texture(texSceneOpaqueLightBuffer, projectedPos.xy);
     float sunlightIntensity = lightBuffer.y;
     vec3 color = calcSunlightColorDeferred(sunlightIntensity, lambTerm, ambTerm, lightDiffuseIntensity, lightColorAmbient, lightColorDiffuse);
 #else
@@ -165,9 +167,9 @@ void main() {
 
 // TODO A 3D wizard should take a look at this. Configurable for the moment to make better comparisons possible.
 #if defined (CLAMP_LIGHTING)
-    gl_FragData[0].rgba = clamp(vec4(color.r, color.g, color.b, specular), 0.0, 1.0);
+    outLight.rgba = clamp(vec4(color.r, color.g, color.b, specular), 0.0, 1.0);
 #else
-    gl_FragData[0].rgba = vec4(color.r, color.g, color.b, specular);
+    outLight.rgba = vec4(color.r, color.g, color.b, specular);
 #endif
 
 }
