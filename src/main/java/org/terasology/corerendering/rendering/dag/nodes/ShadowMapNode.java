@@ -52,7 +52,7 @@ import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.O
  */
 public class ShadowMapNode extends ConditionDependentNode implements PropertyChangeListener {
     public static final SimpleUri SHADOW_MAP_FBO_URI = new SimpleUri("engine:fbo.sceneShadowMap");
-    private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("engine:prog.shadowMap");
+    private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("CoreRendering:shadowMap");
     private static final int SHADOW_FRUSTUM_BOUNDS = 200;
     private Material shadowMapMaterial;
     private static final float STEP_SIZE = 50f;

@@ -55,7 +55,7 @@ import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFr
  * light up the 3d scene.
  */
 public class DeferredMainLightNode extends AbstractNode {
-    private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("engine:prog.lightGeometryPass");
+    private static final ResourceUrn LIGHT_GEOMETRY_MATERIAL_URN = new ResourceUrn("CoreRendering:lightGeometryPass");
 
     private BackdropProvider backdropProvider;
     private RenderingConfig renderingConfig;

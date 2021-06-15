@@ -4,7 +4,6 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
@@ -49,7 +48,7 @@ import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.A
  * the color stored in the frame buffer and the resulting color overwrites the previously stored one.
  */
 public class AlphaRejectBlocksNode extends AbstractNode implements WireframeCapable, PropertyChangeListener {
-    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
+    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("CoreRendering:chunk");
 
     private WorldRenderer worldRenderer;
     private RenderQueuesHelper renderQueues;

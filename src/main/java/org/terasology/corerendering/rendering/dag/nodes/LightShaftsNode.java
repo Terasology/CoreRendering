@@ -45,7 +45,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
  */
 public class LightShaftsNode extends ConditionDependentNode {
     public static final SimpleUri LIGHT_SHAFTS_FBO_URI = new SimpleUri("engine:fbo.lightShafts");
-    private static final ResourceUrn LIGHT_SHAFTS_MATERIAL_URN = new ResourceUrn("engine:prog.lightShafts");
+    private static final ResourceUrn LIGHT_SHAFTS_MATERIAL_URN = new ResourceUrn("CoreRendering:lightShafts");
 
     private BackdropProvider backdropProvider;
     private SubmersibleCamera activeCamera;

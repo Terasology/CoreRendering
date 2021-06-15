@@ -23,7 +23,7 @@ import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage
 import static org.terasology.engine.rendering.world.WorldRenderer.RenderingStage.MONO;
 
 public class OutputToScreenNode extends ConditionDependentNode {
-    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.outputPass");
+    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("CoreRendering:outputPass");
 
     private DisplayResolutionDependentFbo displayResolutionDependentFBOs;
     private DisplayDevice displayDevice;

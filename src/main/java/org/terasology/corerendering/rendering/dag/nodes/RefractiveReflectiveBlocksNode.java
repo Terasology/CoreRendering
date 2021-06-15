@@ -82,7 +82,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
     @Range(min = 0.0f, max = 5.0f)
     public static float waterOffsetY;
 
-    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
+    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("CoreRendering:chunk");
 
     private RenderQueuesHelper renderQueues;
     private WorldRenderer worldRenderer;
