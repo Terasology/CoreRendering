@@ -37,7 +37,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
  */
 public class OutlineNode extends ConditionDependentNode {
     public static final SimpleUri OUTLINE_FBO_URI = new SimpleUri("engine:fbo.outline");
-    private static final ResourceUrn OUTLINE_MATERIAL_URN = new ResourceUrn("engine:prog.sobel");
+    private static final ResourceUrn OUTLINE_MATERIAL_URN = new ResourceUrn("CoreRendering:sobel");
 
     private RenderingConfig renderingConfig;
     private SubmersibleCamera activeCamera;

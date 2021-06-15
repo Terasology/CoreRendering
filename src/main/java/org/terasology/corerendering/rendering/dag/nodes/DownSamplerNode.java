@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.context.Context;
@@ -39,7 +26,7 @@ import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFr
  */
 public class DownSamplerNode extends ConditionDependentNode {
     private static final String TEXTURE_NAME = "tex";
-    private static final ResourceUrn DOWN_SAMPLER_MATERIAL_URN = new ResourceUrn("engine:prog.downSampler");
+    private static final ResourceUrn DOWN_SAMPLER_MATERIAL_URN = new ResourceUrn("CoreRendering:downSampler");
 
     private FBO outputFbo;
     private Material downSampler;

@@ -30,7 +30,7 @@ import static org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDepen
 public class OutputToHMDNode extends ConditionDependentNode {
     private static final SimpleUri LEFT_EYE_FBO_URI = new SimpleUri("engine:fbo.leftEye");
     private static final SimpleUri RIGHT_EYE_FBO_URI = new SimpleUri("engine:fbo.rightEye");
-    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("engine:prog.outputPass");
+    private static final ResourceUrn OUTPUT_TEXTURED_MATERIAL_URN = new ResourceUrn("CoreRendering:outputPass");
     // TODO: make these configurable options
 
     private OpenVRProvider vrProvider;

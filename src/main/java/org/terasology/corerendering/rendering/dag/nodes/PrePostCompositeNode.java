@@ -45,7 +45,7 @@ import static org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFr
  * [1] And refractions? To be verified.
  */
 public class PrePostCompositeNode extends AbstractNode implements PropertyChangeListener {
-    private static final ResourceUrn PRE_POST_MATERIAL_URN = new ResourceUrn("engine:prog.prePostComposite");
+    private static final ResourceUrn PRE_POST_MATERIAL_URN = new ResourceUrn("CoreRendering:prePostComposite");
 
     private RenderingConfig renderingConfig;
     private WorldRenderer worldRenderer;

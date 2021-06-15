@@ -33,7 +33,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 public class HighPassNode extends ConditionDependentNode {
     public static final SimpleUri HIGH_PASS_FBO_URI = new SimpleUri("engine:fbo.highPass");
     public static final FboConfig HIGH_PASS_FBO_CONFIG = new FboConfig(HIGH_PASS_FBO_URI, FULL_SCALE, FBO.Type.DEFAULT);
-    private static final ResourceUrn HIGH_PASS_MATERIAL_URN = new ResourceUrn("engine:prog.highPass");
+    private static final ResourceUrn HIGH_PASS_MATERIAL_URN = new ResourceUrn("CoreRendering:highPass");
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 5.0f)

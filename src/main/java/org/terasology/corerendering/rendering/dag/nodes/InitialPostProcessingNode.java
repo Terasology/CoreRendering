@@ -41,7 +41,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
  */
 public class InitialPostProcessingNode extends AbstractNode implements PropertyChangeListener {
     static final SimpleUri INITIAL_POST_FBO_URI = new SimpleUri("engine:fbo.initialPost");
-    private static final ResourceUrn INITIAL_POST_MATERIAL_URN = new ResourceUrn("engine:prog.initialPost");
+    private static final ResourceUrn INITIAL_POST_MATERIAL_URN = new ResourceUrn("CoreRendering:initialPost");
 
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;

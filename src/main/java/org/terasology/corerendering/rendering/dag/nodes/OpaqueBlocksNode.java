@@ -44,7 +44,7 @@ import static org.terasology.engine.rendering.primitives.ChunkMesh.RenderPhase.O
  * In a typical world this is the majority of the world's landscape.
  */
 public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, PropertyChangeListener {
-    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("engine:prog.chunk");
+    private static final ResourceUrn CHUNK_MATERIAL_URN = new ResourceUrn("CoreRendering:chunk");
 
     private WorldRenderer worldRenderer;
     private RenderQueuesHelper renderQueues;

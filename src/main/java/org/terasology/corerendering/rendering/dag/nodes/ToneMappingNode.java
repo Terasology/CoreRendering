@@ -35,7 +35,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
  */
 public class ToneMappingNode extends AbstractNode {
     public static final SimpleUri TONE_MAPPING_FBO_URI = new SimpleUri("engine:fbo.toneMapping");
-    private static final ResourceUrn TONE_MAPPING_MATERIAL_URN = new ResourceUrn("engine:prog.toneMapping");
+    private static final ResourceUrn TONE_MAPPING_MATERIAL_URN = new ResourceUrn("CoreRendering:toneMapping");
 
     private ScreenGrabber screenGrabber;
 

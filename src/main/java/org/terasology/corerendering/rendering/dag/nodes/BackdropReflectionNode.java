@@ -43,7 +43,7 @@ import static org.terasology.corerendering.rendering.dag.nodes.BackdropNode.getA
  */
 public class BackdropReflectionNode extends AbstractNode {
     public static final SimpleUri REFLECTED_FBO_URI = new SimpleUri("engine:fbo.sceneReflected");
-    private static final ResourceUrn SKY_MATERIAL_URN = new ResourceUrn("engine:prog.sky");
+    private static final ResourceUrn SKY_MATERIAL_URN = new ResourceUrn("CoreRendering:sky");
     private static final int RADIUS = 1024;
     private static final int SLICES = 16;
     private static final int STACKS = 128;
