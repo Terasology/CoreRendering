@@ -217,7 +217,6 @@ void main() {
 
         vec4 reflectionColor = vec4(texture(textureWaterReflection, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
         vec4 refractionColor = vec4(texture(texSceneOpaque, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
-
         vec4 litWaterTint = vec4(WATER_TINT) * vec4(combinedLightValue.x, combinedLightValue.y, combinedLightValue.z, 1.0);
 
         /* FRESNEL */
@@ -234,11 +233,11 @@ void main() {
         texCoord.x = mod(texCoord.x, TEXTURE_OFFSET) * (1.0 / TEXTURE_OFFSET);
         texCoord.y = mod(texCoord.y, TEXTURE_OFFSET) / (128.0 / (1.0 / TEXTURE_OFFSET));
         texCoord.y += mod(timeToTick(time, -0.1), 127.0) * (1.0/128.0);
-
         vec4 albedoColor = texture(textureWater, texCoord.xy).rgba;
         albedoColor.rgb *= combinedLightValue;
 
         vec3 refractionColor = texture(texSceneOpaque, projectedPos + albedoColor.rg * 0.05).rgb;
+
 
         color.rgb += mix(refractionColor, albedoColor.rgb, albedoColor.a);
         color.a = 1.0;

@@ -36,6 +36,5 @@ void main() {
     outNormal.rgba = normalBuffer.rgba;
     outLight.rgb = blocklightColor.rgb;
     outLight.a = sunlightIntensity;
-
     gl_FragDepth = depthOpaque * 0.5 + 0.5;
 }

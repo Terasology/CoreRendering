@@ -9,15 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
-import org.terasology.math.TeraMath;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.opengl.PBO;
 import org.terasology.engine.rendering.opengl.ScreenGrabber;
-
-import java.nio.ByteBuffer;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.math.TeraMath;
+import org.terasology.nui.properties.Range;
 
 /**
  * An instance of this node takes advantage of a downsampled version of the scene,
@@ -82,20 +80,16 @@ public class UpdateExposureNode extends AbstractNode {
         if (renderingConfig.isEyeAdaptation()) {
             PerformanceMonitor.startActivity("rendering/" + getUri());
 
+            float[] pixels = new float[3];
+            writeOnlyPbo.readBackPixels(buffer -> {
+                pixels[0] = (buffer.get(2) & 0xFF) / 255.f;
+                pixels[1] = (buffer.get(1) & 0xFF) / 255.f;
+                pixels[2] = (buffer.get(0) & 0xFF) / 255.f;
+            });
             writeOnlyPbo.copyFromFBO(downSampledSceneId, 1, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE);
-            ByteBuffer pixels = writeOnlyPbo.readBackPixels();
-
-            if (pixels.limit() < 3) {
-                logger.error("Failed to auto-update the exposure value.");
-                return;
-            }
-
-            float red   = (pixels.get(2) & 0xFF) / 255.f;
-            float green = (pixels.get(1) & 0xFF) / 255.f;
-            float blue  = (pixels.get(0) & 0xFF) / 255.f;
 
             // See: https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance for the constants below.
-            float currentSceneLuminance = 0.2126f * red + 0.7152f * green + 0.0722f * blue;
+            float currentSceneLuminance = 0.2126f * pixels[0] + 0.7152f * pixels[1] + 0.0722f * pixels[2];
 
             float targetExposure = hdrMaxExposure;
 

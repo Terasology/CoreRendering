@@ -15,7 +15,7 @@ const vec2 s4 = vec2(-1,-1);
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    vec2 texCoordSample = vec2(0.0);
+	vec2 texCoordSample = vec2(0.0);
 
 	texCoordSample = v_uv0.xy + s1 / size;
 	vec4 color = texture(tex, texCoordSample);

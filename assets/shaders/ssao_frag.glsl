@@ -32,7 +32,6 @@ void main() {
     }
 
     vec3 normal = texture(texNormals, v_uv0.xy).xyz * 2.0 - 1.0;
-
     vec2 noiseScale = noiseTexelSize / texelSize;
     vec3 randomVec = texture(texNoise, v_uv0.xy * noiseScale).xyz * 2.0 - 1.0;
 
@@ -76,6 +75,5 @@ void main() {
     }
 
     occlusion = 1.0 - occlusion / samplesTaken;
-
     outColor.rgba = vec4(pow(occlusion, ssaoStrength));
 }

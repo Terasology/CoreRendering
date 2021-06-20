@@ -14,7 +14,6 @@ uniform float whitePoint = W;
 
 layout(location = 0) out vec4 outColor;
 
-
 void main(){
     vec4 color = srgbToLinear(texture(texScene, v_uv0.xy));
 
@@ -35,6 +34,5 @@ void main(){
     vec3 finalColor = (x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06);
     color.rgb = finalColor;
 #endif
-
     outColor.rgba = linearToSrgb(color);
 }
