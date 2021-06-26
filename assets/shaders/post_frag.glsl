@@ -29,6 +29,8 @@ uniform mat4 invViewProjMatrix;
 uniform mat4 prevViewProjMatrix;
 #endif
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
 #if !defined (NO_BLUR)
     vec4 colorBlur = texture(texBlur, v_uv0.xy);
@@ -112,5 +114,5 @@ void main() {
     vec3 lutOffset = vec3(1.0 / 32.0);
     finalColor.rgb = texture(texColorGradingLut, lutScale * finalColor.rgb + lutOffset).rgb;
 
-    gl_FragData[0].rgba = finalColor;
+    outColor.rgba = finalColor;
 }

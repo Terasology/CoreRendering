@@ -16,6 +16,8 @@ uniform sampler2D texLightShafts;
 
 in vec2 v_uv0;
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
 
     vec4 color = texture(texScene, v_uv0.xy);
@@ -29,5 +31,5 @@ void main() {
     color += colorBloom * bloomFactor;
 #endif
 
-    gl_FragData[0].rgba = color.rgba;
+    outColor.rgba = color.rgba;
 }

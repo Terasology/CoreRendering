@@ -72,6 +72,10 @@ mat2 inverse2(mat2 m) {
     return mat2(m[1][1], -m[0][1], -m[1][0], m[0][0]) / det;
 }
 
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outNormal;
+layout(location = 2) out vec4 outLight;
+
 void main() {
 
 // Active for worldReflectionNode only.
@@ -102,7 +106,7 @@ void main() {
     #if defined (PARALLAX_MAPPING)
         vec2 viewDirectionUvProjection = -normalizedViewPos * uvToView;
 
-        float height = parallaxScale * texture2D(textureAtlasHeight, texCoord).r - parallaxBias;
+        float height = parallaxScale * texture(textureAtlasHeight, texCoord).r - parallaxBias;
         // Ideally this should be divided by dot(normal, normalizedViewPos), as the offset for texCoord
         // is the component parallel to the surface of a vector along the view's forward axis,
         // the other component being a vector perpendicular to the surface and having magnitude "height".
@@ -119,10 +123,10 @@ void main() {
         // Normalised but not orthonormalised. It should be orthogonal anyway (except for some non-rectangular
         // block shapes like torches), but it's not obvious what's the best thing to do when it isn't.
         mat3 uvnSpaceToViewSpace = mat3(normalize(uvToView[0]), normalize(uvToView[1]), normal);
-        normalOpaque = normalize(texture2D(textureAtlasNormal, texCoord).xyz * 2.0 - 1.0);
+        normalOpaque = normalize(texture(textureAtlasNormal, texCoord).xyz * 2.0 - 1.0);
         normalOpaque = normalize(uvnSpaceToViewSpace * normalOpaque);
 
-        shininess = texture2D(textureAtlasNormal, texCoord).w;
+        shininess = texture(textureAtlasNormal, texCoord).w;
     #endif
 #endif
 
@@ -138,8 +142,8 @@ void main() {
         vec2 waterOffset = vec2(scaledVertexWorldPos.x + timeToTick(time, 0.0075), scaledVertexWorldPos.y + timeToTick(time, 0.0075));
         vec2 waterOffset2 = vec2(scaledVertexWorldPos.x + timeToTick(time, 0.005), scaledVertexWorldPos.y - timeToTick(time, 0.005));
 
-        normalWaterOffset = (texture2D(textureWaterNormal, waterOffset).xyz * 2.0 - 1.0).xy;
-        normalWaterOffset += (texture2D(textureWaterNormalAlt, waterOffset2).xyz * 2.0 - 1.0).xy;
+        normalWaterOffset = (texture(textureWaterNormal, waterOffset).xyz * 2.0 - 1.0).xy;
+        normalWaterOffset += (texture(textureWaterNormalAlt, waterOffset2).xyz * 2.0 - 1.0).xy;
         normalWaterOffset *= 0.5 * (1.0 / vertexViewPos.z * waterNormalBias);
 
         normalWater.xy += normalWaterOffset;
@@ -163,7 +167,7 @@ void main() {
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
 
 #if !defined (FEATURE_REFRACTIVE_PASS)
-    color = texture2D(textureAtlas, texCoord.xy);
+    color = texture(textureAtlas, texCoord.xy);
 
     #if defined FEATURE_ALPHA_REJECT
         if (color.a < 0.1) {
@@ -211,9 +215,8 @@ void main() {
         float specularHighlight = WATER_SPEC * calcDayAndNightLightingFactor(daylightValue, daylight) * calcSpecLightNormalized(normalWater, sunVecViewAdjusted, normalizedViewPos, waterSpecExp);
         color.xyz += vec3(specularHighlight, specularHighlight, specularHighlight);
 
-        vec4 reflectionColor = vec4(texture2D(textureWaterReflection, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
-        vec4 refractionColor = vec4(texture2D(texSceneOpaque, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
-
+        vec4 reflectionColor = vec4(texture(textureWaterReflection, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
+        vec4 refractionColor = vec4(texture(texSceneOpaque, projectedPos + normalWaterOffset.xy * waterRefraction).xyz, 1.0);
         vec4 litWaterTint = vec4(WATER_TINT) * vec4(combinedLightValue.x, combinedLightValue.y, combinedLightValue.z, 1.0);
 
         /* FRESNEL */
@@ -230,17 +233,17 @@ void main() {
         texCoord.x = mod(texCoord.x, TEXTURE_OFFSET) * (1.0 / TEXTURE_OFFSET);
         texCoord.y = mod(texCoord.y, TEXTURE_OFFSET) / (128.0 / (1.0 / TEXTURE_OFFSET));
         texCoord.y += mod(timeToTick(time, -0.1), 127.0) * (1.0/128.0);
-
-        vec4 albedoColor = texture2D(textureWater, texCoord.xy).rgba;
+        vec4 albedoColor = texture(textureWater, texCoord.xy).rgba;
         albedoColor.rgb *= combinedLightValue;
 
-        vec3 refractionColor = texture2D(texSceneOpaque, projectedPos + albedoColor.rg * 0.05).rgb;
+        vec3 refractionColor = texture(texSceneOpaque, projectedPos + albedoColor.rg * 0.05).rgb;
+
 
         color.rgb += mix(refractionColor, albedoColor.rgb, albedoColor.a);
         color.a = 1.0;
     } else {
-        vec3 refractionColor = texture2D(texSceneOpaque, projectedPos).rgb;
-        vec4 albedoColor = texture2D(textureAtlas, texCoord.xy);
+        vec3 refractionColor = texture(texSceneOpaque, projectedPos).rgb;
+        vec4 albedoColor = texture(textureAtlas, texCoord.xy);
         albedoColor.rgb *= combinedLightValue;
 
         // TODO: Add support for actual refraction here
@@ -251,26 +254,26 @@ void main() {
     // Apply the final lighting mix
     color.xyz *= combinedLightValue * occlusionValue;
 #else
-    gl_FragData[2].rgba = vec4(blocklightColorBrightness, daylightValue, 0.0, 0.0);
+    outLight.rgba = vec4(blocklightColorBrightness, daylightValue, 0.0, 0.0);
 #endif
 
 #if defined (FEATURE_REFRACTIVE_PASS) || defined (FEATURE_USE_FORWARD_LIGHTING)
-    gl_FragData[0].rgba = color.rgba;
-#if defined (FEATURE_REFRACTIVE_PASS)
-    // Encode "reflection" intensity into normal alpha
-    gl_FragData[1].a = 1.0;
-#endif
+    outColor.rgba = color.rgba;
+    #if defined (FEATURE_REFRACTIVE_PASS)
+        // Encode "reflection" intensity into normal alpha
+        outNormal.a = 1.0;
+    #endif
 #else
-    gl_FragData[0].rgb = color.rgb;
+    outColor.rgb = color.rgb;
     // Encode occlusion value into the alpha channel
-    gl_FragData[0].a = occlusionValue;
+    outColor.a = occlusionValue;
     // Encode shininess value into the normal alpha channel
-    gl_FragData[1].a = shininess;
+    outNormal.a = shininess;
 #endif
 
 #if !defined (FEATURE_REFRACTIVE_PASS) && !defined (FEATURE_USE_FORWARD_LIGHTING)
-    gl_FragData[1].rgb = vec3(normalOpaque.x / 2.0 + 0.5, normalOpaque.y / 2.0 + 0.5, normalOpaque.z / 2.0 + 0.5);
+    outNormal.rgb = vec3(normalOpaque.x / 2.0 + 0.5, normalOpaque.y / 2.0 + 0.5, normalOpaque.z / 2.0 + 0.5);
 #elif defined (FEATURE_REFRACTIVE_PASS)
-    gl_FragData[1].rgb = vec3(normalWater.x / 2.0 + 0.5, normalWater.y / 2.0 + 0.5, normalWater.z / 2.0 + 0.5);
+    outNormal.rgb = vec3(normalWater.x / 2.0 + 0.5, normalWater.y / 2.0 + 0.5, normalWater.z / 2.0 + 0.5);
 #endif
 }

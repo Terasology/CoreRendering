@@ -6,6 +6,8 @@ in vec2 v_uv0;
 
 uniform sampler2D target;
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
     vec4 diffColor = texture(target, v_uv0.xy);
 
@@ -15,5 +17,5 @@ void main() {
     }
     #endif
 
-    gl_FragData[0].rgba = diffColor;
+    outColor.rgba = diffColor;
 }

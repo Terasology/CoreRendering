@@ -14,8 +14,10 @@ uniform sampler2D texScene;
 uniform float lightDirDotViewDir;
 uniform vec2 lightScreenPos;
 
+layout(location = 0) out vec4 outExposure;
+
 void main() {
-    gl_FragData[0].rgba = vec4(0.0, 0.0, 0.0, 1.0);
+    outExposure.rgba = vec4(0.0, 0.0, 0.0, 1.0);
 
     if (lightDirDotViewDir > 0.0) {
         vec2 uv0 = v_uv0;
@@ -35,10 +37,10 @@ void main() {
             vec3 sampler = texture(texScene, uv0).rgb;
 
             sampler *= illuminationDecay * weight;
-            gl_FragData[0].rgb += sampler;
+            outExposure.rgb += sampler;
             illuminationDecay *= decay;
         }
 
-        gl_FragData[0].rgb *= exposure * lightDirDotViewDir;
+        outExposure.rgb *= exposure * lightDirDotViewDir;
     }
 }

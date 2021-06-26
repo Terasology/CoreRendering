@@ -7,6 +7,8 @@ uniform vec2 texelSize;
 
 in vec2 v_uv0;
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
     float result = 0.0;
     for (int i=-2; i<2; ++i) {
@@ -16,5 +18,5 @@ void main() {
         }
     }
 
-    gl_FragData[0].rgba = vec4(result / 16.0);
+    outColor.rgba = vec4(result / 16.0);
 }

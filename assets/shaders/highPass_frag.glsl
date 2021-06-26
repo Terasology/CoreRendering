@@ -7,6 +7,8 @@ in vec2 v_uv0;
 uniform sampler2D tex;
 uniform float highPassThreshold;
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
     vec4 color = texture(tex, v_uv0.xy);
 
@@ -15,8 +17,8 @@ void main() {
     // bright = smoothstep(0.0, 0.5, bright);
 
     if(relativeLuminance * highPassThreshold > 1.0) {
-        gl_FragData[0].rgba = vec4(color.rgb, 1);
+        outColor.rgba = vec4(color.rgb, 1);
     } else {
-        gl_FragData[0].rgba = vec4(0);
+        outColor.rgba = vec4(0);
     }
 }

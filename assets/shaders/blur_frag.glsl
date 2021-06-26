@@ -18,13 +18,15 @@ const vec2 taps[12] = vec2[12](
     vec2(-0.32194,-0.932615), vec2(-0.791559,-0.59771)
 );
 
+layout(location = 0) out vec4 outColor;
+
 void main() {
     vec4 sampleAccum = vec4(0.0, 0.0, 0.0, 0.0);
 
     for (int nTapIndex = 0; nTapIndex < 12; nTapIndex++) {
         vec2 tapcoord = v_uv0.xy + texelSize * taps[nTapIndex] * radius;
-        sampleAccum += texture2D(tex, tapcoord);
+        sampleAccum += texture(tex, tapcoord);
     }
 
-    gl_FragData[0].rgba = sampleAccum / 12.0;
+    outColor = sampleAccum / 12.0;
 }

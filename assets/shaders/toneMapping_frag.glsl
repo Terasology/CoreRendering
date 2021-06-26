@@ -6,12 +6,13 @@
 // #define REINHARD_TONEMAP
 // #define BURGESS_TONEMAP
 
-
 in vec2 v_uv0;
 
 uniform sampler2D texScene;
 uniform float exposure = 1;
 uniform float whitePoint = W;
+
+layout(location = 0) out vec4 outColor;
 
 void main(){
     vec4 color = srgbToLinear(texture(texScene, v_uv0.xy));
@@ -33,6 +34,5 @@ void main(){
     vec3 finalColor = (x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06);
     color.rgb = finalColor;
 #endif
-
-    gl_FragData[0].rgba = linearToSrgb(color);
+    outColor.rgba = linearToSrgb(color);
 }

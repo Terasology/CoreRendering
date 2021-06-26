@@ -12,6 +12,8 @@ uniform vec3 inLiquidTint;
 uniform vec3 tint = vec3(1.0,1.0,1.0);
 #endif
 
+layout(location = 0) out vec4 outColor;
+
 void main(){
     vec4 color = texture(texScene, v_uv0.xy);
 
@@ -24,5 +26,5 @@ void main(){
             color.rgb *= inLiquidTint;
         }
     #endif
-    gl_FragData[0].rgba = color.rgba;
+    outColor.rgba = color.rgba;
 }

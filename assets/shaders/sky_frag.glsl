@@ -26,6 +26,8 @@ const vec4 eyePos = vec4(0.0, 0.0, 0.0, 1.0);
 #define SUN_HIGHLIGHT_INTENSITY_FACTOR 1.0
 #define MOON_HIGHLIGHT_INTENSITY_FACTOR 1.0
 
+layout(location = 0) out vec4 outColor;
+
 void main () {
     vec3 v = normalize(v_position.xyz);
     vec3 l = normalize(sunVec.xyz);
@@ -61,5 +63,5 @@ void main () {
 
     skyColor.rgb += vec3((1.0 - cloudsColor.r) * sunHighlight + (1.0 - cloudsColor.r) * moonHighlight);
 
-    gl_FragData[0].rgba = skyColor.rgba;
+    outColor.rgba = skyColor.rgba;
 }
