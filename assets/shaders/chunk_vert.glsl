@@ -102,6 +102,7 @@ out float v_blocklight;
 out float v_ambientLight;
 flat out int isUpside;
 flat out int v_blockHint;
+out vec4 v_colorOffset;
 
 layout (location = 0) in vec3 in_vert;
 layout (location = 1) in vec3 in_normal;
@@ -114,6 +115,8 @@ layout (location = 5) in float in_sunlight;
 layout (location = 6) in float in_blocklight;
 layout (location = 7) in float in_ambientlight;
 
+layout (location = 8) in vec4 colorOffset;
+
 void main() {
 
     v_uv0 = in_uv0;
@@ -121,6 +124,7 @@ void main() {
     v_blocklight = in_blocklight;
     v_ambientLight = in_ambientlight;
     v_blockHint = in_flags;
+    v_colorOffset = colorOffset;
     vertexViewPos = modelViewMatrix * vec4(in_vert, 1.0);
     vertexWorldPos = in_vert + chunkPositionWorld.xyz;
 
