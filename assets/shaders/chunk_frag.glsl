@@ -65,6 +65,7 @@ uniform float clip;
 in float v_sunlight;
 in float v_blocklight;
 in float v_ambientLight;
+in vec4 v_colorOffset;
 
 //inverse is not available in GLSL 1.20, so calculate it manually
 mat2 inverse2(mat2 m) {
@@ -174,6 +175,23 @@ void main() {
             discard;
         }
     #endif
+
+    /* APPLY OVERALL BIOME COLOR OFFSET */
+    if (v_blockHint != BLOCK_HINT_GRASS) {
+        if (v_colorOffset.r < 0.99 && v_colorOffset.g < 0.99 && v_colorOffset.b < 0.99) {
+            if (color.g > 0.5) {
+                color.rgb = vec3(color.g) * v_colorOffset.rgb;
+            } else {
+                color.rgb *= v_colorOffset.rgb;
+            }
+        }
+        /* MASK GRASS AND APPLY BIOME COLOR */
+    } else {
+        vec4 maskColor = texture2D(textureEffects, vec2(10.0 * TEXTURE_OFFSET_EFFECTS + mod(texCoord.x, TEXTURE_OFFSET_EFFECTS), mod(texCoord.y, TEXTURE_OFFSET_EFFECTS)));
+
+        // Only use one channel so the color won't be altered
+        if (maskColor.a != 0.0) color.rgb = vec3(color.g) * v_colorOffset.rgb;
+    }
 #endif
 
     // Calculate daylight lighting value
