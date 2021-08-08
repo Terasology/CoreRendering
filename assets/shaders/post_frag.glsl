@@ -29,6 +29,11 @@ uniform mat4 invViewProjMatrix;
 uniform mat4 prevViewProjMatrix;
 #endif
 
+#ifdef VIGNETTE
+uniform sampler2D texVignette;
+uniform vec3 tint = vec3(1.0,1.0,1.0);
+#endif
+
 layout(location = 0) out vec4 outColor;
 
 void main() {
@@ -113,6 +118,11 @@ void main() {
     // Color grading
     vec3 lutOffset = vec3(1.0 / 32.0);
     finalColor.rgb = texture(texColorGradingLut, lutScale * finalColor.rgb + lutOffset).rgb;
+
+#ifdef VIGNETTE
+    float vig = texture(texVignette, v_uv0.xy).x;
+    finalColor.rgb *= vec3(vig, vig, vig) + (1 - vig) * tint.rgb;
+#endif
 
     outColor.rgba = finalColor;
 }
