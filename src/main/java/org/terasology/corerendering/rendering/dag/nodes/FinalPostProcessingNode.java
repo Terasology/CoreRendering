@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.joml.Vector3f;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
@@ -70,12 +71,12 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
 
     private FBO lastUpdatedGBuffer;
 
-    private boolean isFilmGrainEnabled;
-    private boolean isMotionBlurEnabled;
-
     private StateChange setBlurTexture;
     private StateChange setNoiseTexture;
+    private StateChange setVignetteInputTexture;
     private Mesh renderQuad;
+
+    private Vector3f tint = new Vector3f(.0f, .0f, .0f);
 
     private final int noiseTextureSize = 1024;
 
@@ -90,9 +91,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         postMaterial = getMaterial(POST_MATERIAL_URN);
 
         renderingConfig = context.get(Config.class).getRendering();
-        isFilmGrainEnabled = renderingConfig.isFilmGrain();
         renderingConfig.subscribe(RenderingConfig.FILM_GRAIN, this);
-        isMotionBlurEnabled = renderingConfig.isMotionBlur();
         renderingConfig.subscribe(RenderingConfig.MOTION_BLUR, this);
         renderingConfig.subscribe(RenderingConfig.BLUR_INTENSITY, this);
         addOutputFboConnection(1);
@@ -121,21 +120,28 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
         setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
         addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN, "texColorGradingLut"));
+
         // TODO: evaluate the possibility to use GPU-based noise algorithms instead of CPU-generated textures.
-        setNoiseTexture = new SetInputTexture2D(texId, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize, 0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
+        setNoiseTexture = new SetInputTexture2D(texId++, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize, 0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
+        setVignetteInputTexture = new SetInputTexture2D(texId++, "engine:vignette", POST_MATERIAL_URN, "texVignette");
+
 
         if (renderingConfig.getBlurIntensity() != 0) {
             addDesiredStateChange(setBlurTexture);
         }
 
-        if (isFilmGrainEnabled) {
+        if (renderingConfig.isVignette()) {
+            addDesiredStateChange(setVignetteInputTexture);
+        }
+
+        if (renderingConfig.isFilmGrain()) {
             addDesiredStateChange(setNoiseTexture);
         }
     }
 
     /**
      * Execute the final post processing on the rendering of the scene obtained so far.
-     *
+     * <p>
      * It uses the data stored in multiple FBOs as input and the FINAL FBO to store its output, rendering everything to a quad.
      */
     @Override
@@ -144,7 +150,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
 
         postMaterial.setFloat("focalDistance", cameraTargetSystem.getFocalDistance(), true); //for use in DOF effect
 
-        if (isFilmGrainEnabled) {
+        if (renderingConfig.isFilmGrain()) {
             postMaterial.setFloat("grainIntensity", filmGrainIntensity, true);
             postMaterial.setFloat("noiseOffset", randomGenerator.nextFloat(), true);
 
@@ -152,12 +158,17 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
             postMaterial.setFloat2("renderTargetSize", lastUpdatedGBuffer.width(), lastUpdatedGBuffer.height(), true);
         }
 
-        if (isMotionBlurEnabled) {
+        if (renderingConfig.isMotionBlur()) {
             postMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             postMaterial.setMatrix4("prevViewProjMatrix", activeCamera.getPrevViewProjectionMatrix(), true);
         }
 
+        if (renderingConfig.isVignette()) {
+            postMaterial.setFloat3("tint", tint);
+        }
+
         this.renderQuad.render();
+
         if (screenGrabber.isTakingScreenshot()) {
             screenGrabber.saveScreenshot();
         }
@@ -168,21 +179,21 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();
-
         switch (propertyName) {
             case RenderingConfig.FILM_GRAIN:
-                isFilmGrainEnabled = renderingConfig.isFilmGrain();
-                if (isFilmGrainEnabled) {
+                if (renderingConfig.isFilmGrain()) {
                     addDesiredStateChange(setNoiseTexture);
                 } else {
                     removeDesiredStateChange(setNoiseTexture);
                 }
                 break;
-
-            case RenderingConfig.MOTION_BLUR:
-                isMotionBlurEnabled = renderingConfig.isMotionBlur();
+            case RenderingConfig.VIGNETTE:
+                if (renderingConfig.isVignette()) {
+                    addDesiredStateChange(setVignetteInputTexture);
+                } else {
+                    removeDesiredStateChange(setVignetteInputTexture);
+                }
                 break;
-
             case RenderingConfig.BLUR_INTENSITY:
                 if (renderingConfig.getBlurIntensity() != 0) {
                     addDesiredStateChange(setBlurTexture);
@@ -191,7 +202,6 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
                 }
                 break;
         }
-
         worldRenderer.requestTaskListRefresh();
     }
 }

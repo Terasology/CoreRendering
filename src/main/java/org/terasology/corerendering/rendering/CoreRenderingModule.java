@@ -88,8 +88,6 @@ public class CoreRenderingModule extends ModuleRendering {
 
         addFinalPostProcessingNodes(renderGraph);
 
-        addVignetteNode(renderGraph);
-
         addOutputNodes(renderGraph);
     }
 
@@ -348,14 +346,6 @@ public class CoreRenderingModule extends ModuleRendering {
         renderGraph.addNode(finalPostProcessingNode);
 
         // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);
-    }
-
-    private void addVignetteNode(RenderGraph renderGraph) {
-        Node finalPostProcessingNode = renderGraph.findNode("CoreRendering:finalPostProcessingNode");
-
-        VignetteNode vignetteNode = new VignetteNode("vignetteNode", providingModule, context);
-        renderGraph.addNode(vignetteNode);
-        renderGraph.connectFbo(finalPostProcessingNode, 1, vignetteNode, 1);
     }
 
     private void addOutputNodes(RenderGraph renderGraph) {
