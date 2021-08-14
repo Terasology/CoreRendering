@@ -39,7 +39,7 @@ This minimal setup (not to confuse with the "Minimal" preset) results in the fol
 
 The following screenshot shows the graphic effects baseline with all graphic effects disabled.
 
-<fig src="_media/img/graphic-effects_baseline.png">Baseline</fig>
+<fig src="_media/img/graphic-effects_baseline.jpg">Baseline</fig>
 
 
 ## Animate Grass
@@ -55,7 +55,7 @@ Animated grass can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Animate Grass" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline_close-up.png" src2="_media/img/graphic-effects_animate-grass_close-up.png">Baseline (left) and "Animate Grass" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline_close-up.jpg" src2="_media/img/graphic-effects_animate-grass_close-up.jpg">Baseline (left) and "Animate Grass" Effect (right)</fig-side-by-side>
 
 
 ## Animate Water
@@ -70,7 +70,7 @@ Animated grass can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Animate Water" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_animate-water.png">Baseline (left) and "Animate Water" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_animate-water.jpg">Baseline (left) and "Animate Water" Effect (right)</fig-side-by-side>
 
 
 ## Bloom
@@ -85,7 +85,7 @@ Bloom can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Bloom" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_bloom.png">Baseline (left) and "Bloom" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_bloom.jpg">Baseline (left) and "Bloom" Effect (right)</fig-side-by-side>
 
 
 ## Blur
@@ -101,8 +101,8 @@ The respective levels can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Bloom" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_blur-some.png">Baseline (left) and "Blur" Effect on Level "Some" (right)</fig-side-by-side>
-<fig-side-by-side src1="_media/img/graphic-effects_blur-normal.png" src2="_media/img/graphic-effects_blur-max.png">"Blur" Effect on Level "Normal" (left) and "Blur" Effect on Level "Max" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_blur-some.jpg">Baseline (left) and "Blur" Effect on Level "Some" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_blur-normal.jpg" src2="_media/img/graphic-effects_blur-max.jpg">"Blur" Effect on Level "Normal" (left) and "Blur" Effect on Level "Max" (right)</fig-side-by-side>
 
 
 ## Clamp Lighting
@@ -116,7 +116,7 @@ Clamp Lighting can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Clamp Lighting" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_clamp-lighting.png">Baseline (left) and "Clamp Lighting" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_clamp-lighting.jpg">Baseline (left) and "Clamp Lighting" Effect (right)</fig-side-by-side>
 
 
 ## Cloud Shadows
@@ -130,7 +130,7 @@ Cloud Shadows can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Cloud Shadows" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_cloud-shadows.png">Baseline (left) and "Cloud Shadows" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_cloud-shadows.jpg">Baseline (left) and "Cloud Shadows" Effect (right)</fig-side-by-side>
 
 
 ## Extra Lighting
@@ -144,7 +144,7 @@ Extra Lighting can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Extra Lighting" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_extra-lighting.png">Baseline (left) and "Extra Lighting" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_extra-lighting.jpg">Baseline (left) and "Extra Lighting" Effect (right)</fig-side-by-side>
 
 
 ## Film Grain
@@ -158,7 +158,7 @@ Film Grain can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Film Grain" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_film-grain.png">Baseline (left) and "Film Grain" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_film-grain.jpg">Baseline (left) and "Film Grain" Effect (right)</fig-side-by-side>
 
 
 ## Fog
@@ -172,7 +172,7 @@ Fog can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Fog" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_fog.png">Baseline (left) and "Fog" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_fog.jpg">Baseline (left) and "Fog" Effect (right)</fig-side-by-side>
 
 
 ## Light Shafts
@@ -186,7 +186,7 @@ Light Shafts can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Light Shafts" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_light-shafts.png">Baseline (left) and "Light Shafts" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_light-shafts.jpg">Baseline (left) and "Light Shafts" Effect (right)</fig-side-by-side>
 
 
 ## Outline
@@ -200,7 +200,7 @@ Outline can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Outline" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_outline.png">Baseline (left) and "Outline" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_outline.jpg">Baseline (left) and "Outline" Effect (right)</fig-side-by-side>
 
 
 ## Parallax Mapping
@@ -214,7 +214,7 @@ Parallax Mapping can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Parallax Mapping" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_parallax-mapping.png">Baseline (left) and "Parallax Mapping" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_parallax-mapping.jpg">Baseline (left) and "Parallax Mapping" Effect (right)</fig-side-by-side>
 
 
 ## Shadows
@@ -236,8 +236,8 @@ Shadows in mode "PCR" can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Shadows" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_shadows-on.png">Baseline (left) and "Shadows" Effect in mode "On" (right)</fig-side-by-side>
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_shadows-PCR.png">Baseline (left) and "Shadows" Effect in mode "PCR" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_shadows-on.jpg">Baseline (left) and "Shadows" Effect in mode "On" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_shadows-PCR.jpg">Baseline (left) and "Shadows" Effect in mode "PCR" (right)</fig-side-by-side>
 
 
 ## SSAO
@@ -251,7 +251,7 @@ SSAO can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "SSAO" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_SSAO.png">Baseline (left) and "SSAO" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_SSAO.jpg">Baseline (left) and "SSAO" Effect (right)</fig-side-by-side>
 
 
 ## Vignette
@@ -265,7 +265,7 @@ Vignette can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Vignette" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_vignette.png">Baseline (left) and "Vignette" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_vignette.jpg">Baseline (left) and "Vignette" Effect (right)</fig-side-by-side>
 
 
 ## Volumetric Fog
@@ -279,7 +279,7 @@ Volumetric Fog can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Volumetric Fog" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_volumetric-fog.png">Baseline (left) and "Volumetric Fog" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_volumetric-fog.jpg">Baseline (left) and "Volumetric Fog" Effect (right)</fig-side-by-side>
 
 
 ## Water Reflections
@@ -301,5 +301,5 @@ Water Reflections in mode "SSR" can be enabled with the following config adjustm
 
 The following screenshots show the graphic setting baseline to the left and only the "Water Reflections" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_water-reflections-global.png">Baseline (left) and "Water Reflections" Effect in mode "Global" (right)</fig-side-by-side>
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.png" src2="_media/img/graphic-effects_water-reflections-SSR.png">Baseline (left) and "Water Reflections" Effect in mode "SSR" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_water-reflections-global.jpg">Baseline (left) and "Water Reflections" Effect in mode "Global" (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_water-reflections-SSR.jpg">Baseline (left) and "Water Reflections" Effect in mode "SSR" (right)</fig-side-by-side>
