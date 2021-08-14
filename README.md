@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./docs/_media/banner.png">
+<img src="https://raw.githubusercontent.com/Terasology/CoreRendering/develop/docs/_media/banner.png">
 </div>
 
 _This is a module for [Terasology].
