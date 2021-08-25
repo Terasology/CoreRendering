@@ -11,8 +11,6 @@ import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
 import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.cameras.PerspectiveCamera;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;

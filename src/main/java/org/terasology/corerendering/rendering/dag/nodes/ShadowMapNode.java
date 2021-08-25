@@ -15,8 +15,6 @@ import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
 import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.cameras.OrthographicCamera;
-import org.terasology.engine.rendering.cameras.PerspectiveCamera;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.EnableFaceCulling;
@@ -29,8 +27,6 @@ import org.terasology.engine.rendering.world.RenderableWorld;
 import org.terasology.engine.world.chunks.RenderableChunk;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.math.TeraMath;
-
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

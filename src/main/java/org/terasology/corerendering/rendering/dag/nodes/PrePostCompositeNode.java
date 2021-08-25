@@ -2,19 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
-import org.terasology.engine.rendering.assets.mesh.Mesh;
-import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.cameras.PerspectiveCamera;
-import org.terasology.engine.utilities.Assets;
-import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -25,6 +19,10 @@ import org.terasology.engine.rendering.dag.stateChanges.SetInputTextureFromFbo;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

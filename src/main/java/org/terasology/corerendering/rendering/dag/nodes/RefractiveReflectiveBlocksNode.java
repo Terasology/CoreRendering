@@ -15,8 +15,6 @@ import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
 import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.cameras.PerspectiveCamera;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
