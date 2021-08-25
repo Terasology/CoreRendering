@@ -7,7 +7,6 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.terasology.engine.config.RenderingConfig;
-import org.terasology.engine.rendering.RenderHelper;
 import org.terasology.engine.rendering.dag.nodes.RefractiveReflectiveBlocksNodeProxy;
 import org.terasology.engine.world.WorldProvider;
 
@@ -83,7 +82,7 @@ public final class UnderwaterHelper {
         Vector3f position = new Vector3f(pos);
 
         if (config.isAnimateWater()) {
-            position.y -= RenderHelper.evaluateOceanHeightAtPosition(position, worldProvider.getTime().getDays());
+            position.y -= UnderwaterHelper.evaluateOceanHeightAtPosition(position, worldProvider.getTime().getDays());
         }
 
         if (worldProvider.isBlockRelevant(position)) {
