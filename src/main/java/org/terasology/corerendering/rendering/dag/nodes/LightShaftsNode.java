@@ -5,6 +5,8 @@ package org.terasology.corerendering.rendering.dag.nodes;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
@@ -48,7 +50,7 @@ public class LightShaftsNode extends ConditionDependentNode {
     private static final ResourceUrn LIGHT_SHAFTS_MATERIAL_URN = new ResourceUrn("CoreRendering:lightShafts");
 
     private BackdropProvider backdropProvider;
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private WorldProvider worldProvider;
     private Material lightShaftsMaterial;
     private float exposure;

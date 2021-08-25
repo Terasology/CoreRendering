@@ -40,7 +40,6 @@ public class OverlaysNode extends AbstractNode implements WireframeCapable {
 
     @Override
     public void setDependencies(Context context) {
-        SubmersibleCamera playerCamera = worldRenderer.getActiveCamera();
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();

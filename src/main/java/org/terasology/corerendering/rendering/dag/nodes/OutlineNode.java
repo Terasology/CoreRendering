@@ -9,6 +9,8 @@ import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -40,7 +42,7 @@ public class OutlineNode extends ConditionDependentNode {
     private static final ResourceUrn OUTLINE_MATERIAL_URN = new ResourceUrn("CoreRendering:sobel");
 
     private RenderingConfig renderingConfig;
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
 
     private Material outlineMaterial;
 

@@ -3,6 +3,8 @@
 package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.config.Config;
@@ -49,7 +51,7 @@ public class PrePostCompositeNode extends AbstractNode implements PropertyChange
 
     private RenderingConfig renderingConfig;
     private WorldRenderer worldRenderer;
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material prePostMaterial;

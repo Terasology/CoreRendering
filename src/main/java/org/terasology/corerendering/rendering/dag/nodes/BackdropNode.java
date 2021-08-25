@@ -11,6 +11,7 @@ import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
@@ -98,7 +99,7 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     @Override
     public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
-        SubmersibleCamera activeCamera = worldRenderer.getActiveCamera();
+        Camera activeCamera = worldRenderer.getActiveCamera();
 
         sphereMesh.reload(builder.setRadius(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS).build());
 

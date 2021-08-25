@@ -13,6 +13,8 @@ import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.AABBRenderer;
 import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
@@ -56,7 +58,7 @@ public class OpaqueBlocksNode extends AbstractNode implements WireframeCapable, 
     private EnableFaceCulling faceCullingStateChange;
     private RenderingDebugConfig renderingDebugConfig;
 
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
 
     private boolean normalMappingIsEnabled;
     private boolean parallaxMappingIsEnabled;

@@ -18,6 +18,7 @@ import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -61,7 +62,7 @@ public class DeferredPointLightsNode extends AbstractNode {
 
     private Material lightGeometryMaterial;
 
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private Camera lightCamera;
 
     @SuppressWarnings("FieldCanBeLocal")

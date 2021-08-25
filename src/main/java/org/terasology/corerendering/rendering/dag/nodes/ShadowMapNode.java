@@ -15,6 +15,7 @@ import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
 import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.cameras.OrthographicCamera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.ConditionDependentNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
@@ -63,7 +64,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private RenderingConfig renderingConfig;
     private RenderQueuesHelper renderQueues;
 
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private double texelSize;
 
     public ShadowMapNode(String nodeUri, Name providingModule, Context context) {

@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.terasology.corerendering.rendering.utils.UnderwaterHelper;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
+import org.terasology.engine.rendering.cameras.PerspectiveCamera;
 import org.terasology.engine.utilities.Assets;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.naming.Name;
@@ -46,7 +49,7 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
     private WorldRenderer worldRenderer;
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material initialPostMaterial;
@@ -56,7 +59,6 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
     private boolean bloomIsEnabled;
     private int texBloomSlot = -1;
     private boolean lightShaftsAreEnabled;
-    private int texlightShaftsSlot = -1;
 
     private StateChange setLightShaftsInputTexture;
     private StateChange setBloomInputTexture;
@@ -137,7 +139,7 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         // Common Shader Parameters
 
-        initialPostMaterial.setFloat("swimming", activeCamera.isUnderWater() ? 1.0f : 0.0f, true);
+        initialPostMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
 
         // Shader Parameters
 
