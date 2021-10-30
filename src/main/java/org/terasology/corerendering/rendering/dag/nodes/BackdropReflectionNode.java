@@ -11,7 +11,6 @@ import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
 import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
 import org.terasology.engine.rendering.dag.stateChanges.DisableDepthWriting;
@@ -97,7 +96,7 @@ public class BackdropReflectionNode extends AbstractNode {
     public void setDependencies(Context context) {
         backdropProvider = context.get(BackdropProvider.class);
 
-        SubmersibleCamera activeCamera = renderer.getActiveCamera();
+        Camera activeCamera = renderer.getActiveCamera();
         addDesiredStateChange(new ReflectedCamera(activeCamera));
 
         FBO reflectedFbo = getInputFboData(1);
