@@ -193,8 +193,10 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN, "textureWater"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN, "textureWaterNormal"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN, "textureWaterNormalAlt"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
 
         setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal", CHUNK_MATERIAL_URN, "textureAtlasNormal");
         setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN, "textureAtlasHeight");
@@ -229,7 +231,8 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         sunDirection = backdropProvider.getSunDirection(false);
 
         chunkMaterial.setFloat("daylight", backdropProvider.getDaylight(), true);
-        chunkMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
+        chunkMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(
+                activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
         chunkMaterial.setFloat("time", worldProvider.getTime().getDays(), true);
         chunkMaterial.setFloat3("sunVec", sunDirection, true);
 

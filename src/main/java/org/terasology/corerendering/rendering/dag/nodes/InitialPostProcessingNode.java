@@ -109,21 +109,25 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         // FBO lightShaftsFbo = getInputFboData(1);
 
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texScene"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette", INITIAL_POST_MATERIAL_URN, "texVignette"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFbo,
+                INITIAL_POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette",
+                INITIAL_POST_MATERIAL_URN, "texVignette"));
 
         if (bloomIsEnabled) {
             if (texBloomSlot < 0) {
                 texBloomSlot = textureSlot++;
             }
-            setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
+            setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture,
+                    displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
             addDesiredStateChange(setBloomInputTexture);
         }
         if (lightShaftsAreEnabled) {
             if (texBloomSlot < 0) {
                 texBloomSlot = textureSlot++;
             }
-            setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
+            setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture,
+                    displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
             addDesiredStateChange(setLightShaftsInputTexture);
         }
     }
@@ -137,7 +141,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         // Common Shader Parameters
 
-        initialPostMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
+        initialPostMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(
+                activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
 
         // Shader Parameters
 
@@ -164,7 +169,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
                     if (texBloomSlot < 0) {
                         texBloomSlot = textureSlot++;
                     }
-                    setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
+                    setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture,
+                            displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
                     addDesiredStateChange(setBloomInputTexture);
                 } else {
                     removeDesiredStateChange(setBloomInputTexture);
@@ -177,7 +183,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
                     if (texBloomSlot < 0) {
                         texBloomSlot = textureSlot++;
                     }
-                    setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
+                    setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture,
+                            displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
                     addDesiredStateChange(setLightShaftsInputTexture);
                 } else {
                     removeDesiredStateChange(setLightShaftsInputTexture);

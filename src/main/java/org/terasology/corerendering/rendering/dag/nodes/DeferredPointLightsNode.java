@@ -161,10 +161,10 @@ public class DeferredPointLightsNode extends AbstractNode {
         if (renderingConfig.isDynamicShadows()) {
 
             lightGeometryMaterial.setMatrix4("lightMatrix", new Matrix4f(
-                    0.5f,0.0f,0.0f,0.0f,
-                    0.0f,0.5f,0.0f,0.0f,
-                    0.0f,0.0f,0.5f,0.0f,
-                    0.5f,0.5f,0.5f,1.0f)
+                    0.5f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 0.5f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 0.5f, 0.0f,
+                    0.5f, 0.5f, 0.5f, 1.0f)
                     .mul(lightCamera.getProjectionMatrix())
                     .mul(lightCamera.getViewMatrix())
             );
