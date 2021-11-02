@@ -4,20 +4,15 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.terasology.engine.rendering.assets.mesh.Mesh;
-import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
-import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingDebugConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.engine.utilities.Assets;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;
@@ -32,6 +27,10 @@ import org.terasology.engine.rendering.dag.stateChanges.SetInputTexture2D;
 import org.terasology.engine.rendering.dag.stateChanges.SetWireframe;
 import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import static org.lwjgl.opengl.GL11.GL_FRONT;
 
@@ -98,7 +97,7 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     @Override
     public void setDependencies(Context context) {
         worldRenderer = context.get(WorldRenderer.class);
-        SubmersibleCamera activeCamera = worldRenderer.getActiveCamera();
+        Camera activeCamera = worldRenderer.getActiveCamera();
 
         sphereMesh.reload(builder.setRadius(activeCamera.getzFar() < RADIUS ? activeCamera.getzFar() : RADIUS).build());
 

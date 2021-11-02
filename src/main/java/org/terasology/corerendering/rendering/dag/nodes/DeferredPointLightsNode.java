@@ -18,7 +18,6 @@ import org.terasology.engine.rendering.assets.mesh.Mesh;
 import org.terasology.engine.rendering.assets.mesh.SphereBuilder;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.cameras.Camera;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
 import org.terasology.engine.rendering.dag.stateChanges.BindFbo;
@@ -61,7 +60,7 @@ public class DeferredPointLightsNode extends AbstractNode {
 
     private Material lightGeometryMaterial;
 
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private Camera lightCamera;
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -162,10 +161,10 @@ public class DeferredPointLightsNode extends AbstractNode {
         if (renderingConfig.isDynamicShadows()) {
 
             lightGeometryMaterial.setMatrix4("lightMatrix", new Matrix4f(
-                    0.5f,0.0f,0.0f,0.0f,
-                    0.0f,0.5f,0.0f,0.0f,
-                    0.0f,0.0f,0.5f,0.0f,
-                    0.5f,0.5f,0.5f,1.0f)
+                    0.5f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 0.5f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 0.5f, 0.0f,
+                    0.5f, 0.5f, 0.5f, 1.0f)
                     .mul(lightCamera.getProjectionMatrix())
                     .mul(lightCamera.getViewMatrix())
             );

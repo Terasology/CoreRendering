@@ -5,6 +5,7 @@ package org.terasology.corerendering.rendering.dag.nodes;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.terasology.corerendering.rendering.utils.UnderwaterHelper;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
@@ -13,7 +14,7 @@ import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.assets.shader.ShaderProgramFeature;
 import org.terasology.engine.rendering.backdrop.BackdropProvider;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -97,7 +98,7 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
     private FBO lastUpdatedGBuffer;
     private FBO refractiveReflectiveFbo;
 
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
 
     private boolean normalMappingIsEnabled;
     private boolean parallaxMappingIsEnabled;
@@ -192,8 +193,10 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterStill", CHUNK_MATERIAL_URN, "textureWater"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormal", CHUNK_MATERIAL_URN, "textureWaterNormal"));
         addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:waterNormalAlt", CHUNK_MATERIAL_URN, "textureWaterNormalAlt"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture, displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "textureWaterReflection"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, ColorTexture,
+                displayResolutionDependentFbo, CHUNK_MATERIAL_URN, "texSceneOpaque"));
 
         setTerrainNormalsInputTexture = new SetInputTexture2D(textureSlot++, "engine:terrainNormal", CHUNK_MATERIAL_URN, "textureAtlasNormal");
         setTerrainHeightInputTexture = new SetInputTexture2D(textureSlot, "engine:terrainHeight", CHUNK_MATERIAL_URN, "textureAtlasHeight");
@@ -228,7 +231,8 @@ public class RefractiveReflectiveBlocksNode extends AbstractNode implements Prop
         sunDirection = backdropProvider.getSunDirection(false);
 
         chunkMaterial.setFloat("daylight", backdropProvider.getDaylight(), true);
-        chunkMaterial.setFloat("swimming", activeCamera.isUnderWater() ? 1.0f : 0.0f, true);
+        chunkMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(
+                activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
         chunkMaterial.setFloat("time", worldProvider.getTime().getDays(), true);
         chunkMaterial.setFloat3("sunVec", sunDirection, true);
 

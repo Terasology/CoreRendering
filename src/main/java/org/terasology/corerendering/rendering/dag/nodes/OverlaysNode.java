@@ -8,7 +8,6 @@ import org.terasology.engine.context.Context;
 import org.terasology.engine.core.ComponentSystemManager;
 import org.terasology.engine.entitySystem.systems.RenderSystem;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.WireframeCapable;
 import org.terasology.engine.rendering.dag.WireframeTrigger;
@@ -40,7 +39,6 @@ public class OverlaysNode extends AbstractNode implements WireframeCapable {
 
     @Override
     public void setDependencies(Context context) {
-        SubmersibleCamera playerCamera = worldRenderer.getActiveCamera();
 
         wireframeStateChange = new SetWireframe(true);
         RenderingDebugConfig renderingDebugConfig = context.get(Config.class).getRendering().getDebug();

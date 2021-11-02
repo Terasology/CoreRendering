@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering.dag.nodes;
 
+import org.terasology.corerendering.rendering.utils.UnderwaterHelper;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.SimpleUri;
 import org.terasology.engine.monitoring.PerformanceMonitor;
-import org.terasology.engine.rendering.assets.mesh.Mesh;
-import org.terasology.engine.utilities.Assets;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.gestalt.naming.Name;
-import org.terasology.nui.properties.Range;
 import org.terasology.engine.rendering.assets.material.Material;
-import org.terasology.engine.rendering.cameras.SubmersibleCamera;
+import org.terasology.engine.rendering.assets.mesh.Mesh;
+import org.terasology.engine.rendering.cameras.Camera;
 import org.terasology.engine.rendering.dag.AbstractNode;
 import org.terasology.engine.rendering.dag.StateChange;
 import org.terasology.engine.rendering.dag.dependencyConnections.BufferPairConnection;
@@ -26,7 +23,11 @@ import org.terasology.engine.rendering.opengl.FBO;
 import org.terasology.engine.rendering.opengl.FboConfig;
 import org.terasology.engine.rendering.opengl.fbms.DisplayResolutionDependentFbo;
 import org.terasology.engine.rendering.world.WorldRenderer;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.engine.world.WorldProvider;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.naming.Name;
+import org.terasology.nui.properties.Range;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -46,7 +47,7 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
     private RenderingConfig renderingConfig;
     private WorldProvider worldProvider;
     private WorldRenderer worldRenderer;
-    private SubmersibleCamera activeCamera;
+    private Camera activeCamera;
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
 
     private Material initialPostMaterial;
@@ -56,7 +57,6 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
     private boolean bloomIsEnabled;
     private int texBloomSlot = -1;
     private boolean lightShaftsAreEnabled;
-    private int texlightShaftsSlot = -1;
 
     private StateChange setLightShaftsInputTexture;
     private StateChange setBloomInputTexture;
@@ -109,21 +109,25 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         // FBO lightShaftsFbo = getInputFboData(1);
 
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texScene"));
-        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette", INITIAL_POST_MATERIAL_URN, "texVignette"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedFbo, ColorTexture, displayResolutionDependentFbo,
+                INITIAL_POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTexture2D(textureSlot++, "engine:vignette",
+                INITIAL_POST_MATERIAL_URN, "texVignette"));
 
         if (bloomIsEnabled) {
             if (texBloomSlot < 0) {
                 texBloomSlot = textureSlot++;
             }
-            setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
+            setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture,
+                    displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
             addDesiredStateChange(setBloomInputTexture);
         }
         if (lightShaftsAreEnabled) {
             if (texBloomSlot < 0) {
                 texBloomSlot = textureSlot++;
             }
-            setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
+            setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture,
+                    displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
             addDesiredStateChange(setLightShaftsInputTexture);
         }
     }
@@ -137,7 +141,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
 
         // Common Shader Parameters
 
-        initialPostMaterial.setFloat("swimming", activeCamera.isUnderWater() ? 1.0f : 0.0f, true);
+        initialPostMaterial.setFloat("swimming", UnderwaterHelper.isUnderwater(
+                activeCamera.getPosition(), worldProvider, renderingConfig) ? 1.0f : 0.0f, true);
 
         // Shader Parameters
 
@@ -164,7 +169,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
                     if (texBloomSlot < 0) {
                         texBloomSlot = textureSlot++;
                     }
-                    setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
+                    setBloomInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(2), ColorTexture,
+                            displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texBloom");
                     addDesiredStateChange(setBloomInputTexture);
                 } else {
                     removeDesiredStateChange(setBloomInputTexture);
@@ -177,7 +183,8 @@ public class InitialPostProcessingNode extends AbstractNode implements PropertyC
                     if (texBloomSlot < 0) {
                         texBloomSlot = textureSlot++;
                     }
-                    setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture, displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
+                    setLightShaftsInputTexture = new SetInputTextureFromFbo(texBloomSlot, getInputFboData(1), ColorTexture,
+                            displayResolutionDependentFbo, INITIAL_POST_MATERIAL_URN, "texLightShafts");
                     addDesiredStateChange(setLightShaftsInputTexture);
                 } else {
                     removeDesiredStateChange(setLightShaftsInputTexture);
