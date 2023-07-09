@@ -355,11 +355,6 @@ public class CoreRenderingModule extends ModuleRendering {
 //        tintNode.connectFbo(1, finalPostProcessingNode.getOutputFboConnection(1));
 //        renderGraph.addNode(tintNode);
 
-        Node outputToVRFrameBufferNode = new OutputToHMDNode("outputToVRFrameBufferNode", providingModule, context);
-        renderGraph.addNode(outputToVRFrameBufferNode);
-
-        // renderGraph.connect(finalPostProcessingNode, outputToVRFrameBufferNode);
-
         Node outputToScreenNode = new OutputToScreenNode("outputToScreenNode", providingModule, context);
         renderGraph.connectBufferPair(finalPostProcessingNode, 1, outputToScreenNode, 1);
         renderGraph.connectFbo(finalPostProcessingNode, 1, outputToScreenNode, 1);
