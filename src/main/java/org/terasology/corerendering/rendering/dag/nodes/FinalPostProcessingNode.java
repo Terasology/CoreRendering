@@ -53,6 +53,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 public class FinalPostProcessingNode extends AbstractNode implements PropertyChangeListener {
     public static final SimpleUri POST_FBO_URI = new SimpleUri("engine:fbo.finalBuffer");
     private static final ResourceUrn POST_MATERIAL_URN = new ResourceUrn("CoreRendering:post");
+    private static final int noiseTextureSize = 1024;
 
     private WorldRenderer worldRenderer;
     private RenderingConfig renderingConfig;
@@ -78,7 +79,6 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
 
     private Vector3f tint = new Vector3f(.0f, .0f, .0f);
 
-    private final int noiseTextureSize = 1024;
 
     public FinalPostProcessingNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
