@@ -2,7 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering;
 
-import org.terasology.corerendering.rendering.dag.nodes.*;
+import org.terasology.corerendering.rendering.dag.nodes.AlphaRejectBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.ApplyDeferredLightingNode;
+import org.terasology.corerendering.rendering.dag.nodes.BackdropNode;
+import org.terasology.corerendering.rendering.dag.nodes.BackdropReflectionNode;
+import org.terasology.corerendering.rendering.dag.nodes.BufferClearingNode;
+import org.terasology.corerendering.rendering.dag.nodes.DeferredMainLightNode;
+import org.terasology.corerendering.rendering.dag.nodes.DeferredPointLightsNode;
+import org.terasology.corerendering.rendering.dag.nodes.DownSamplerForExposureNode;
+import org.terasology.corerendering.rendering.dag.nodes.FinalPostProcessingNode;
+import org.terasology.corerendering.rendering.dag.nodes.InitialPostProcessingNode;
+import org.terasology.corerendering.rendering.dag.nodes.LateBlurNode;
+import org.terasology.corerendering.rendering.dag.nodes.OpaqueBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.OpaqueObjectsNode;
+import org.terasology.corerendering.rendering.dag.nodes.OutlineNode;
+import org.terasology.corerendering.rendering.dag.nodes.OutputToScreenNode;
+import org.terasology.corerendering.rendering.dag.nodes.OverlaysNode;
+import org.terasology.corerendering.rendering.dag.nodes.PrePostCompositeNode;
+import org.terasology.corerendering.rendering.dag.nodes.RefractiveReflectiveBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.ShadowMapNode;
+import org.terasology.corerendering.rendering.dag.nodes.SimpleBlendMaterialsNode;
+import org.terasology.corerendering.rendering.dag.nodes.ToneMappingNode;
+import org.terasology.corerendering.rendering.dag.nodes.UpdateExposureNode;
+import org.terasology.corerendering.rendering.dag.nodes.WorldReflectionNode;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.subsystem.DisplayDevice;
 import org.terasology.engine.rendering.cameras.Camera;
@@ -34,14 +56,14 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
 
 public class CoreRenderingModule extends ModuleRendering {
 
+    private static int initializationPriority = 1;
+
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
     private ShadowMapResolutionDependentFbo shadowMapResolutionDependentFbo;
     private ImmutableFbo immutableFbo;
 
     private ShadowMapNode shadowMapNode;
     private DisplayDevice displayDevice;
-
-    private static int initializationPriority = 1;
 
     // Created in renderingModuleRegistry trough reflection and Constructor calling
     public CoreRenderingModule(Context context) {
@@ -357,8 +379,8 @@ public class CoreRenderingModule extends ModuleRendering {
         FinalPostProcessingNode finalPostProcessingNode =
                 new FinalPostProcessingNode("finalPostProcessingNode", providingModule, context/*finalIn1*/);
         renderGraph.connectBufferPair(initialPostProcessingNode, 1, finalPostProcessingNode, 1);
-        renderGraph.connectFbo(toneMappingNode,1, finalPostProcessingNode, 1);
-        renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode,2);
+        renderGraph.connectFbo(toneMappingNode, 1, finalPostProcessingNode, 1);
+        renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode, 2);
         renderGraph.addNode(finalPostProcessingNode);
 
         // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);

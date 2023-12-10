@@ -49,6 +49,8 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     private static final int STACKS = 128;
     private static final int RADIUS = 1024;
 
+    SphereBuilder builder = new SphereBuilder();
+
     private WorldRenderer worldRenderer;
     private BackdropProvider backdropProvider;
 
@@ -75,8 +77,6 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
     private float turbidity;
 
     private final Mesh sphereMesh;
-    SphereBuilder builder = new SphereBuilder();
-
     public BackdropNode(String nodeUri, Name providingModule, Context context) {
         super(nodeUri, providingModule, context);
 

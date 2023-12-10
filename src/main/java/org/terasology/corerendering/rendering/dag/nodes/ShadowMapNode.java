@@ -51,8 +51,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     public static final SimpleUri SHADOW_MAP_FBO_URI = new SimpleUri("engine:fbo.sceneShadowMap");
     private static final ResourceUrn SHADOW_MAP_MATERIAL_URN = new ResourceUrn("CoreRendering:shadowMap");
     private static final int SHADOW_FRUSTUM_BOUNDS = 200;
-    private Material shadowMapMaterial;
     private static final float STEP_SIZE = 50f;
+    private Material shadowMapMaterial;
 
     public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS,
             -SHADOW_FRUSTUM_BOUNDS);
@@ -150,7 +150,7 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
 
         GL30.glViewport(0, 0, renderingConfig.getShadowMapResolution(), renderingConfig.getShadowMapResolution());
         GL30.glEnable(GL30.GL_POLYGON_OFFSET_FILL);
-        GL30.glPolygonOffset(0,1);
+        GL30.glPolygonOffset(0, 1);
 
         // TODO: remove this IF statement when VR is handled via parallel nodes, one per eye.
         if (worldRenderer.isFirstRenderingStageForCurrentFrame()) {
