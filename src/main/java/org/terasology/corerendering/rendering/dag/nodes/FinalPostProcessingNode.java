@@ -116,13 +116,18 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         addOutputBufferPairConnection(1, bufferPairConnection);
 
         int texId = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
-        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
-        addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN, "texColorGradingLut"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
+        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
+        addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN,
+                "texColorGradingLut"));
 
         // TODO: evaluate the possibility to use GPU-based noise algorithms instead of CPU-generated textures.
-        setNoiseTexture = new SetInputTexture2D(texId++, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize, 0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
+        setNoiseTexture = new SetInputTexture2D(texId++, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize,
+                0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
         setVignetteInputTexture = new SetInputTexture2D(texId++, "engine:vignette", POST_MATERIAL_URN, "texVignette");
 
 

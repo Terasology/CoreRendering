@@ -34,7 +34,8 @@ public class BufferClearingNode extends AbstractNode {
      *                      Non GL_*_BIT values will be accepted but might eventually generate an opengl error.
      * @throws IllegalArgumentException if fboConfig, fboManager are null and if clearingMask is zero.
      */@Deprecated
-    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
+    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager,
+                              int clearingMask) {
         super(nodeUri, providingModule, context);
 
         boolean argumentsAreValid = validateArguments(fboConfig, fboManager, clearingMask);

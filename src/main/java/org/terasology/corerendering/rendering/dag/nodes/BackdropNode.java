@@ -160,7 +160,8 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
 
         // Shader Parameters
 
-        skyMaterial.setFloat3("zenith", getAllWeatherZenith(backdropProvider.getSunDirection(false).y, turbidity), true);
+        skyMaterial.setFloat3("zenith", getAllWeatherZenith(backdropProvider.getSunDirection(false).y, turbidity),
+                true);
         skyMaterial.setFloat("turbidity", turbidity, true);
         skyMaterial.setFloat("colorExp", backdropProvider.getColorExp(), true);
         skyMaterial.setFloat4("skySettings", sunExponent, moonExponent, skyDaylightBrightness, skyNightBrightness, true);

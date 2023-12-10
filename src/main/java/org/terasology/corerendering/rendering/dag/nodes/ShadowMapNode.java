@@ -54,7 +54,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
     private Material shadowMapMaterial;
     private static final float STEP_SIZE = 50f;
 
-    public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, -SHADOW_FRUSTUM_BOUNDS);
+    public Camera shadowMapCamera = new OrthographicCamera(-SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS, SHADOW_FRUSTUM_BOUNDS,
+            -SHADOW_FRUSTUM_BOUNDS);
 
     private BackdropProvider backdropProvider;
     private RenderingConfig renderingConfig;
@@ -213,7 +214,8 @@ public class ShadowMapNode extends ConditionDependentNode implements PropertyCha
         // The shadow projected onto the ground must move in in light-space texel-steps, to avoid causing flickering.
         // That's why we first convert it to the previous frame's light-space coordinates and then back to world-space.
         shadowMapCamera.getViewProjectionMatrix().transformPosition(mainLightPosition); // to light-space
-        mainLightPosition.set(Math.floor(mainLightPosition.x / texelSize) * texelSize, 0.0f,Math.floor(mainLightPosition.z / texelSize) * texelSize);
+        mainLightPosition.set(Math.floor(mainLightPosition.x / texelSize) * texelSize, 0.0f,
+                Math.floor(mainLightPosition.z / texelSize) * texelSize);
         shadowMapCamera.getInverseViewProjectionMatrix().transformPosition(mainLightPosition); // back to world-space
         shadowMapCamera.getPosition().set(mainLightPosition);
         shadowMapCamera.updateMatrices();

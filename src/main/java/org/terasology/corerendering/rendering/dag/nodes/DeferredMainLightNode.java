@@ -116,14 +116,19 @@ public class DeferredMainLightNode extends AbstractNode {
         DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
 
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture, displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, NormalsTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, LightAccumulationTexture,
+                displayResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueLightBuffer"));
         if (renderingConfig.isDynamicShadows()) {
-            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(1), DepthStencilTexture, shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
+            addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, getInputFboData(1), DepthStencilTexture,
+                    shadowMapResolutionDependentFBOs, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneShadowMap"));
 
             if (renderingConfig.isCloudShadows()) {
-                addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:perlinNoiseTileable", LIGHT_GEOMETRY_MATERIAL_URN, "texSceneClouds"));
+                addDesiredStateChange(new SetInputTexture2D(textureSlot, "engine:perlinNoiseTileable",
+                        LIGHT_GEOMETRY_MATERIAL_URN, "texSceneClouds"));
             }
         }
     }

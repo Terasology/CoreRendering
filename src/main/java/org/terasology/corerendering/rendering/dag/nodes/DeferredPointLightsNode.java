@@ -111,8 +111,10 @@ public class DeferredPointLightsNode extends AbstractNode {
 
         DisplayResolutionDependentFbo displayResolutionDependentFbo = context.get(DisplayResolutionDependentFbo.class);
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, NormalsTexture,
+                displayResolutionDependentFbo, LIGHT_GEOMETRY_MATERIAL_URN, "texSceneOpaqueNormals"));
     }
 
     private boolean lightIsRenderable(LightComponent lightComponent, Vector3f lightPositionRelativeToCamera) {
@@ -169,7 +171,8 @@ public class DeferredPointLightsNode extends AbstractNode {
 
             lightGeometryMaterial.setMatrix4("invViewProjMatrix", activeCamera.getInverseViewProjectionMatrix(), true);
             cameraPosition.sub(lightCamera.getPosition(), activeCameraToLightSpace);
-            lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y, activeCameraToLightSpace.z, true);
+            lightGeometryMaterial.setFloat3("activeCameraToLightSpace", activeCameraToLightSpace.x, activeCameraToLightSpace.y,
+                    activeCameraToLightSpace.z, true);
         }
 
         // Actual Node Processing
@@ -200,12 +203,15 @@ public class DeferredPointLightsNode extends AbstractNode {
                     // setting shader parameters for the light position in camera space
                     Vector3f lightPositionInViewSpace = new Vector3f(lightPositionRelativeToCamera).mulPosition(activeCamera.getViewMatrix());
 
-                    lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y, lightPositionInViewSpace.z, true);
+                    lightGeometryMaterial.setFloat3("lightViewPos", lightPositionInViewSpace.x, lightPositionInViewSpace.y,
+                            lightPositionInViewSpace.z, true);
 
                     // set the size and location of the sphere to be rendered via shader parameters
                     Matrix4f modelMatrix = new Matrix4f();
-                    modelMatrix.scale(lightComponent.lightAttenuationRange); // scales the modelview matrix, effectively scales the light sphere
-                    modelMatrix.setTranslation(lightPositionRelativeToCamera); // effectively moves the light sphere in the right position relative to camera
+                    // scales the modelview matrix, effectively scales the light sphere
+                    modelMatrix.scale(lightComponent.lightAttenuationRange);
+                    // effectively moves the light sphere in the right position relative to camera
+                    modelMatrix.setTranslation(lightPositionRelativeToCamera);
                     lightGeometryMaterial.setMatrix4("modelMatrix", modelMatrix, true);
 
                     unitSphereMesh.render();
