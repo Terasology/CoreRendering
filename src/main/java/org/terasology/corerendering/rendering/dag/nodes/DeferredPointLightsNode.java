@@ -185,7 +185,7 @@ public class DeferredPointLightsNode extends AbstractNode {
                 final Vector3f lightPositionInTeraCoords = locationComponent.getWorldPosition(new Vector3f());
 
                 Vector3f lightPositionRelativeToCamera = new Vector3f();
-                lightPositionInTeraCoords.sub(activeCamera.getPosition(),lightPositionRelativeToCamera);
+                lightPositionInTeraCoords.sub(activeCamera.getPosition(), lightPositionRelativeToCamera);
 
                 if (lightIsRenderable(lightComponent, lightPositionRelativeToCamera)) {
                     lightGeometryMaterial.setCamera(activeCamera);
