@@ -28,8 +28,6 @@ import org.terasology.nui.properties.Range;
  * (1) See https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance
  */
 public class UpdateExposureNode extends AbstractNode {
-    private static final Logger logger = LoggerFactory.getLogger(UpdateExposureNode.class);
-
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
     private float hdrExposureDefault = 5f;
