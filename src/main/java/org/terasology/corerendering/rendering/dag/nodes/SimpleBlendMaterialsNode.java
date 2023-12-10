@@ -47,8 +47,6 @@ public class SimpleBlendMaterialsNode extends AbstractNode {
 
     @Override
     public void setDependencies(Context context) {
-        Camera playerCamera = context.get(WorldRenderer.class).getActiveCamera();
-
         BufferPairConnection bufferPairConnection = getInputBufferPairConnection(1);
         addOutputBufferPairConnection(1, bufferPairConnection);
         addOutputFboConnection(1, bufferPairConnection.getBufferPair().getPrimaryFbo());

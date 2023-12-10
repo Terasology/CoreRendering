@@ -101,7 +101,6 @@ public class WorldReflectionNode extends ConditionDependentNode {
     public void setDependencies(Context context) {
         addDesiredStateChange(new ReflectedCamera(activeCamera)); // this has to go before the LookThrough state change
 
-        DisplayResolutionDependentFbo displayResolutionDependentFBOs = context.get(DisplayResolutionDependentFbo.class);
         FBO reflectedFbo = getInputFboData(1);
         addOutputFboConnection(1, reflectedFbo);
         addDesiredStateChange(new BindFbo(reflectedFbo));
