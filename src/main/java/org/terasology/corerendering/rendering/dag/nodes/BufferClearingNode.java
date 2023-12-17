@@ -23,6 +23,7 @@ public class BufferClearingNode extends AbstractNode {
     private int clearingMask;
     private FBO fbo;
     /**
+     * @deprecated
      * Constructs the node by requesting the creation (if necessary) of the FBO to be cleared
      * and by requesting for this FBO to be bound by the time process() gets executed. Also
      * stores the clearing mask, for use in process().
@@ -34,7 +35,8 @@ public class BufferClearingNode extends AbstractNode {
      *                      Non GL_*_BIT values will be accepted but might eventually generate an opengl error.
      * @throws IllegalArgumentException if fboConfig, fboManager are null and if clearingMask is zero.
      */@Deprecated
-    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager, int clearingMask) {
+    public BufferClearingNode(String nodeUri,  Name providingModule, Context context, FboConfig fboConfig, BaseFboManager fboManager,
+                              int clearingMask) {
         super(nodeUri, providingModule, context);
 
         boolean argumentsAreValid = validateArguments(fboConfig, fboManager, clearingMask);

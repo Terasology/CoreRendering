@@ -45,7 +45,7 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
  * An instance of this class adds depth of field blur, motion blur and film grain to the rendering
  * of the scene obtained so far. Furthermore, depending if a screenshot has been requested,
  * it instructs the ScreenGrabber to save it to a file.
- *
+ * <p>
  * If RenderingDebugConfig.isEnabled() returns true, this node is instead responsible for displaying
  * the content of a number of technical buffers rather than the final, post-processed rendering
  * of the scene.
@@ -53,18 +53,18 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.FULL_SCALE;
 public class FinalPostProcessingNode extends AbstractNode implements PropertyChangeListener {
     public static final SimpleUri POST_FBO_URI = new SimpleUri("engine:fbo.finalBuffer");
     private static final ResourceUrn POST_MATERIAL_URN = new ResourceUrn("CoreRendering:post");
-    private static final int noiseTextureSize = 1024;
+    private static final int NOISE_TEXTURE_SIZE = 1024;
 
-    private WorldRenderer worldRenderer;
-    private RenderingConfig renderingConfig;
-    private ScreenGrabber screenGrabber;
+    private final WorldRenderer worldRenderer;
+    private final RenderingConfig renderingConfig;
+    private final ScreenGrabber screenGrabber;
 
-    private Material postMaterial;
+    private final Material postMaterial;
 
-    private Random randomGenerator = new FastRandom();
+    private final Random randomGenerator = new FastRandom();
 
-    private CameraTargetSystem cameraTargetSystem;
-    private Camera activeCamera;
+    private final CameraTargetSystem cameraTargetSystem;
+    private final Camera activeCamera;
 
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 1.0f)
@@ -75,9 +75,9 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
     private StateChange setBlurTexture;
     private StateChange setNoiseTexture;
     private StateChange setVignetteInputTexture;
-    private Mesh renderQuad;
+    private final Mesh renderQuad;
 
-    private Vector3f tint = new Vector3f(.0f, .0f, .0f);
+    private final Vector3f tint = new Vector3f(.0f, .0f, .0f);
 
 
     public FinalPostProcessingNode(String nodeUri, Name providingModule, Context context) {
@@ -116,13 +116,18 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
         addOutputBufferPairConnection(1, bufferPairConnection);
 
         int texId = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
-        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture, displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
-        addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN, "texColorGradingLut"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, this.getInputFboData(1), ColorTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texScene"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texDepth"));
+        setBlurTexture = new SetInputTextureFromFbo(texId++, this.getInputFboData(2), ColorTexture,
+                displayResolutionDependentFbo, POST_MATERIAL_URN, "texBlur");
+        addDesiredStateChange(new SetInputTexture3D(texId++, "engine:colorGradingLut1", POST_MATERIAL_URN,
+                "texColorGradingLut"));
 
         // TODO: evaluate the possibility to use GPU-based noise algorithms instead of CPU-generated textures.
-        setNoiseTexture = new SetInputTexture2D(texId++, TextureUtil.getTextureUriForWhiteNoise(noiseTextureSize, 0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
+        setNoiseTexture = new SetInputTexture2D(texId++, TextureUtil.getTextureUriForWhiteNoise(NOISE_TEXTURE_SIZE,
+                0x1234, 0, 512).toString(), POST_MATERIAL_URN, "texNoise");
         setVignetteInputTexture = new SetInputTexture2D(texId++, "engine:vignette", POST_MATERIAL_URN, "texVignette");
 
 
@@ -154,7 +159,7 @@ public class FinalPostProcessingNode extends AbstractNode implements PropertyCha
             postMaterial.setFloat("grainIntensity", filmGrainIntensity, true);
             postMaterial.setFloat("noiseOffset", randomGenerator.nextFloat(), true);
 
-            postMaterial.setFloat2("noiseSize", noiseTextureSize, noiseTextureSize, true);
+            postMaterial.setFloat2("noiseSize", NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE, true);
             postMaterial.setFloat2("renderTargetSize", lastUpdatedGBuffer.width(), lastUpdatedGBuffer.height(), true);
         }
 

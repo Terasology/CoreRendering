@@ -48,7 +48,8 @@ public class OutputToScreenNode extends ConditionDependentNode {
     @Override
     public void setDependencies(Context context) {
         addDesiredStateChange(new EnableMaterial(OUTPUT_TEXTURED_MATERIAL_URN));
-        bindFbo = new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs, OUTPUT_TEXTURED_MATERIAL_URN, "target");
+        bindFbo = new SetInputTextureFromFbo(0, this.getInputFboData(1), ColorTexture, displayResolutionDependentFBOs,
+                OUTPUT_TEXTURED_MATERIAL_URN, "target");
         addDesiredStateChange(bindFbo);
 
         lastUpdatedGBuffer = getInputBufferPairConnection(1).getBufferPair().getPrimaryFbo();
@@ -102,7 +103,8 @@ public class OutputToScreenNode extends ConditionDependentNode {
 
     private void setFbo(FBO fbo) {
         removeDesiredStateChange(bindFbo);
-        bindFbo = new SetInputTextureFromFbo(0, fbo, ColorTexture, displayResolutionDependentFBOs, OUTPUT_TEXTURED_MATERIAL_URN, "target");
+        bindFbo = new SetInputTextureFromFbo(0, fbo, ColorTexture, displayResolutionDependentFBOs, OUTPUT_TEXTURED_MATERIAL_URN,
+                "target");
         addDesiredStateChange(bindFbo);
         worldRenderer.requestTaskListRefresh();
     }

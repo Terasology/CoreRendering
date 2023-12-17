@@ -124,8 +124,10 @@ public class AmbientOcclusionNode extends ConditionDependentNode {
         addOutputBufferPairConnection(1, bufferPairConnection);
 
         int texId = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, SSAO_MATERIAL_URN, "texDepth"));
-        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs, SSAO_MATERIAL_URN, "texNormals"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs,
+                SSAO_MATERIAL_URN, "texDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(texId++, lastUpdatedGBuffer, NormalsTexture, displayResolutionDependentFBOs,
+                SSAO_MATERIAL_URN, "texNormals"));
         addDesiredStateChange(new SetInputTexture2D(texId, generateNoiseTexture().getId(), SSAO_MATERIAL_URN, "texNoise"));
 
         if (ssaoSamples == null) {

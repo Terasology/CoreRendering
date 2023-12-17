@@ -2,7 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.corerendering.rendering;
 
-import org.terasology.corerendering.rendering.dag.nodes.*;
+import org.terasology.corerendering.rendering.dag.nodes.AlphaRejectBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.ApplyDeferredLightingNode;
+import org.terasology.corerendering.rendering.dag.nodes.BackdropNode;
+import org.terasology.corerendering.rendering.dag.nodes.BackdropReflectionNode;
+import org.terasology.corerendering.rendering.dag.nodes.BufferClearingNode;
+import org.terasology.corerendering.rendering.dag.nodes.DeferredMainLightNode;
+import org.terasology.corerendering.rendering.dag.nodes.DeferredPointLightsNode;
+import org.terasology.corerendering.rendering.dag.nodes.DownSamplerForExposureNode;
+import org.terasology.corerendering.rendering.dag.nodes.FinalPostProcessingNode;
+import org.terasology.corerendering.rendering.dag.nodes.InitialPostProcessingNode;
+import org.terasology.corerendering.rendering.dag.nodes.LateBlurNode;
+import org.terasology.corerendering.rendering.dag.nodes.OpaqueBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.OpaqueObjectsNode;
+import org.terasology.corerendering.rendering.dag.nodes.OutlineNode;
+import org.terasology.corerendering.rendering.dag.nodes.OutputToScreenNode;
+import org.terasology.corerendering.rendering.dag.nodes.OverlaysNode;
+import org.terasology.corerendering.rendering.dag.nodes.PrePostCompositeNode;
+import org.terasology.corerendering.rendering.dag.nodes.RefractiveReflectiveBlocksNode;
+import org.terasology.corerendering.rendering.dag.nodes.ShadowMapNode;
+import org.terasology.corerendering.rendering.dag.nodes.SimpleBlendMaterialsNode;
+import org.terasology.corerendering.rendering.dag.nodes.ToneMappingNode;
+import org.terasology.corerendering.rendering.dag.nodes.UpdateExposureNode;
+import org.terasology.corerendering.rendering.dag.nodes.WorldReflectionNode;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.core.subsystem.DisplayDevice;
 import org.terasology.engine.rendering.cameras.Camera;
@@ -34,14 +56,14 @@ import static org.terasology.engine.rendering.opengl.ScalingFactors.HALF_SCALE;
 
 public class CoreRenderingModule extends ModuleRendering {
 
+    private static int initializationPriority = 1;
+
     private DisplayResolutionDependentFbo displayResolutionDependentFbo;
     private ShadowMapResolutionDependentFbo shadowMapResolutionDependentFbo;
     private ImmutableFbo immutableFbo;
 
     private ShadowMapNode shadowMapNode;
     private DisplayDevice displayDevice;
-
-    private static int initializationPriority = 1;
 
     // Created in renderingModuleRegistry trough reflection and Constructor calling
     public CoreRenderingModule(Context context) {
@@ -103,7 +125,8 @@ public class CoreRenderingModule extends ModuleRendering {
         // FULL_SCALE, FBO.Type.HDR, fullScale);
         BufferPair gBufferPair = new BufferPair(legacyGBuffers.getLastUpdatedFbo(), legacyGBuffers.getStaleFbo());
 
-        BufferClearingNode lastUpdatedGBufferClearingNode = new BufferClearingNode("lastUpdatedGBufferClearingNode", context, providingModule,
+        BufferClearingNode lastUpdatedGBufferClearingNode = new BufferClearingNode(
+                "lastUpdatedGBufferClearingNode", context, providingModule,
                 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         lastUpdatedGBufferClearingNode.addInputFboConnection(1, gBufferPair.getPrimaryFbo());
         lastUpdatedGBufferClearingNode.addOutputBufferPairConnection(1, gBufferPair);
@@ -123,7 +146,8 @@ public class CoreRenderingModule extends ModuleRendering {
         //  don't make them output buffer pair when they only clear 1 of the buffers. Prone to error
         Node backdropNode = new BackdropNode("backdropNode", providingModule, context);
         renderGraph.connectBufferPair(lastUpdatedGBufferClearingNode, 1, backdropNode, 1);
-        ((AbstractNode) backdropNode).addOutputBufferPairConnection(1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
+        ((AbstractNode) backdropNode).addOutputBufferPairConnection(
+                1, lastUpdatedGBufferClearingNode.getOutputBufferPairConnection(1).getBufferPair());
 
         renderGraph.addNode(backdropNode);
         //renderGraph.connect(lastUpdatedGBufferClearingNode, backdropNode);
@@ -198,8 +222,10 @@ public class CoreRenderingModule extends ModuleRendering {
     private void addReflectionAndRefractionNodes(RenderGraph renderGraph) {
         Node applyDeferredLightingNode = renderGraph.findNode("CoreRendering:applyDeferredLightingNode");
 
-        FboConfig reflectedBufferConfig = new FboConfig(BackdropReflectionNode.REFLECTED_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT).useDepthBuffer();
-        BufferClearingNode reflectedBufferClearingNode = new BufferClearingNode("reflectedBufferClearingNode", providingModule, context, reflectedBufferConfig,
+        FboConfig reflectedBufferConfig =
+                new FboConfig(BackdropReflectionNode.REFLECTED_FBO_URI, HALF_SCALE, FBO.Type.DEFAULT).useDepthBuffer();
+        BufferClearingNode reflectedBufferClearingNode = new BufferClearingNode(
+                "reflectedBufferClearingNode", providingModule, context, reflectedBufferConfig,
                 displayResolutionDependentFbo, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderGraph.addNode(reflectedBufferClearingNode);
 
@@ -211,12 +237,16 @@ public class CoreRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(reflectedBackdropNode, 1, worldReflectionNode, 1);
         renderGraph.addNode(worldReflectionNode);
 
-        FboConfig reflectedRefractedBufferConfig = new FboConfig(RefractiveReflectiveBlocksNode.REFRACTIVE_REFLECTIVE_FBO_URI, FULL_SCALE, FBO.Type.HDR).useNormalBuffer();
-        BufferClearingNode reflectedRefractedBufferClearingNode = new BufferClearingNode("reflectedRefractedBufferClearingNode", providingModule,
-                context, reflectedRefractedBufferConfig, displayResolutionDependentFbo, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        FboConfig reflectedRefractedBufferConfig = new FboConfig(
+                RefractiveReflectiveBlocksNode.REFRACTIVE_REFLECTIVE_FBO_URI, FULL_SCALE, FBO.Type.HDR).useNormalBuffer();
+        BufferClearingNode reflectedRefractedBufferClearingNode = new BufferClearingNode(
+                "reflectedRefractedBufferClearingNode", providingModule,
+                context, reflectedRefractedBufferConfig, displayResolutionDependentFbo,
+                GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderGraph.addNode(reflectedRefractedBufferClearingNode);
 
-        Node chunksRefractiveReflectiveNode = new RefractiveReflectiveBlocksNode("chunksRefractiveReflectiveNode", providingModule, context);
+        Node chunksRefractiveReflectiveNode = new RefractiveReflectiveBlocksNode(
+                "chunksRefractiveReflectiveNode", providingModule, context);
         renderGraph.connectBufferPair(applyDeferredLightingNode, 1, chunksRefractiveReflectiveNode, 1);
         renderGraph.connectFbo(reflectedRefractedBufferClearingNode, 1, chunksRefractiveReflectiveNode, 1);
         renderGraph.connectFbo(worldReflectionNode, 1, chunksRefractiveReflectiveNode, 2);
@@ -266,30 +296,37 @@ public class CoreRenderingModule extends ModuleRendering {
     }
 
     private void addExposureNodes(RenderGraph renderGraph) {
-            SimpleBlendMaterialsNode simpleBlendMaterialsNode = (SimpleBlendMaterialsNode) renderGraph.findNode("CoreRendering:simpleBlendMaterialsNode");
-        // FboConfig gBuffer2Config = displayResolutionDependentFbo.getFboConfig(new SimpleUri("CoreRendering:fbo.gBuffer2")); // TODO: Remove the hard coded value here
-        DownSamplerForExposureNode exposureDownSamplerTo16pixels = new DownSamplerForExposureNode("exposureDownSamplerTo16pixels", providingModule,
+            SimpleBlendMaterialsNode simpleBlendMaterialsNode =
+                    (SimpleBlendMaterialsNode) renderGraph.findNode("CoreRendering:simpleBlendMaterialsNode");
+        // TODO: Remove the hard coded value here
+        // FboConfig gBuffer2Config = displayResolutionDependentFbo.getFboConfig(new SimpleUri("CoreRendering:fbo.gBuffer2"));
+        DownSamplerForExposureNode exposureDownSamplerTo16pixels =
+                new DownSamplerForExposureNode("exposureDownSamplerTo16pixels", providingModule,
                 context, displayResolutionDependentFbo, FBO_16X16_CONFIG, immutableFbo);
         renderGraph.connectFbo(simpleBlendMaterialsNode, 1, exposureDownSamplerTo16pixels, 1);
         renderGraph.addNode(exposureDownSamplerTo16pixels);
 
-        DownSamplerForExposureNode exposureDownSamplerTo8pixels = new DownSamplerForExposureNode("exposureDownSamplerTo8pixels", providingModule, context,
+        DownSamplerForExposureNode exposureDownSamplerTo8pixels =
+                new DownSamplerForExposureNode("exposureDownSamplerTo8pixels", providingModule, context,
                 immutableFbo, FBO_8X8_CONFIG, immutableFbo);
         renderGraph.connectFbo(exposureDownSamplerTo16pixels, 1, exposureDownSamplerTo8pixels, 1);
         renderGraph.addNode(exposureDownSamplerTo8pixels);
 
 
-        DownSamplerForExposureNode exposureDownSamplerTo4pixels = new DownSamplerForExposureNode("exposureDownSamplerTo4pixels", providingModule, context,
+        DownSamplerForExposureNode exposureDownSamplerTo4pixels =
+                new DownSamplerForExposureNode("exposureDownSamplerTo4pixels", providingModule, context,
                 immutableFbo, FBO_4X4_CONFIG, immutableFbo);
         renderGraph.connectFbo(exposureDownSamplerTo8pixels, 1, exposureDownSamplerTo4pixels, 1);
         renderGraph.addNode(exposureDownSamplerTo4pixels);
 
-        DownSamplerForExposureNode exposureDownSamplerTo2pixels = new DownSamplerForExposureNode("exposureDownSamplerTo2pixels", providingModule, context,
+        DownSamplerForExposureNode exposureDownSamplerTo2pixels =
+                new DownSamplerForExposureNode("exposureDownSamplerTo2pixels", providingModule, context,
                 immutableFbo, FBO_2X2_CONFIG, immutableFbo);
         renderGraph.connectFbo(exposureDownSamplerTo4pixels, 1, exposureDownSamplerTo2pixels, 1);
         renderGraph.addNode(exposureDownSamplerTo2pixels);
 
-        DownSamplerForExposureNode exposureDownSamplerTo1pixel = new DownSamplerForExposureNode("exposureDownSamplerTo1pixel", providingModule, context,
+        DownSamplerForExposureNode exposureDownSamplerTo1pixel =
+                new DownSamplerForExposureNode("exposureDownSamplerTo1pixel", providingModule, context,
                 immutableFbo, FBO_1X1_CONFIG, immutableFbo);
         renderGraph.connectFbo(exposureDownSamplerTo2pixels, 1, exposureDownSamplerTo1pixel, 1);
         renderGraph.addNode(exposureDownSamplerTo1pixel);
@@ -339,10 +376,11 @@ public class CoreRenderingModule extends ModuleRendering {
         renderGraph.connectFbo(firstLateBlurNode, 1, secondLateBlurNode, 1);
         renderGraph.addNode(secondLateBlurNode);
 
-        FinalPostProcessingNode finalPostProcessingNode = new FinalPostProcessingNode("finalPostProcessingNode", providingModule, context/*finalIn1*/);
+        FinalPostProcessingNode finalPostProcessingNode =
+                new FinalPostProcessingNode("finalPostProcessingNode", providingModule, context/*finalIn1*/);
         renderGraph.connectBufferPair(initialPostProcessingNode, 1, finalPostProcessingNode, 1);
-        renderGraph.connectFbo(toneMappingNode,1, finalPostProcessingNode, 1);
-        renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode,2);
+        renderGraph.connectFbo(toneMappingNode, 1, finalPostProcessingNode, 1);
+        renderGraph.connectFbo(secondLateBlurNode, 1, finalPostProcessingNode, 2);
         renderGraph.addNode(finalPostProcessingNode);
 
         // renderGraph.connect(toneMappingNode, firstLateBlurNode, secondLateBlurNode);

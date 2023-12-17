@@ -85,7 +85,8 @@ public class OutlineNode extends ConditionDependentNode {
         outlineMaterial = getMaterial(OUTLINE_MATERIAL_URN);
 
         int textureSlot = 0;
-        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, DepthStencilTexture, displayResolutionDependentFBOs, OUTLINE_MATERIAL_URN, "texDepth"));
+        addDesiredStateChange(new SetInputTextureFromFbo(textureSlot, lastUpdatedGBuffer, DepthStencilTexture,
+                displayResolutionDependentFBOs, OUTLINE_MATERIAL_URN, "texDepth"));
     }
 
     /**

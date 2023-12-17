@@ -4,8 +4,6 @@ package org.terasology.corerendering.rendering.dag.nodes;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.engine.config.Config;
 import org.terasology.engine.config.RenderingConfig;
 import org.terasology.engine.context.Context;
@@ -28,8 +26,6 @@ import org.terasology.nui.properties.Range;
  * (1) See https://en.wikipedia.org/wiki/Luma_(video)#Use_of_relative_luminance
  */
 public class UpdateExposureNode extends AbstractNode {
-    private static final Logger logger = LoggerFactory.getLogger(UpdateExposureNode.class);
-
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 10.0f)
     private float hdrExposureDefault = 5f;
