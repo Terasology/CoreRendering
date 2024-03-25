@@ -27,21 +27,23 @@ import org.terasology.nui.properties.Range;
  */
 public class UpdateExposureNode extends AbstractNode {
     @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 10.0f)
-    private float hdrExposureDefault = 5f;
+    @Range(min = 0.0f, max = 20.0f)
+    private float hdrExposureDefault = 8f;
     @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 10.0f)
-    private float hdrMaxExposure = 8.0f;
+    @Range(min = 0.0f, max = 20.0f)
+    private float hdrMaxExposure = 20.0f;
     @SuppressWarnings("FieldCanBeLocal")
-    @Range(min = 0.0f, max = 10.0f)
-    private float hdrMinExposure = 1.0f;
+    @Range(min = 0.0f, max = 20.0f)
+    private float hdrMinExposure = 6.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 4.0f)
-    private float hdrTargetLuminance = 1.0f;
+    private float hdrTargetLuminance = 4.0f;
     @SuppressWarnings("FieldCanBeLocal")
     @Range(min = 0.0f, max = 0.5f)
-    private float hdrExposureAdjustmentSpeed = 0.05f;
-
+    private float hdrExposureAdjustmentSpeed = 0.02f;
+    @SuppressWarnings("FieldCanBeLocal")
+    @Range(min = 0.0f, max = 40f)
+    private float hdrExposureOffset = 20;
     private ScreenGrabber screenGrabber;
 
     private RenderingConfig renderingConfig;
@@ -90,7 +92,7 @@ public class UpdateExposureNode extends AbstractNode {
             float targetExposure = hdrMaxExposure;
 
             if (currentSceneLuminance > 0) {
-                targetExposure = hdrTargetLuminance / currentSceneLuminance;
+                targetExposure = hdrTargetLuminance / currentSceneLuminance - hdrExposureOffset;
             }
 
             float maxExposure = hdrMaxExposure;
