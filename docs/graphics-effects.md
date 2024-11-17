@@ -133,18 +133,18 @@ The following screenshots show the graphic setting baseline to the left and only
 <fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_cloud-shadows.jpg">Baseline (left) and "Cloud Shadows" Effect (right)</fig-side-by-side>
 
 
-## Extra Lighting
+## Normal Mapping
 
-Extra Lighting can be enabled with the following config adjustment:
+Normal Mapping can be enabled with the following config adjustment:
 ```json5
 {
   "normalMapping": true
 }
 ```
 
-The following screenshots show the graphic setting baseline to the left and only the "Extra Lighting" effect enabled to the right.
+The following screenshots show the graphic setting baseline to the left and only the "Normal Mapping" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_extra-lighting.jpg">Baseline (left) and "Extra Lighting" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_texture-mapping_baseline.jpg" src2="_media/img/graphic-effects_texture-mapping_normal-mapping.jpg">Baseline (left) and "Extra Lighting" Effect (right)</fig-side-by-side>
 
 
 ## Film Grain
@@ -214,7 +214,7 @@ Parallax Mapping can be enabled with the following config adjustment:
 
 The following screenshots show the graphic setting baseline to the left and only the "Parallax Mapping" effect enabled to the right.
 
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_parallax-mapping.jpg">Baseline (left) and "Parallax Mapping" Effect (right)</fig-side-by-side>
+<fig-side-by-side src1="_media/img/graphic-effects_texture-mapping_baseline.jpg" src2="_media/img/graphic-effects_texture-mapping_parallax-mapping.jpg">Baseline (left) and "Parallax Mapping" Effect (right)</fig-side-by-side>
 
 
 ## Shadows
