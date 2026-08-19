@@ -165,11 +165,6 @@ void main() {
     color *= attenuation * max(dot(lightDir/ lightDist, normal), 0);
 #endif
 
-// TODO A 3D wizard should take a look at this. Configurable for the moment to make better comparisons possible.
-#if defined (CLAMP_LIGHTING)
-    outLight.rgba = clamp(vec4(color.r, color.g, color.b, specular), 0.0, 1.0);
-#else
     outLight.rgba = vec4(color.r, color.g, color.b, specular);
-#endif
 
 }

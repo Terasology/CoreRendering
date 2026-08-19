@@ -31,7 +31,6 @@ This minimal setup (not to confuse with the "Minimal" preset) results in the fol
     "meshLimit": 400,
     "inscattering": false,
     "localReflections": false,
-    "clampLighting": false,
     "volumetricFog": false
   }
 }
@@ -103,20 +102,6 @@ The following screenshots show the graphic setting baseline to the left and only
 
 <fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_blur-some.jpg">Baseline (left) and "Blur" Effect on Level "Some" (right)</fig-side-by-side>
 <fig-side-by-side src1="_media/img/graphic-effects_blur-normal.jpg" src2="_media/img/graphic-effects_blur-max.jpg">"Blur" Effect on Level "Normal" (left) and "Blur" Effect on Level "Max" (right)</fig-side-by-side>
-
-
-## Clamp Lighting
-
-Clamp Lighting can be enabled with the following config adjustment:
-```json5
-{
-  "clampLighting": true
-}
-```
-
-The following screenshots show the graphic setting baseline to the left and only the "Clamp Lighting" effect enabled to the right.
-
-<fig-side-by-side src1="_media/img/graphic-effects_baseline.jpg" src2="_media/img/graphic-effects_clamp-lighting.jpg">Baseline (left) and "Clamp Lighting" Effect (right)</fig-side-by-side>
 
 
 ## Cloud Shadows
