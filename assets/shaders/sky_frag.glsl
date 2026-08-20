@@ -20,11 +20,14 @@ uniform vec4 skySettings;
 #define skyDaylightBrightness skySettings.z
 #define skyNightBrightness skySettings.w
 
+// 0.0 at new moon, 1.0 at full moon - see CelestialSystem#getMoonPhase(). Modulates the moon
+// highlight's peak brightness so the "moon" dims and brightens through its cycle (#94).
+uniform float moonPhaseIntensity = 1.0;
+
 const vec4 eyePos = vec4(0.0, 0.0, 0.0, 1.0);
 
 #define HIGHLIGHT_BLEND_START 0.1
 #define SUN_HIGHLIGHT_INTENSITY_FACTOR 1.0
-#define MOON_HIGHLIGHT_INTENSITY_FACTOR 1.0
 
 layout(location = 0) out vec4 outColor;
 
@@ -45,7 +48,7 @@ void main () {
 
     float moonHighlight = 0.0;
     if (negLDotV >= 0.0 && -l.y >= 0.0) {
-       moonHighlight = pow(negLDotV, moonExponent) * MOON_HIGHLIGHT_INTENSITY_FACTOR;
+       moonHighlight = pow(negLDotV, moonExponent) * moonPhaseIntensity;
     }
     if (-l.y < HIGHLIGHT_BLEND_START && -l.y >= 0.0) {
        moonHighlight *= 1.0 - (HIGHLIGHT_BLEND_START + l.y) / HIGHLIGHT_BLEND_START;
