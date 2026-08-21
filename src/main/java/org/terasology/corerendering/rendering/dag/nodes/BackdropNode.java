@@ -166,6 +166,12 @@ public class BackdropNode extends AbstractNode implements WireframeCapable {
         skyMaterial.setFloat("colorExp", backdropProvider.getColorExp(), true);
         skyMaterial.setFloat4("skySettings", sunExponent, moonExponent, skyDaylightBrightness, skyNightBrightness, true);
 
+        // Moon phase in [0, 1): 0/1 is new moon, 0.5 is full moon. Fold it into a triangle wave so
+        // the highlight peaks at full moon and fades to nothing at new moon, rather than jumping. #94
+        float moonPhase = backdropProvider.getMoonPhase();
+        float moonPhaseIntensity = 1.0f - Math.abs(moonPhase * 2.0f - 1.0f);
+        skyMaterial.setFloat("moonPhaseIntensity", moonPhaseIntensity, true);
+
         Camera camera = worldRenderer.getActiveCamera();
         skyMaterial.setMatrix4("projectionMatrix", camera.getProjectionMatrix());
         skyMaterial.setMatrix4("modelViewMatrix", camera.getNormViewMatrix());
